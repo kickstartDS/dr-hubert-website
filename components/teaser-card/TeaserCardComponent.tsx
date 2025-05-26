@@ -29,13 +29,13 @@ export const TeaserCardContextDefault = forwardRef<
       <Container name="teaser-card">
         <div
           className={classnames(
-            `dsa-teaser-card`,
-            newTag && `dsa-teaser-card--new`,
-            `dsa-teaser-card--${layout}`,
-            `dsa-teaser-card--${imageRatio}`
+            `drh-teaser-card`,
+            newTag && `drh-teaser-card--new`,
+            `drh-teaser-card--${layout}`,
+            `drh-teaser-card--${imageRatio}`
           )}
         >
-          {newTag && <span className="dsa-teaser-card__tag">Neu</span>}
+          {newTag && <span className="drh-teaser-card__tag">Neu</span>}
           <TeaserBoxContextDefault
             {...props}
             topic={headline}
@@ -43,12 +43,12 @@ export const TeaserCardContextDefault = forwardRef<
             renderTopic={() => (
               <>
                 {label && (
-                  <span className="dsa-teaser-card__label">{label}</span>
+                  <span className="drh-teaser-card__label">{label}</span>
                 )}
-                <span className="dsa-teaser-card__title">{headline}</span>
+                <span className="drh-teaser-card__title">{headline}</span>
 
                 {date && (
-                  <span className="dsa-teaser-card__date">
+                  <span className="drh-teaser-card__date">
                     <relative-time
                       datetime={date}
                       format="relative"
