@@ -20,8 +20,9 @@ servers:
 proxy:
   ssl: true
   hosts:
-    - drhubert.de
-    - www.drhubert.de
+    # - drhubert.de
+    # - www.drhubert.de
+    - hubert.ruhmesmeile.com
   # Proxy connects to your container on port 80 by default.
   app_port: 3030
   healthcheck:
