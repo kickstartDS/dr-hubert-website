@@ -89,3 +89,8 @@ export const getStaticProps = (async ({ params }) => {
     };
   }
 }) satisfies GetStaticProps<PageProps, NodeJS.Dict<string[]>, string>;
+
+// see: https://github.com/vercel/next.js/pull/11949
+export const config = {
+  unstable_runtimeJS: false,
+};

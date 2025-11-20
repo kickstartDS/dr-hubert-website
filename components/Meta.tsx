@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { SeoStoryblok } from "@/types/components-schema";
 
+import bundleHash from "@/components/bundle-hash";
+
 export default function Meta({
   pageSeo,
   globalSeo,
@@ -43,6 +45,17 @@ export default function Meta({
       <meta name="twitter:description" content={description} />
       {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
       <style>{`body { display: block !important }`}</style>
+      <script
+        defer
+        src="https://usage.ruhmesmeile.com/script.js"
+        data-website-id="3dd1b8bb-e68e-4f87-b45a-130605c8b4a2"
+        data-do-not-track="true"
+      ></script>
+      <script
+        defer
+        type="module"
+        src={`/_/client.js?cacheBuster=${bundleHash}`}
+      ></script>
     </Head>
   );
 }

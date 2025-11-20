@@ -10,7 +10,7 @@
     "dev": "run-p dev:*",
     "dev:next": "BUILD_ENV=preview next dev",
     "dev:proxy": "wait-on http://localhost:3000/ && local-ssl-proxy --source 3010 --target 3000 --cert localhost.pem --key localhost-key.pem",
-    "build": "npm run build-tokens && npm run extract-tokens && npm run blurhashes && next build",
+    "build": "npm run build-tokens && npm run extract-tokens && npm run blurhashes && npm run bundle-static-assets && next build",
     "postbuild": "next-sitemap",
     "export": "next build && next export",
     "build-preview": "BUILD_ENV=preview npm run build",
@@ -33,6 +33,7 @@
     "push-components": "dotenvx run -f .env.local -- npm run storyblok-push-components",
     "storyblok-push-components": "storyblok push-components cms/components.123456.json --space $NEXT_STORYBLOK_SPACE_ID --presets-source cms/presets.123456.json",
     "create-storyblok-config": "kickstartDS cms storyblok --components-path node_modules/@kickstartds/ds-agency-premium/dist/components --cms-path components --configuration-path cms --components blog-teaser contact cta divider faq features gallery hero html image-story image-text info-table logos mosaic slider stats teaser-card testimonials text video-curtain",
+    "bundle-static-assets": "node scripts/bundleStaticAssets.js",
     "storyblok-logout": "storyblok logout",
     "storyblok-login": "storyblok login"
   },
