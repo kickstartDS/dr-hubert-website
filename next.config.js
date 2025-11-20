@@ -1,7 +1,7 @@
 const cspHeader = `
     default-src 'self';
-    connect-src 'self' https://helpdesk.drhubert.de;
-    style-src-elem 'self' 'unsafe-inline' https://helpdesk.drhubert.de;
+    connect-src 'self' https://usage.ruhmesmeile.com https://helpdesk.drhubert.de;
+    style-src-elem 'self' 'unsafe-inline' https://usage.ruhmesmeile.com https://helpdesk.drhubert.de;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.storyblok.com https://code.jquery.com https://helpdesk.drhubert.de;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://a.storyblok.com;
@@ -25,6 +25,7 @@ const nextConfig = {
     "@kickstartds/form",
     "@kickstartds/ds-agency-premium",
   ],
+  output: "standalone",
 };
 
 module.exports = {
