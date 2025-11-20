@@ -42,5 +42,15 @@ module.exports = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "header", key: "host", value: "drhubert.de" }],
+        destination: "https://www.drhubert.de/:path*",
+        permanent: true,
+      },
+    ];
+  },
   ...nextConfig,
 };
