@@ -13,6 +13,7 @@ import "lazysizes/plugins/attrchange/ls.attrchange";
 
 import ComponentProviders from "@/components/ComponentProviders";
 import ImageSizeProviders from "@/components/ImageSizeProviders";
+import ImageRatioProviders from "@/components/ImageRatioProviders";
 
 import palette from "@kickstartds/ds-agency-premium/global.client.js";
 import "@kickstartds/ds-agency-premium/global.css";
@@ -87,24 +88,26 @@ export default function App({
         <DsaProviders>
           <ComponentProviders>
             <ImageSizeProviders>
-              <Meta
-                globalSeo={settings?.seo}
-                pageSeo={story?.content.seo}
-                fallbackName={story?.name}
-              />
-              <IconSprite />
-              {headerProps && (
-                <Header
-                  logo={{}}
-                  {...headerProps}
-                  inverted={invertHeader}
-                  floating={floatHeader}
+              <ImageRatioProviders>
+                <Meta
+                  globalSeo={settings?.seo}
+                  pageSeo={story?.content.seo}
+                  fallbackName={story?.name}
                 />
-              )}
-              <Component {...pageProps} />
-              {footerProps && (
-                <Footer logo={{}} {...footerProps} inverted={invertFooter} />
-              )}
+                <IconSprite />
+                {headerProps && (
+                  <Header
+                    logo={{}}
+                    {...headerProps}
+                    inverted={invertHeader}
+                    floating={floatHeader}
+                  />
+                )}
+                <Component {...pageProps} />
+                {footerProps && (
+                  <Footer logo={{}} {...footerProps} inverted={invertFooter} />
+                )}
+              </ImageRatioProviders>
             </ImageSizeProviders>
           </ComponentProviders>
         </DsaProviders>
