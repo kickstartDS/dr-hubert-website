@@ -3,9 +3,6 @@
 [ks-theme] {
   --ks-color-secondary: #953434;
 
-  --dsa-text-color-on-primary: var(--ks-color-fg-inverted-base);
-  --dsa-text-color-on-primary-inverted: var(--ks-color-fg-inverted-base);
-
   --dsa-topic--font-weight: var(--ks-font-weight-semi-bold);
   --dsa-topic--color: var(--ks-text-color-primary);
 
@@ -15,4 +12,23 @@
   --dsa-link--text-decoration_hover: underline;
 
   --dsa-gradient--higlight: linear-gradient(135deg, var(--ks-color-primary) 0%, var(--ks-color-primary) 100%);
+}
+
+:root,
+[ks-inverted],
+[ks-theme] {
+  --dsa-text-color-on-primary-base: var(--ks-color-fg-inverted);
+  --dsa-text-color-on-primary-inverted-base: var(--ks-color-primary-inverted);
+}
+
+:root,
+[ks-inverted],
+[ks-theme] {
+  --dsa-text-color-on-primary: var(--dsa-text-color-on-primary-base);
+  --dsa-text-color-on-primary-inverted: var(--dsa-text-color-on-primary-inverted-base);
+}
+
+[ks-inverted="true"] {
+  --dsa-text-color-on-primary: var(--dsa-text-color-on-primary-inverted-base);
+  --dsa-text-color-on-primary-inverted: var(--dsa-text-color-on-primary-base);
 }

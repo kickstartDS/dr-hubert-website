@@ -9,6 +9,10 @@
       --dsa-button--padding: 0.75em 0.75em 0.75em 1.15em;
     }
 
+    &.c-button.c-button--solid {
+      color: var(--dsa-text-color-on-primary);
+    }
+
     //SECONDARY
 
     --dsa-button_secondary--color: var(--ks-text-color-primary);

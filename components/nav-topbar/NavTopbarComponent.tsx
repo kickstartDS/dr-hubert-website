@@ -65,34 +65,36 @@ export const NavTopbarContextDefault = forwardRef<
           );
         })}
 
-        <ul className="dsa-nav-topbar__lang">
-          <li className="dsa-nav-topbar__lang__item">
-            <Link
-              href="/"
-              className={classnames(
-                "dsa-nav-topbar__lang__link",
-                language &&
-                  language === "de" &&
-                  "dsa-nav-topbar__lang__link--active"
-              )}
-            >
-              DE
-            </Link>
-          </li>
-          <li className="dsa-nav-topbar__lang__item">
-            <Link
-              href="/en"
-              className={classnames(
-                "dsa-nav-topbar__lang__link",
-                language &&
-                  language === "en" &&
-                  "dsa-nav-topbar__lang__link--active"
-              )}
-            >
-              EN
-            </Link>
-          </li>
-        </ul>
+        <li className="dsa-nav-topbar__item">
+          <ul className="dsa-nav-topbar__lang">
+            <li className="dsa-nav-topbar__lang__item">
+              <Link
+                href="/"
+                className={classnames(
+                  "dsa-nav-topbar__lang__link",
+                  language &&
+                    language === "de" &&
+                    "dsa-nav-topbar__lang__link--active"
+                )}
+              >
+                DE
+              </Link>
+            </li>
+            <li className="dsa-nav-topbar__lang__item">
+              <Link
+                href="/en"
+                className={classnames(
+                  "dsa-nav-topbar__lang__link",
+                  language &&
+                    language === "en" &&
+                    "dsa-nav-topbar__lang__link--active"
+                )}
+              >
+                EN
+              </Link>
+            </li>
+          </ul>
+        </li>
       </ul>
     </nav>
   ) : null;
