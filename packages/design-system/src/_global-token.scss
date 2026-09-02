@@ -1,6 +1,9 @@
 @use "./selectors" as *;
 
 #{$selectors} {
+  // drhubert brand accent. Drives the teaser-card tag background and focus ring.
+  --ks-color-secondary: #953434;
+
   // Text color on primary backgrounds (e.g., buttons)
   --dsa-text-color-on-primary-base: var(--ks-brand-color-on-primary);
   --dsa-text-color-on-primary-inverted-base: var(--ks-brand-color-on-primary-inverted);
