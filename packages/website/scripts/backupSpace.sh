@@ -32,8 +32,21 @@ npx storyblok stories pull --space "$SPACE" --path "$DEST/stories"
 echo "  components + presets…"
 npx storyblok components pull --space "$SPACE" --path "$DEST/components"
 
-echo "  datasources…"
-npx storyblok datasources pull --space "$SPACE" --path "$DEST/datasources" || echo "    (none)"
+echo "  datasources… (if this space has none, expect a ~90s wait - see below)"
+# Wrapped in `timeout` because of an upstream CLI bug: when a space has no
+# datasources, `datasources pull` returns early without stopping its spinner
+# (unlike `languages pull`, which calls spinner.failed() first). The spinner's
+# animation timer then keeps the Node event loop alive and the process never
+# exits. `|| echo` cannot help - a process that never exits never returns a
+# non-zero code. The fetch itself has already completed at that point, so
+# tripping the timeout here means "no datasources", not "lost data".
+if timeout -k 5 90 npx storyblok datasources pull --space "$SPACE" --path "$DEST/datasources"; then
+  :
+elif [ $? -eq 124 ]; then
+  echo "    (none - CLI hung on empty result, see comment in this script)"
+else
+  echo "    (none)"
+fi
 
 echo "  languages…"
 npx storyblok languages pull --space "$SPACE" --path "$DEST/languages" || echo "    (none)"
