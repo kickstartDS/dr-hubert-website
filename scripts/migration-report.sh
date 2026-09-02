@@ -115,9 +115,60 @@ for f in $(git diff --name-only "$MB" "$BRANCH"); do
   fi
 done
 
-n_id=$(wc -l < "$TMP/identical" | tr -d ' ')
-n_df=$(wc -l < "$TMP/differs"   | tr -d ' ')
-n_no=$(wc -l < "$TMP/newonly"   | tr -d ' ')
+# ---------------------------------------------------------------------------
+# Upstream-diverged files.
+#
+# The diff-since-merge-base above only sees what the PROJECT changed. It is
+# blind to files the project left untouched while the monorepo changed them -
+# adopting the monorepo baseline silently overwrites those.
+#
+# This matters most for brand identity (tokens, fonts, colours), which is often
+# established BEFORE the merge-base and therefore never shows up as a local
+# change. Left unchecked, a project quietly inherits the upstream demo's brand.
+# ---------------------------------------------------------------------------
+git diff --name-only "$MB" "$REF"    > "$TMP/up_changed"
+git diff --name-only "$MB" "$BRANCH" > "$TMP/local_changed"
+: > "$TMP/div_identity"; : > "$TMP/div_other"
+
+# Map a monorepo path back to its equivalent path in the old flat layout.
+unmap() {
+  t="$1"
+  case "$t" in
+    packages/website/*)           echo "${t#packages/website/}" ;;
+    packages/design-system/src/*) echo "${t#packages/design-system/src/}" ;;
+    *)                            echo "$t" ;;
+  esac
+}
+
+while read -r t; do
+  # Files deleted upstream also show up in this diff; they are not overwrites.
+  git cat-file -e "$REF:$t" 2>/dev/null || continue
+  f="$(unmap "$t")"
+  if ! git cat-file -e "$BRANCH:$f" 2>/dev/null; then
+    # design-system token partials gained a leading underscore
+    d="$(dirname "$f")"; b="$(basename "$f")"
+    case "$b" in
+      _*) f2="$d/${b#_}"; [ "$d" = "." ] && f2="${b#_}" ;;
+      *)  continue ;;
+    esac
+    git cat-file -e "$BRANCH:$f2" 2>/dev/null || continue
+    f="$f2"
+  fi
+  grep -qxF "$f" "$TMP/local_changed" && continue          # project changed it too -> already triaged
+  [ "$(git rev-parse "$BRANCH:$f")" = "$(git rev-parse "$REF:$t")" ] && continue
+  case "$f" in
+    token/*|*token*.json|*-tokens.scss|fonts.scss|index.scss|sd.config.cjs|cms/*|public/img/*|*font*)
+      echo "$f|$t" >> "$TMP/div_identity" ;;
+    *)
+      echo "$f|$t" >> "$TMP/div_other" ;;
+  esac
+done < "$TMP/up_changed"
+
+n_id=$(wc -l < "$TMP/identical"    | tr -d ' ')
+n_df=$(wc -l < "$TMP/differs"      | tr -d ' ')
+n_no=$(wc -l < "$TMP/newonly"      | tr -d ' ')
+n_di=$(wc -l < "$TMP/div_identity" | tr -d ' ')
+n_do=$(wc -l < "$TMP/div_other"    | tr -d ' ')
 
 {
   echo "# Monorepo migration report"
@@ -159,6 +210,27 @@ n_no=$(wc -l < "$TMP/newonly"   | tr -d ' ')
   sort "$TMP/identical" | while IFS='|' read -r f t; do
     echo "- \`$f\`"
   done
+  echo
+  echo "## Upstream-diverged, brand/style critical — $n_di file(s)"
+  echo
+  echo "The project never changed these, so they are invisible to the diff above —"
+  echo "but the monorepo did change them. Adopting the baseline **silently replaces**"
+  echo "them with the upstream demo's values. Review every one."
+  echo
+  echo "| Decision | Local path | Monorepo path |"
+  echo "| --- | --- | --- |"
+  sort "$TMP/div_identity" | while IFS='|' read -r f t; do
+    echo "|  | \`$f\` | \`$t\` |"
+  done
+  echo
+  echo "## Upstream-diverged, other — $n_do file(s)"
+  echo
+  echo "Untouched locally, changed upstream. Normally you want the upstream version;"
+  echo "listed only for completeness."
+  echo
+  sort "$TMP/div_other" | while IFS='|' read -r f t; do
+    echo "- \`$f\` → \`$t\`"
+  done
 
   # Uncommitted work is customization too, and is easy to lose in a migration.
   unc="$(git diff --name-only HEAD)"
@@ -173,6 +245,8 @@ n_no=$(wc -l < "$TMP/newonly"   | tr -d ' ')
 } > "$OUT"
 
 echo "Wrote $OUT"
-echo "  needs triage:     $n_df"
-echo "  project-specific: $n_no"
-echo "  already upstream: $n_id"
+echo "  needs triage:        $n_df"
+echo "  project-specific:    $n_no"
+echo "  already upstream:    $n_id"
+echo "  diverged (identity): $n_di   <- silent-overwrite risk"
+echo "  diverged (other):    $n_do"
