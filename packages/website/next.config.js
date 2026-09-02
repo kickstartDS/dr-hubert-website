@@ -2,8 +2,9 @@ const path = require("path");
 
 const cspHeader = `
     default-src 'self';
-    connect-src 'self' https://api.storyblok.com https://*.${process.env.NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN} https://journeyengine.production.wlp.cloud;
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.storyblok.com https://*.${process.env.NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN} https://journeyengine.production.wlp.cloud;
+    connect-src 'self' https://api.storyblok.com https://*.${process.env.NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN} https://journeyengine.production.wlp.cloud https://${process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN} https://helpdesk.drhubert.de;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.storyblok.com https://*.${process.env.NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN} https://journeyengine.production.wlp.cloud https://${process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN} https://code.jquery.com https://helpdesk.drhubert.de;
+    style-src-elem 'self' 'unsafe-inline' https://helpdesk.drhubert.de;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://journeyengine.production.wlp.cloud;
     frame-src 'self' https://youtube.com https://www.youtube.com https://player.vimeo.com *.google.com;
     img-src 'self' blob: data: https://a.storyblok.com https://placehold.co https://journeyengine.production.wlp.cloud;
@@ -92,6 +93,28 @@ module.exports = {
           },
         ],
         destination: `https://${process.env.NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN}/:path*`,
+        permanent: true,
+      },
+      // Legacy URLs from the pre-relaunch site. These were Netlify `[[redirects]]`
+      // rules before hosting moved to Kamal, where netlify.toml is no longer read.
+      {
+        source: "/start.html",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/downloads.html",
+        destination: "/kontakt",
+        permanent: true,
+      },
+      {
+        source: "/downloads-en.html",
+        destination: "/en/contact",
+        permanent: true,
+      },
+      {
+        source: "/praezisions-leistungsverstaerker.html",
+        destination: "/produkte",
         permanent: true,
       },
     ];
