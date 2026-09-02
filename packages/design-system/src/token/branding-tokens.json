@@ -381,11 +381,11 @@
         },
         "shrink-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 2
         },
         "grow-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 1.64286
         },
         "bp-factor": {
           "$type": "number",
@@ -402,11 +402,11 @@
         },
         "shrink-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 2
         },
         "grow-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 1.64286
         },
         "bp-factor": {
           "$type": "number",
@@ -423,11 +423,11 @@
         },
         "shrink-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 2
         },
         "grow-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 1.64286
         },
         "bp-factor": {
           "$type": "number",
@@ -444,11 +444,11 @@
         },
         "shrink-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 2
         },
         "grow-factor": {
           "$type": "number",
-          "$value": 1.5
+          "$value": 1.64286
         },
         "bp-factor": {
           "$type": "number",
@@ -460,15 +460,15 @@
   "spacing": {
     "factor": {
       "$type": "number",
-      "$value": 1.5
+      "$value": 1.27778
     },
     "shrink-factor": {
       "$type": "number",
-      "$value": 1.5
+      "$value": 1.45886
     },
     "grow-factor": {
       "$type": "number",
-      "$value": 1.5
+      "$value": 1.53125
     },
     "bp-factor": {
       "$type": "number",
