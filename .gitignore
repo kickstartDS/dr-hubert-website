@@ -87,3 +87,6 @@ packages/design-tokens-editor/dist/
 packages/design-system/debug-storybook.log
 packages/design-system/dist/
 packages/design-system/storybook-static/
+
+# Storyblok space backups (scripts/backupSpace.sh) - content snapshots, never committed
+packages/website/backup/

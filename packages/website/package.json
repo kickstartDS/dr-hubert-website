@@ -44,7 +44,8 @@
     "bundle-static-assets": "node scripts/bundleStaticAssets.js",
     "storyblok-logout": "storyblok logout",
     "storyblok-login": "storyblok login",
-    "migrate-content-fields": "dotenvx run -f .env.local -- npx tsx scripts/migrateContentFields.ts"
+    "migrate-content-fields": "dotenvx run -f .env.local -- npx tsx scripts/migrateContentFields.ts",
+    "backup-space": "dotenvx run -f .env.local -- bash scripts/backupSpace.sh"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.7.0",
