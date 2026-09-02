@@ -13,6 +13,7 @@ const allToken = require("../token/components.js");
 const required = {
   desktop: [
     "--dsa-logos__grid--gap-horizontal",
+    "--dsa-image-story--horizontal-padding",
     "--dsa-blog-teaser__avatar--size",
     "--dsa-downloads-item__placeholder-icon--size",
   ],

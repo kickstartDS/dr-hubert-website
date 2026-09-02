@@ -121,9 +121,13 @@ const ImageStoryProvider: FC<PropsWithChildren> = (props) => {
           HTMLAttributes<HTMLDivElement>
       >(function ImageStoryImageSize(props, ref) {
         const size = useImageSize();
+        // The two image-story images sit side by side with the horizontal
+        // padding between them, so the available width is (size - gap) split in
+        // two - not size/2 minus a full gap. Uses the desktop value because
+        // that is the breakpoint where the side-by-side layout applies.
         const gapSize =
-          calculated.phone["--dsa-image-story--horizontal-padding"];
-        const imageSize = Math.ceil(size / 2 - gapSize);
+          calculated.desktop["--dsa-image-story--horizontal-padding"];
+        const imageSize = Math.ceil((size - gapSize) / 2);
 
         return (
           <ImageSizeProvider size={imageSize}>
