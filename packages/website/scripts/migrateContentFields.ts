@@ -48,24 +48,84 @@ const RENAMES: Record<string, Record<string, string>> = {
 
 /**
  * Changes this script deliberately does NOT make, because they are not
- * mechanical renames. Reported so they cannot be forgotten.
+ * mechanical renames. Counted, never modified, so the manual effort left
+ * over is a number rather than a guess.
+ *
+ * `component: "*"` matches any component carrying the field.
  */
-const MANUAL_REVIEW: Array<[string, string]> = [
-  ["buttons.icon", "removed upstream with no replacement — icons on buttons will be lost"],
-  ["cta.fullWidth", "closest new field is `padding`, but the boolean is likely inverted — check before mapping"],
-  ["footer.navItems", "became `navGroups` ({ heading, items }); the group's own link has no home — restructure by hand"],
-  ["*.type", 'internal "type for interface resolution" field, dropped upstream — no action needed'],
+const MANUAL_REVIEW: Array<{ component: string; field: string; note: string }> = [
+  {
+    component: "buttons",
+    field: "icon",
+    note: "removed upstream with no replacement — these icons are lost unless the field is re-added to the design system's button schema",
+  },
+  {
+    component: "cta",
+    field: "fullWidth",
+    note: "closest new field is `padding`, but the boolean is likely inverted — decide the mapping, then migrate",
+  },
+  {
+    component: "footer",
+    field: "navItems",
+    note: "became `navGroups` ({ heading, items }); the group's own link has no home — restructure by hand",
+  },
+  {
+    component: "*",
+    field: "type",
+    note: 'internal "type for interface resolution" field, dropped upstream — no action needed, listed for completeness',
+  },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type Counts = Record<string, number>;
+interface ManualStat {
+  /** bloks carrying the field at all */
+  present: number;
+  /** bloks where it actually holds a value worth migrating */
+  withValue: number;
+  /** for `bloks`/array fields: total nested entries */
+  children: number;
+  stories: Set<string>;
+}
 
-function migrateContent(node: unknown, counts: Counts): boolean {
+interface Stats {
+  renames: Record<string, number>;
+  manual: Map<string, ManualStat>;
+}
+
+/** Empty string, false, empty array/object and null all mean "nothing to migrate". */
+function hasValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === "" || value === false) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(value as object).length > 0;
+  return true;
+}
+
+function countManual(component: string, obj: Record<string, unknown>, stats: Stats, slug: string): void {
+  for (const entry of MANUAL_REVIEW) {
+    if (entry.component !== "*" && entry.component !== component) continue;
+    if (!(entry.field in obj)) continue;
+
+    const key = `${entry.component === "*" ? "*" : component}.${entry.field}`;
+    let stat = stats.manual.get(key);
+    if (!stat) {
+      stat = { present: 0, withValue: 0, children: 0, stories: new Set() };
+      stats.manual.set(key, stat);
+    }
+
+    const value = obj[entry.field];
+    stat.present += 1;
+    if (hasValue(value)) stat.withValue += 1;
+    if (Array.isArray(value)) stat.children += value.length;
+    stat.stories.add(slug);
+  }
+}
+
+function migrateContent(node: unknown, stats: Stats, slug: string): boolean {
   let changed = false;
 
   if (Array.isArray(node)) {
-    for (const child of node) if (migrateContent(child, counts)) changed = true;
+    for (const child of node) if (migrateContent(child, stats, slug)) changed = true;
     return changed;
   }
 
@@ -73,8 +133,10 @@ function migrateContent(node: unknown, counts: Counts): boolean {
 
   const obj = node as Record<string, unknown>;
   const component = typeof obj.component === "string" ? obj.component : undefined;
-  const renames = component ? RENAMES[component] : undefined;
 
+  if (component) countManual(component, obj, stats, slug);
+
+  const renames = component ? RENAMES[component] : undefined;
   if (renames) {
     for (const [from, to] of Object.entries(renames)) {
       // Only move it if the old key is present and the new one is not already set,
@@ -82,14 +144,15 @@ function migrateContent(node: unknown, counts: Counts): boolean {
       if (from in obj && !(to in obj && obj[to] !== null && obj[to] !== "")) {
         obj[to] = obj[from];
         delete obj[from];
-        counts[`${component}.${from} -> ${to}`] = (counts[`${component}.${from} -> ${to}`] || 0) + 1;
+        const key = `${component}.${from} -> ${to}`;
+        stats.renames[key] = (stats.renames[key] || 0) + 1;
         changed = true;
       }
     }
   }
 
   for (const value of Object.values(obj)) {
-    if (value && typeof value === "object" && migrateContent(value, counts)) changed = true;
+    if (value && typeof value === "object" && migrateContent(value, stats, slug)) changed = true;
   }
 
   return changed;
@@ -120,14 +183,16 @@ async function main(): Promise<void> {
   }
   console.log(`found ${ids.length} stories\n`);
 
-  const counts: Counts = {};
+  const stats: Stats = { renames: {}, manual: new Map() };
   const touched: string[] = [];
 
   for (const id of ids) {
     const { data } = await client.get(`spaces/${spaceId}/stories/${id}`);
     const story = data.story;
 
-    if (!migrateContent(story.content, counts)) {
+    // Always walks the whole story, so the manual-review tally is complete
+    // even for stories that need no renames.
+    if (!migrateContent(story.content, stats, story.full_slug)) {
       await sleep(150);
       continue;
     }
@@ -148,12 +213,34 @@ async function main(): Promise<void> {
   for (const slug of touched) console.log(`  ${slug}`);
 
   console.log("\nfield migrations:");
-  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  if (entries.length === 0) console.log("  none — content already migrated");
-  for (const [key, n] of entries) console.log(`  ${String(n).padStart(5)} × ${key}`);
+  const renameEntries = Object.entries(stats.renames).sort((a, b) => b[1] - a[1]);
+  if (renameEntries.length === 0) console.log("  none — content already migrated");
+  for (const [key, n] of renameEntries) console.log(`  ${String(n).padStart(5)} × ${key}`);
 
-  console.log("\nNOT handled automatically — review by hand:");
-  for (const [field, why] of MANUAL_REVIEW) console.log(`  ${field}\n      ${why}`);
+  console.log("\nNOT migrated — manual review, with the scale of the problem:");
+  for (const entry of MANUAL_REVIEW) {
+    const key = `${entry.component}.${entry.field}`;
+    const stat = stats.manual.get(key);
+
+    if (!stat || stat.present === 0) {
+      console.log(`\n  ${key}: not present in any story — nothing to do`);
+      continue;
+    }
+
+    const detail = [
+      `${stat.withValue} with a value`,
+      `${stat.present} total`,
+      `${stat.stories.size} ${stat.stories.size === 1 ? "story" : "stories"}`,
+    ];
+    if (stat.children > 0) detail.push(`${stat.children} nested entries`);
+
+    console.log(`\n  ${key}: ${detail.join(", ")}`);
+    console.log(`      ${entry.note}`);
+    if (stat.withValue > 0) {
+      const slugs = [...stat.stories].sort();
+      console.log(`      affected: ${slugs.slice(0, 10).join(", ")}${slugs.length > 10 ? `, +${slugs.length - 10} more` : ""}`);
+    }
+  }
 
   if (!apply && touched.length > 0) console.log("\nRe-run with --apply to commit these changes.");
 }
