@@ -1,6 +1,7 @@
 import classnames from "classnames";
 import { NavFlyoutProps } from "./NavFlyoutProps";
 import { Link } from "@kickstartds/base/lib/link";
+import { Logo } from "../logo/LogoComponent";
 import "./nav-flyout.scss";
 import { createContext, forwardRef, HTMLAttributes, useContext } from "react";
 import { deepMergeDefaults } from "../helpers";
@@ -11,15 +12,17 @@ export type { NavFlyoutProps };
 export const NavFlyoutContextDefault = forwardRef<
   HTMLElement,
   NavFlyoutProps & HTMLAttributes<HTMLElement>
->(({ items, inverted }, ref) =>
+>(({ items, inverted, logo }, ref) =>
   items && items.length > 0 ? (
     <nav
       className="dsa-nav-flyout"
       ks-inverted={inverted.toString()}
       id="dsa-nav-flyout"
-      aria-label="Main Navigation"
+      aria-label="Hauptnavigation"
       ref={ref}
     >
+      <Logo {...logo} className="dsa-nav-flyout__logo" />
+
       <ul className="dsa-nav-flyout__list">
         {items.map(({ label, url, active, items: subItems }) => {
           return (

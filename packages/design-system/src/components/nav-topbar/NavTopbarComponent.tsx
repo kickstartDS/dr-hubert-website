@@ -18,7 +18,7 @@ export const NavTopbarContextDefault = forwardRef<
     <nav
       className="dsa-nav-topbar"
       id="dsa-nav-topbar"
-      aria-label="Main Navigation"
+      aria-label="Hauptnavigation"
       ref={ref}
     >
       <ul className="dsa-nav-topbar__list">

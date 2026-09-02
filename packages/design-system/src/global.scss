@@ -152,3 +152,36 @@ hr.c-divider {
     --dsa-overlay-text--text-color-base
   );
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Bare-element table styling, ported from the pre-monorepo website
+// (components/table/table.scss + table-tokens.scss, previously pulled in via
+// the website's index.scss). Renamed --drh- -> --dsa- to match this design
+// system. Applies to tables coming out of rich text / CMS content.
+:root {
+  --dsa-table--font: var(--ks-font-copy-m);
+}
+
+table {
+  width: 100%;
+  font: var(--dsa-table--font);
+  border-spacing: 0px;
+  border-top: var(--ks-border-width-default) solid var(--ks-border-color-accent);
+  border-bottom: var(--ks-border-width-default) solid
+    var(--ks-border-color-accent);
+
+  td,
+  th {
+    padding: 0.5em;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: var(--ks-color-primary-alpha-8);
+    text-align: left;
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--ks-color-primary-alpha-9);
+  }
+}
