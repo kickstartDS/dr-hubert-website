@@ -351,3 +351,36 @@
     }
   }
 }
+
+// ─── drhubert additions ──────────────────────────────────────────
+// Styles for the `date` and `newTag` fields, ported from the pre-monorepo
+// website (renamed from the `--drh-` prefix to match this design system).
+.dsa-teaser-card {
+  &.dsa-teaser-card--new .c-teaser {
+    box-shadow: 0 0 0 3px var(--ks-color-secondary) !important;
+  }
+
+  &__date {
+    font: var(--dsa-teaser-card__date--font, var(--ks-font-interface-s));
+    font-weight: var(--dsa-teaser-card__date--font-weight);
+    color: var(--dsa-teaser-card__date--color);
+  }
+
+  &__tag {
+    text-transform: uppercase;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    border-radius: var(--dsa-teaser-card__tag--border-radius);
+    border: var(--dsa-teaser-card__tag--border, 0);
+    pointer-events: initial;
+    padding: var(--dsa-teaser-card__tag--padding);
+    transform: translate(calc(var(--dsa-teaser-card--border-radius) * -1), -54%);
+    font: var(--dsa-teaser-card__tag--font);
+    text-align: center;
+    font-weight: var(--dsa-teaser-card__tag--font-weight);
+    color: var(--dsa-teaser-card__tag--color);
+    background-color: var(--dsa-teaser-card__tag--background-color);
+  }
+}

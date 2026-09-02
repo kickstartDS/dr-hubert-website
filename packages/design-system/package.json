@@ -88,6 +88,7 @@
   "dependencies": {
     "@bedrock-layout/primitives": "^3.0.23",
     "@bedrock-layout/spacing-constants": "^3.2.5",
+    "@github/relative-time-element": "^4.4.8",
     "classnames": "^2.3.2",
     "markdown-to-jsx": "^7.5.0"
   },

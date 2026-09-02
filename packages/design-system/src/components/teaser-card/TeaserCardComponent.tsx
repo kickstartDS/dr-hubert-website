@@ -7,6 +7,7 @@ import {
   useContext,
 } from "react";
 import classnames from "classnames";
+import "@github/relative-time-element";
 import {
   TeaserBoxContextDefault,
   TeaserBoxContext,
@@ -41,8 +42,10 @@ export const TeaserCardContextDefault = forwardRef<
     imageAlt,
     imageHoverEffect = true,
     label,
+    date,
     layout = "stack",
     centered = false,
+    newTag,
     ...rest
   } = typedProps;
 
@@ -61,8 +64,10 @@ export const TeaserCardContextDefault = forwardRef<
           !image && "dsa-teaser-card--no-image",
           !imageHoverEffect && "dsa-teaser-card--no-image-hover",
           !hasLink && "dsa-teaser-card--no-link",
+          newTag && "dsa-teaser-card--new",
         )}
       >
+        {newTag && <span className="dsa-teaser-card__tag">Neu</span>}
         {label && layout !== "compact" && (
           <span className="dsa-teaser-card__label">{label}</span>
         )}
@@ -77,6 +82,16 @@ export const TeaserCardContextDefault = forwardRef<
                 <span className="dsa-teaser-card__label">{label}</span>
               )}
               {compiler(headline)}
+              {date && (
+                <span className="dsa-teaser-card__date">
+                  <relative-time
+                    datetime={date}
+                    format="relative"
+                    threshold="P60D"
+                    prefix=""
+                  ></relative-time>
+                </span>
+              )}
             </>
           )}
           link={{

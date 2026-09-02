@@ -95,3 +95,20 @@
     }
   }
 }
+
+// ─── drhubert additions ──────────────────────────────────────────
+// Tokens for the `date` and `newTag` fields, ported from the pre-monorepo
+// website (renamed from the `--drh-` prefix to match this design system).
+.dsa-teaser-card {
+  --dsa-teaser-card__date--font: var(--ks-font-interface-s);
+  --dsa-teaser-card__date--font-weight: var(--ks-font-weight-regular);
+  --dsa-teaser-card__date--color: var(--ks-color-fg-to-bg-4);
+
+  --dsa-teaser-card__tag--font: var(--ks-font-interface-s);
+  --dsa-teaser-card__tag--font-weight: var(--ks-font-weight-semi-bold);
+  --dsa-teaser-card__tag--color: var(--dsa-text-color-on-primary);
+  --dsa-teaser-card__tag--background-color: var(--ks-color-secondary);
+  --dsa-teaser-card__tag--padding: 0.5em 1em;
+  --dsa-teaser-card__tag--border-radius: var(--ks-border-radius-pill);
+  --dsa-teaser-card__tag--border: 0;
+}

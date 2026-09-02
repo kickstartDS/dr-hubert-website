@@ -24,7 +24,11 @@
     },
     "layout": {
       "type": "string",
-      "enum": ["stack", "row", "compact"],
+      "enum": [
+        "stack",
+        "row",
+        "compact"
+      ],
       "description": "Layout for the Teaser Card",
       "default": "stack"
     },
@@ -61,7 +65,9 @@
           "default": false
         }
       },
-      "required": ["label"]
+      "required": [
+        "label"
+      ]
     },
     "image": {
       "type": "string",
@@ -76,7 +82,12 @@
     },
     "imageRatio": {
       "type": "string",
-      "enum": ["wide", "landscape", "square", "unset"],
+      "enum": [
+        "wide",
+        "landscape",
+        "square",
+        "unset"
+      ],
       "description": "Aspect ratio of the image",
       "default": "wide"
     },
@@ -85,8 +96,23 @@
       "title": "Image Hover Effect",
       "description": "Whether the image zooms in slightly when hovering over the card",
       "default": true
+    },
+    "date": {
+      "type": "string",
+      "title": "Date",
+      "description": "Date of the content, displayed in the card",
+      "format": "date"
+    },
+    "newTag": {
+      "type": "boolean",
+      "title": "New Tag",
+      "description": "Toggle wether the card should be marked as new with a tag",
+      "default": false
     }
   },
   "additionalProperties": false,
-  "required": ["topic", "url"]
+  "required": [
+    "topic",
+    "url"
+  ]
 }
