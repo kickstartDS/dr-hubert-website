@@ -164,6 +164,24 @@ while read -r t; do
   esac
 done < "$TMP/up_changed"
 
+# Several monorepo paths can unmap() back to the SAME local file - token/dictionary/*.json,
+# for instance, exists under both packages/website/ and packages/design-system/src/. Emitting
+# one row per counterpart would inflate the counts and, worse, give a single file two rows
+# that can be given contradicting dispositions. Collapse to one row per local file, listing
+# every counterpart, so "nothing may be left blank" stays a per-file guarantee.
+aggregate_by_local() {
+  sort "$1" | awk -F'|' '
+    $1 != prev { if (NR > 1) print prev "|" acc; prev = $1; acc = "`" $2 "`"; next }
+    { acc = acc " · `" $2 "`" }
+    END { if (NR > 0) print prev "|" acc }
+  '
+}
+
+for bucket in div_identity div_other; do
+  aggregate_by_local "$TMP/$bucket" > "$TMP/$bucket.agg"
+  mv "$TMP/$bucket.agg" "$TMP/$bucket"
+done
+
 n_id=$(wc -l < "$TMP/identical"    | tr -d ' ')
 n_df=$(wc -l < "$TMP/differs"      | tr -d ' ')
 n_no=$(wc -l < "$TMP/newonly"      | tr -d ' ')
@@ -219,18 +237,18 @@ n_do=$(wc -l < "$TMP/div_other"    | tr -d ' ')
   echo
   echo "| Decision | Local path | Monorepo path |"
   echo "| --- | --- | --- |"
-  sort "$TMP/div_identity" | while IFS='|' read -r f t; do
-    echo "|  | \`$f\` | \`$t\` |"
-  done
+  while IFS='|' read -r f t; do
+    echo "|  | \`$f\` | $t |"
+  done < "$TMP/div_identity"
   echo
   echo "## Upstream-diverged, other — $n_do file(s)"
   echo
   echo "Untouched locally, changed upstream. Normally you want the upstream version;"
   echo "listed only for completeness."
   echo
-  sort "$TMP/div_other" | while IFS='|' read -r f t; do
-    echo "- \`$f\` → \`$t\`"
-  done
+  while IFS='|' read -r f t; do
+    echo "- \`$f\` → $t"
+  done < "$TMP/div_other"
 
   # Uncommitted work is customization too, and is easy to lose in a migration.
   unc="$(git diff --name-only HEAD)"
