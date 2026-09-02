@@ -49,6 +49,14 @@ export type ImageAlt = string;
  * Whether the image zooms in slightly when hovering over the card
  */
 export type ImageHoverEffect = boolean;
+/**
+ * Date of the content, displayed in the card
+ */
+export type Date = string;
+/**
+ * Toggle wether the card should be marked as new with a tag
+ */
+export type NewTag = boolean;
 
 /**
  * Component used to tease content
@@ -75,4 +83,6 @@ export interface TeaserCardProps {
    */
   imageRatio?: "wide" | "landscape" | "square" | "unset";
   imageHoverEffect?: ImageHoverEffect;
+  date?: Date;
+  newTag?: NewTag;
 }

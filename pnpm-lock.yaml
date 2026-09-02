@@ -67,6 +67,9 @@ importers:
       '@bedrock-layout/spacing-constants':
         specifier: ^3.2.5
         version: 3.3.10(react@19.2.1)
+      '@github/relative-time-element':
+        specifier: ^4.4.8
+        version: 4.5.1
       classnames:
         specifier: ^2.3.2
         version: 2.5.1
@@ -2830,6 +2833,9 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@github/relative-time-element@4.5.1':
+    resolution: {integrity: sha512-uxCxCwe9vdwUDmRmM84tN0UERlj8MosLV44+r/VDj7DZUVUSTP4vyWlE9mRK6vHelOmT8DS3RMlaMrLlg1h1PQ==}
 
   '@glidejs/glide@3.7.1':
     resolution: {integrity: sha512-8he0pZpLSqTesSFYiuWdhBmtdlYSPWxfPUCKtkkiX6ZmT8UdMdmoFPtJaOwLBXv4p2JiGxqbuPdiRGGo2e/htQ==}
@@ -15855,6 +15861,8 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+  '@github/relative-time-element@4.5.1': {}
+
   '@glidejs/glide@3.7.1(patch_hash=5789e9e3d626fd9184f499fc7f258f95caae73d9ff519acd6028eee56a31bd97)': {}
 
   '@grpc/grpc-js@1.14.3':
@@ -16821,6 +16829,7 @@ snapshots:
     dependencies:
       '@bedrock-layout/primitives': 3.0.47(@bedrock-layout/css@2.14.1)(react@19.2.1)
       '@bedrock-layout/spacing-constants': 3.3.10(react@19.2.1)
+      '@github/relative-time-element': 4.5.1
       '@kickstartds/base': 4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(4461bb4e8b92c16c19ac103aebdd0c54)))(react@19.2.1)
       '@kickstartds/blog': 4.2.0(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(4461bb4e8b92c16c19ac103aebdd0c54)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(4461bb4e8b92c16c19ac103aebdd0c54)))(react@19.2.1)
       '@kickstartds/content': 4.1.4(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(4461bb4e8b92c16c19ac103aebdd0c54)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(4461bb4e8b92c16c19ac103aebdd0c54)))(react@19.2.1)
@@ -16841,6 +16850,7 @@ snapshots:
     dependencies:
       '@bedrock-layout/primitives': 3.0.47(@bedrock-layout/css@2.14.1)(react@19.2.1)
       '@bedrock-layout/spacing-constants': 3.3.10(react@19.2.1)
+      '@github/relative-time-element': 4.5.1
       '@kickstartds/base': 4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(2e3c3ad36c1c9bb55cac8fe2e7256485)))(react@19.2.1)
       '@kickstartds/blog': 4.2.0(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(2e3c3ad36c1c9bb55cac8fe2e7256485)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(2e3c3ad36c1c9bb55cac8fe2e7256485)))(react@19.2.1)
       '@kickstartds/content': 4.1.4(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(2e3c3ad36c1c9bb55cac8fe2e7256485)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(2e3c3ad36c1c9bb55cac8fe2e7256485)))(react@19.2.1)
@@ -16861,6 +16871,7 @@ snapshots:
     dependencies:
       '@bedrock-layout/primitives': 3.0.47(@bedrock-layout/css@2.14.1)(react@19.2.1)
       '@bedrock-layout/spacing-constants': 3.3.10(react@19.2.1)
+      '@github/relative-time-element': 4.5.1
       '@kickstartds/base': 4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
       '@kickstartds/blog': 4.2.0(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
       '@kickstartds/content': 4.1.4(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
@@ -16881,6 +16892,7 @@ snapshots:
     dependencies:
       '@bedrock-layout/primitives': 3.0.47(@bedrock-layout/css@2.14.1)(react@19.2.1)
       '@bedrock-layout/spacing-constants': 3.3.10(react@19.2.1)
+      '@github/relative-time-element': 4.5.1
       '@kickstartds/base': 4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
       '@kickstartds/blog': 4.2.0(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
       '@kickstartds/content': 4.1.4(@kickstartds/base@4.2.0(patch_hash=cebbe13791236b358cd4018afb3c91b80149ff0c93ddf1b3d797e3dbbd8126bb)(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1))(@kickstartds/core@4.1.0(@storybook/types@7.6.24)(react@19.2.1)(storybook-design-token@3.0.0-beta.3(bef48b934e1d9984605ca58e4a294608)))(react@19.2.1)
