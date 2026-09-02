@@ -18,3 +18,13 @@
   --dsa-stats__copy--font: var(--ks-font-copy-s);
   --dsa-stats__copy--color: var(--ks-text-color-default);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/stats/stats-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  .dsa-stats {
+    --dsa-stats__number--backgroud: var(--ks-color-primary);
+  }
+}

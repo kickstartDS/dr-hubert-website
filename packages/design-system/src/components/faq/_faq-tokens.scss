@@ -14,3 +14,13 @@
   --dsa-faq_header--padding: 1em 0;
   --dsa-faq_content--padding: 0em 0em 1em 0em;
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/faq/faq-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  .dsa-faq {
+    --dsa-faq--border-color: var(--ks-border-color-accent);
+  }
+}

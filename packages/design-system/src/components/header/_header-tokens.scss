@@ -28,3 +28,13 @@
 
   --dsa-header__logo--height: var(--dsa-logo--height);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/header/header-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  .dsa-header {
+    --dsa-header_floating--background: transparent;
+  }
+}

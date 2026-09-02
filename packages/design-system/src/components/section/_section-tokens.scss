@@ -69,3 +69,66 @@
   --dsa-section__spotlight--blur: 0%;
   --dsa-section__spotlight--color: var(--ks-color-primary-alpha-5);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/section/section-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  .dsa-section {
+    --dsa-section__slider-arrow--background: var(--ks-color-fg-alpha-4);
+    --dsa-section__slider-arrow--color: var(--ks-color-bg);
+
+    --dsa-section_stagelights--background-image: radial-gradient(
+        50% 100% at 100% -50%,
+        var(--ks-color-primary-alpha-5) 0%,
+        transparent 100%
+      ),
+      radial-gradient(50% 100% at 0% -50%, var(--ks-color-primary-alpha-5) 0%, transparent 100%);
+
+    &[ks-inverted="true"] {
+      --dsa-section_stagelights--background-image: radial-gradient(
+          50% 100% at 100% -50%,
+          var(--ks-color-primary-to-bg-1-base) 0%,
+          transparent 100%
+        ),
+        radial-gradient(50% 100% at 0% -50%, var(--ks-color-primary-to-bg-1-base) 0%, transparent 100%);
+    }
+
+    --dsa-section_anchor-glow--background-image: radial-gradient(
+      50% 50% at 50% 100%,
+      var(--ks-color-primary-alpha-8) 0%,
+      transparent 100%
+    );
+
+    &[ks-inverted="true"] {
+      --dsa-section_anchor-glow--background-image: radial-gradient(
+        50% 50% at 50% 100%,
+        var(--ks-color-primary-to-bg-1-base) 0%,
+        transparent 100%
+      );
+    }
+
+    --dsa-section_symmetric-glow--background-image: radial-gradient(
+        20% 50% at 100% 50%,
+        var(--ks-color-primary-alpha-7) 0%,
+        transparent 100%
+      ),
+      radial-gradient(20% 50% at 0% 50%, var(--ks-color-primary-alpha-7) 0%, transparent 100%);
+
+    --dsa-section_vertical-gradient--background-image: linear-gradient(
+      45deg,
+      var(--ks-background-color-default) 0%,
+      var(--ks-color-bg-to-fg-2) 100%
+    );
+
+    --dsa-section_horizontal-gradient--background-image: linear-gradient(
+      90deg,
+      var(--ks-background-color-default) 0%,
+      var(--ks-color-bg-to-fg-2) 100%
+    );
+
+    //Spotlight
+    --dsa-section__spotlight--color: var(--ks-color-primary-alpha-7);
+  }
+}

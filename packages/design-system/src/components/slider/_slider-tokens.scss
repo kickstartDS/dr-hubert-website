@@ -17,3 +17,16 @@
 
   --dsa-slider__arrow--color: var(--ks-color-fg-inverted);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/slider/slider-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+.dsa-slider {
+  --dsa-slider__arrow--border-radius: var(--ks-border-radius-pill);
+  --dsa-slider__arrow--background-color: var(--ks-color-fg-alpha-4);
+  --dsa-slider__arrow--background-color: var(--ks-color-fg-alpha-4);
+  --dsa-slider__arrow--background-color_hover: var(--ks-color-fg-alpha-4);
+  --dsa-slider__arrow--background-color_active: var(--ks-color-fg-alpha-4);
+  --dsa-slider__arrow--color: var(--ks-color-bg);
+}

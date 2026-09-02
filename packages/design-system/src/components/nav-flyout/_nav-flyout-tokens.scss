@@ -34,3 +34,15 @@
   --dsa-nav-flyout__sublist__label--font-weight: var(--ks-font-weight-semi-bold);
   --dsa-nav-flyout__sublist__label--padding: 0.25em 0;
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/nav-flyout/nav-flyout-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  .dsa-nav-flyout {
+    --dsa-nav-flyout--shadow: 20px 0px 30px var(--ks-color-fg-alpha-7-base);
+    --dsa-nav-flyout--background: var(--ks-color-fg-to-bg-9);
+    --dsa-nav-flyout--gap: 0.35em;
+  }
+}

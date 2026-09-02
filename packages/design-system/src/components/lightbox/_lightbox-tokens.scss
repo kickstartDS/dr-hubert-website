@@ -13,3 +13,13 @@
 
   --dsa-lightbox__thumb--hover-filter: brightness(40%);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// Ported verbatim from the pre-monorepo website (components/lightbox/lightbox-tokens.scss).
+// Kept as a trailing block so the original selectors and specificity are
+// preserved; these win over the design system defaults above.
+:root {
+  --dsa-lightbox__arrow--color: var(--ks-color-primary);
+  --dsa-lightbox__caption--color: var(--ks-color-fg-inverted);
+  --dsa-lightbox__counter--color: var(--ks-color-fg-inverted);
+}
