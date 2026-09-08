@@ -5,8 +5,23 @@
   --ks-color-secondary: #953434;
 
   // Text color on primary backgrounds (e.g., buttons)
-  --dsa-text-color-on-primary-base: var(--ks-brand-color-on-primary);
-  --dsa-text-color-on-primary-inverted-base: var(--ks-brand-color-on-primary-inverted);
+  //
+  // UPSTREAM BUG: --ks-brand-color-on-primary is never emitted. It is absent
+  // from all nine branding-tokens*.json themes and from the branding token
+  // schema, so this resolved to an invalid value and every consumer of
+  // --dsa-text-color-on-primary silently fell back to inherited text colour
+  // (black on solid buttons, black on teaser-card tags).
+  //
+  // The fallbacks restore the wiring the pre-monorepo site used
+  // (token/global-token.scss). If upstream ever emits the brand token it wins.
+  --dsa-text-color-on-primary-base: var(
+    --ks-brand-color-on-primary,
+    var(--ks-color-fg-inverted)
+  );
+  --dsa-text-color-on-primary-inverted-base: var(
+    --ks-brand-color-on-primary-inverted,
+    var(--ks-color-primary-inverted)
+  );
 
   // Overlay styles
   --dsa-overlay--background-color: var(--ks-color-fg-alpha-4);
