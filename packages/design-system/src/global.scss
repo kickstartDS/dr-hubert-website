@@ -185,3 +185,60 @@ table {
     background-color: var(--ks-color-primary-alpha-9);
   }
 }
+
+// Zammad contact form styling, ported from the pre-monorepo website
+// (components/form/form.scss + form-tokens.scss, previously pulled in via the
+// website's index.scss). The forms are third-party markup injected at runtime
+// by helpdesk.drhubert.de/assets/form/form.js from HTML bloks in Storyblok
+// (sales, support and section-library stories), so they cannot be styled from
+// a component - they are matched on the .zammad-form class the embed emits.
+:root {
+  .c-form-check {
+    --dsa-form-check--background_checked: var(--ks-color-primary);
+  }
+}
+
+.zammad-form {
+  label {
+    font: var(--ks-font-interface-s);
+    color: var(--ks-text-color-interface);
+  }
+
+  input,
+  textarea {
+    border: var(--ks-border-width-default) solid
+      var(--ks-border-color-interface-interactive);
+    padding: var(--ks-spacing-inset-xs);
+    border-radius: var(--ks-border-radius-control);
+    background-color: var(--ks-background-color-default);
+    font: var(--ks-font-interface-s);
+    color: var(--ks-text-color-interface);
+
+    &:active,
+    &:focus {
+      border-color: var(--ks-border-color-interface-interactive-active);
+      outline: 0;
+    }
+
+    &::placeholder {
+      font: var(--ks-font-interface-s);
+    }
+  }
+
+  button {
+    padding: 0.75em 1.15em;
+    border-radius: var(--ks-border-radius-pill);
+    font: var(--ks-font-interface-m);
+    font-weight: var(--ks-font-weight-semi-bold);
+    color: var(--ks-color-fg-inverted);
+    background-color: var(--ks-background-color-primary-interactive);
+
+    &:hover {
+      background-color: var(--ks-background-color-primary-interactive-hover);
+    }
+
+    &:active {
+      background-color: var(--ks-background-color-primary-interactive-active);
+    }
+  }
+}
