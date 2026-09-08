@@ -23,9 +23,7 @@ import ComponentProviders from "@/components/ComponentProviders";
 import ImageSizeProviders from "@/components/ImageSizeProviders";
 import ImageRatioProviders from "@/components/ImageRatioProviders";
 
-// Side-effect only: pulls in base globals and global.scss. The package marks
-// **/*.client.js and **/*.scss as sideEffects, so this is not tree-shaken.
-import "@kickstartds/design-system/global.client.js";
+import palette from "@kickstartds/design-system/global.client.js";
 import "@kickstartds/design-system/global.css";
 import "@/index.scss";
 import "@/components/prompter/prompter.scss";
@@ -42,6 +40,9 @@ import { Section } from "@kickstartds/design-system/components/section/index.js"
 import { StoryblokComponent, useStoryblokState } from "@storyblok/react";
 
 initStoryblok(process.env.NEXT_STORYBLOK_API_TOKEN);
+if (typeof window !== "undefined") {
+  console.log(palette);
+}
 
 const handleRouteChange = (url: string) => {
   // close mobile nav

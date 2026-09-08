@@ -47,6 +47,17 @@ const RENAMES: Record<string, Record<string, string>> = {
 };
 
 /**
+ * Fields upstream removed outright. Carrying them forward only leaves dead keys
+ * in the content, so they are deleted rather than counted.
+ *
+ * Only ever applied inside a blok (an object with a `component` key). Richtext
+ * documents are plain nested objects in which *every* node carries a `type`
+ * ("doc", "paragraph", "text", ...), so an unscoped delete would shred every
+ * rich text field in the space.
+ */
+const DROPS: string[] = ["type"];
+
+/**
  * Changes this script deliberately does NOT make, because they are not
  * mechanical renames. Counted, never modified, so the manual effort left
  * over is a number rather than a guess.
@@ -69,11 +80,6 @@ const MANUAL_REVIEW: Array<{ component: string; field: string; note: string }> =
     field: "navItems",
     note: "became `navGroups` ({ heading, items }); the group's own link has no home — restructure by hand",
   },
-  {
-    component: "*",
-    field: "type",
-    note: 'internal "type for interface resolution" field, dropped upstream — no action needed, listed for completeness',
-  },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -90,6 +96,7 @@ interface ManualStat {
 
 interface Stats {
   renames: Record<string, number>;
+  drops: Record<string, number>;
   manual: Map<string, ManualStat>;
 }
 
@@ -134,7 +141,18 @@ function migrateContent(node: unknown, stats: Stats, slug: string): boolean {
   const obj = node as Record<string, unknown>;
   const component = typeof obj.component === "string" ? obj.component : undefined;
 
-  if (component) countManual(component, obj, stats, slug);
+  if (component) {
+    countManual(component, obj, stats, slug);
+
+    for (const field of DROPS) {
+      if (field in obj) {
+        delete obj[field];
+        const key = `${component}.${field}`;
+        stats.drops[key] = (stats.drops[key] || 0) + 1;
+        changed = true;
+      }
+    }
+  }
 
   const renames = component ? RENAMES[component] : undefined;
   if (renames) {
@@ -183,7 +201,7 @@ async function main(): Promise<void> {
   }
   console.log(`found ${ids.length} stories\n`);
 
-  const stats: Stats = { renames: {}, manual: new Map() };
+  const stats: Stats = { renames: {}, drops: {}, manual: new Map() };
   const touched: string[] = [];
 
   for (const id of ids) {
@@ -216,6 +234,13 @@ async function main(): Promise<void> {
   const renameEntries = Object.entries(stats.renames).sort((a, b) => b[1] - a[1]);
   if (renameEntries.length === 0) console.log("  none — content already migrated");
   for (const [key, n] of renameEntries) console.log(`  ${String(n).padStart(5)} × ${key}`);
+
+  const dropEntries = Object.entries(stats.drops).sort((a, b) => b[1] - a[1]);
+  if (dropEntries.length > 0) {
+    const total = dropEntries.reduce((sum, [, n]) => sum + n, 0);
+    console.log(`\nfields dropped (${total} total):`);
+    for (const [key, n] of dropEntries) console.log(`  ${String(n).padStart(5)} × ${key}`);
+  }
 
   console.log("\nNOT migrated — manual review, with the scale of the problem:");
   for (const entry of MANUAL_REVIEW) {
