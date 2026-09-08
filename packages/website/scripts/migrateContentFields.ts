@@ -41,6 +41,7 @@ const RENAMES: Record<string, Record<string, string>> = {
   tile: { button_target: "button_url" },
   feature: { cta_target: "cta_url" },
   // renamed, identical option values / type
+  "blog-teaser": { link_label: "link_text" },
   cta: { contentAlign: "align" },
   slider: { typeProp: "variant" },
   footer: { byline: "copyright" },

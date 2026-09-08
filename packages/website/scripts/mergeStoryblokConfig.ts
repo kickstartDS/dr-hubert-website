@@ -12,6 +12,10 @@
  * Options:
  *   --component <name>     Merge only this component
  *   --dry-run              Report only, no file output
+ *   --reset                Drop live-only fields instead of preserving them.
+ *                          Use when deliberately resetting the space to the
+ *                          code-defined model, so obsolete fields do not
+ *                          linger alongside their replacements.
  *   --generated <path>     Path to generated config (default: cms/components.generated.json)
  *   --live <path>          Path to live config (default: types/components-schema.json)
  *   --generated-presets <path>  Path to generated presets (default: cms/presets.generated.json)
@@ -104,6 +108,8 @@ interface ComponentReport {
   fieldsReplaced: string[];
   fieldsPreserved: string[];
   fieldsDropped: string[];
+  /** Live-only fields removed because --reset was passed. */
+  fieldsReset: string[];
   tabsMapped: number;
   whitelistEntriesAdded: string[];
 }
@@ -115,6 +121,7 @@ interface ComponentReport {
 function parseArgs(): {
   component?: string;
   dryRun: boolean;
+  resetLiveFields: boolean;
   generated: string;
   live: string;
   generatedPresets: string;
@@ -130,6 +137,8 @@ function parseArgs(): {
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--dry-run") {
       flags.add("dryRun");
+    } else if (args[i] === "--reset") {
+      flags.add("resetLiveFields");
     } else if (args[i].startsWith("--") && i + 1 < args.length) {
       const key = args[i]
         .replace(/^--/, "")
@@ -141,6 +150,7 @@ function parseArgs(): {
   return {
     component: opts.component,
     dryRun: flags.has("dryRun"),
+    resetLiveFields: flags.has("resetLiveFields"),
     generated: opts.generated ?? "cms/components.generated.json",
     live: opts.live ?? "types/components-schema.json",
     generatedPresets: opts.generatedPresets ?? "cms/presets.generated.json",
@@ -289,6 +299,7 @@ function mergeComponent(
   live: StoryblokComponent | undefined,
   hiddenFields: Set<string>,
   report: ComponentReport,
+  resetLiveFields: boolean,
 ): StoryblokComponent {
   // No live match — new component
   if (!live) {
@@ -331,6 +342,7 @@ function mergeComponent(
     live.schema,
     hiddenFields,
     report,
+    resetLiveFields,
   );
 
   return merged;
@@ -341,6 +353,7 @@ function mergeSchema(
   liveSchema: Record<string, StoryblokField>,
   hiddenFields: Set<string>,
   report: ComponentReport,
+  resetLiveFields: boolean,
 ): Record<string, StoryblokField> {
   const result: Record<string, StoryblokField> = {};
 
@@ -388,6 +401,11 @@ function mergeSchema(
       if (hiddenFields.has(key)) {
         // Visibility-hidden → drop
         report.fieldsDropped.push(key);
+      } else if (resetLiveFields) {
+        // Deliberate reset to the code-defined model → drop.
+        // Stored content keeps the key (Storyblok does not strip unknown
+        // fields), so this is reversible by re-adding the field.
+        report.fieldsReset.push(key);
       } else {
         // Manually-added → preserve
         result[key] = liveSchema[key];
@@ -557,11 +575,18 @@ function main() {
       fieldsReplaced: [],
       fieldsPreserved: [],
       fieldsDropped: [],
+      fieldsReset: [],
       tabsMapped: 0,
       whitelistEntriesAdded: [],
     };
 
-    const merged = mergeComponent(genComp, liveComp, hiddenFields, compReport);
+    const merged = mergeComponent(
+      genComp,
+      liveComp,
+      hiddenFields,
+      compReport,
+      opts.resetLiveFields,
+    );
 
     // Check if anything actually changed
     if (compReport.status === "merged") {
@@ -569,6 +594,7 @@ function main() {
         compReport.fieldsAdded.length > 0 ||
         compReport.fieldsReplaced.length > 0 ||
         compReport.fieldsDropped.length > 0 ||
+        compReport.fieldsReset.length > 0 ||
         compReport.whitelistEntriesAdded.length > 0;
       if (!hasChanges && compReport.fieldsPreserved.length === 0) {
         compReport.status = "unchanged";
@@ -603,6 +629,7 @@ function main() {
         `${compReport.fieldsReplaced.length} replaced, ` +
         `${compReport.fieldsPreserved.length} preserved, ` +
         `${compReport.fieldsDropped.length} dropped, ` +
+        `${compReport.fieldsReset.length} reset, ` +
         `${compReport.tabsMapped} tabs mapped`,
     );
 
@@ -618,6 +645,11 @@ function main() {
         `      dropped (visibility-hidden): ${compReport.fieldsDropped.join(
           ", ",
         )}`,
+      );
+    }
+    if (compReport.fieldsReset.length > 0) {
+      console.log(
+        `      reset (removed from space): ${compReport.fieldsReset.join(", ")}`,
       );
     }
     if (compReport.fieldsPreserved.length > 0) {
