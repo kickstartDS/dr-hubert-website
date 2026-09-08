@@ -13,7 +13,6 @@ import {
   ComponentProps,
 } from "react";
 import NextLink from "next/link";
-import { useRouter } from "next/router";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import { Image } from "@unpic/react/nextjs";
 import { StoryblokComponent } from "@storyblok/react";
@@ -65,6 +64,7 @@ import { DownloadsProvider } from "./downloads/DownloadsProvider";
 
 import { useHeaderButton } from "./HeaderButtonContext";
 import { useLanguage, useAlternates } from "./LanguageContext";
+import { LANGUAGES, alternatePath } from "@/helpers/i18n";
 import { useBlurHashes } from "./BlurHashContext";
 import { useImagePriority } from "./ImagePriorityContext";
 import { useImageSize } from "./ImageSizeContext";
@@ -444,27 +444,10 @@ const StorytellingProvider: FC<PropsWithChildren> = (props) => (
   <StorytellingContext.Provider {...props} value={Storytelling} />
 );
 
-const SUPPORTED_LANGS = ["en", "de"] as const;
-type SupportedLang = (typeof SUPPORTED_LANGS)[number];
-
-function getAltPath(currentPath: string, altLang: SupportedLang): string {
-  const segments = currentPath.split("/").filter(Boolean);
-  if (SUPPORTED_LANGS.includes(segments[0] as SupportedLang)) {
-    segments[0] = altLang;
-    return "/" + segments.join("/");
-  }
-  return `/${altLang}/home`;
-}
-
-function getTranslatedPath(
-  altLang: SupportedLang,
-  alternates: Array<{ full_slug?: string }>,
-  currentPath: string,
-): string {
-  const match = alternates.find((a) => a.full_slug?.startsWith(`${altLang}/`));
-  if (match?.full_slug) return `/${match.full_slug}`;
-  return getAltPath(currentPath, altLang);
-}
+// The starter built the switcher targets by swapping a leading language
+// segment (`/en/contact` -> `/de/contact`) and fell back to `/<lang>/home`.
+// German is unprefixed on this site, so both of those produce URLs that do not
+// exist. helpers/i18n owns the real model - see the notes there.
 
 const NavMainWithCta = forwardRef<
   HTMLDivElement,
@@ -473,7 +456,6 @@ const NavMainWithCta = forwardRef<
   const headerButton = useHeaderButton();
   const language = useLanguage();
   const alternates = useAlternates();
-  const router = useRouter();
   const hasItems = items && items.length > 0;
   const hasButton = headerButton?.enabled && headerButton?.url;
   return (
@@ -481,7 +463,7 @@ const NavMainWithCta = forwardRef<
       {hasItems && <NavToggle />}
       {hasItems && <NavTopbar items={items} inverted={dropdownInverted} />}
       <div className="dsa-language-switcher">
-        {SUPPORTED_LANGS.map((lang, idx) => (
+        {LANGUAGES.map((lang, idx) => (
           <>
             {idx > 0 && (
               <span
@@ -501,7 +483,7 @@ const NavMainWithCta = forwardRef<
             ) : (
               <a
                 key={lang}
-                href={getTranslatedPath(lang, alternates, router.asPath)}
+                href={alternatePath(lang, alternates)}
                 className="dsa-language-switcher__item dsa-language-switcher__item--link"
                 lang={lang}
               >

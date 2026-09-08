@@ -2,6 +2,7 @@ import Head from "next/head";
 import { SeoStoryblok } from "@/types/components-schema";
 
 import bundleHash from "@/components/bundle-hash";
+import { languageOf, pathOf } from "@/helpers/i18n";
 
 export default function Meta({
   pageSeo,
@@ -33,10 +34,13 @@ export default function Meta({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
 
   // Determine the English version for x-default
+  // `startsWith("en/")` used to miss the English home page, whose full_slug is
+  // just "en/", and the German slugs carry no prefix at all to match on.
   const enSlug =
     currentLang === "en"
       ? currentSlug
-      : alternates?.find((a) => a.full_slug?.startsWith("en/"))?.full_slug;
+      : alternates?.find((a) => a.full_slug && languageOf(a.full_slug) === "en")
+          ?.full_slug;
 
   return (
     <Head>
@@ -62,19 +66,21 @@ export default function Meta({
         <link
           rel="alternate"
           hrefLang={currentLang}
-          href={`${siteUrl}/${currentSlug}`}
+          href={`${siteUrl}${pathOf(currentSlug)}`}
         />
       )}
       {siteUrl &&
         alternates?.map((alt) => {
-          const altLang = alt.full_slug?.split("/")[0];
-          if (!altLang || !alt.full_slug) return null;
+          // The first path segment is only a language code for the prefixed
+          // languages; for German alternates it is the page slug, which used to
+          // be emitted as hrefLang="kontakt".
+          if (!alt.full_slug) return null;
           return (
             <link
               key={alt.id ?? alt.full_slug}
               rel="alternate"
-              hrefLang={altLang}
-              href={`${siteUrl}/${alt.full_slug}`}
+              hrefLang={languageOf(alt.full_slug)}
+              href={`${siteUrl}${pathOf(alt.full_slug)}`}
             />
           );
         })}
@@ -82,7 +88,7 @@ export default function Meta({
         <link
           rel="alternate"
           hrefLang="x-default"
-          href={`${siteUrl}/${enSlug}`}
+          href={`${siteUrl}${pathOf(enSlug)}`}
         />
       )}
 

@@ -20,6 +20,7 @@ import {
   MultilinkStoryblok,
 } from "@/types/components-schema";
 import componentsSchema from "@/types/components-schema.json";
+import { INDEX_SLUG } from "@/helpers/i18n";
 
 export function initStoryblok(accessToken?: string) {
   storyblokInit({
@@ -448,4 +449,6 @@ export async function fetchPageProps(
   return { pageData, settingsData };
 }
 
-export const INDEX_SLUG = "home";
+// Kept exported here for the call sites that already import it from this
+// module; the language and URL model itself lives in helpers/i18n.
+export { INDEX_SLUG };

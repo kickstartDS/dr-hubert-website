@@ -2,12 +2,12 @@ import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { StoryblokComponent, ISbStory, ISbStoryData } from "@storyblok/react";
 import { fetchPageProps, fetchPaths, INDEX_SLUG } from "@/helpers/storyblok";
 import { fontClassNamesPreview } from "@/helpers/fonts";
-import { locale } from "@/components";
+import { Language, languageOf } from "@/helpers/i18n";
 import { HeadlineLevelProvider } from "@/components/headline/HeadlineLevelContext";
 
 type PageProps = ISbStory["data"] & {
   settings?: ISbStoryData["content"];
-  language: typeof locale;
+  language: Language;
 };
 
 const Page: NextPage<PageProps> = ({ story }) => {
@@ -88,7 +88,12 @@ export const getStaticProps = (async ({ params, previewData }) => {
         fontClassNames: fontClassNamesPreview,
         settings: settingsStory.content || null,
         key: pageData.story.id,
-        language: locale,
+        // UPSTREAM BUG - deviates from monorepo/main, contribute back and
+        // drop. The starter hardcodes this to the `locale` constant ("en"),
+        // so `useLanguage()` never reports the language actually being
+        // rendered: the switcher marks the wrong entry active and dates are
+        // formatted in English on German pages. Derive it from the slug.
+        language: languageOf(slug),
       },
     };
   } catch (e) {

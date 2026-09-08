@@ -1,7 +1,9 @@
 import { FC, PropsWithChildren, createContext, useContext } from "react";
-import { locale } from ".";
+import { DEFAULT_LANGUAGE } from "@/helpers/i18n";
 
-const LanguageContext = createContext<string>(locale);
+// German is this site's default language, so an unwrapped component reads
+// as German rather than as English.
+const LanguageContext = createContext<string>(DEFAULT_LANGUAGE);
 export const LanguageProvider: FC<PropsWithChildren<{ language: string }>> = (
   props,
 ) => {

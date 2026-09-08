@@ -33,6 +33,12 @@ import {
   LanguageProvider,
   AlternatesProvider,
 } from "@/components/LanguageContext";
+import {
+  DEFAULT_LANGUAGE,
+  homePath,
+  languageOf,
+  languagePrefix,
+} from "@/helpers/i18n";
 import { BookADemo } from "@/components/book-a-demo/BookADemoComponent";
 import HeaderButtonContext from "@/components/HeaderButtonContext";
 import { SettingsContext } from "@/components/SettingsContext";
@@ -160,15 +166,14 @@ export default function App({
     return () => router.events.off("routeChangeStart", handleRouteChange);
   }, [router.events]);
 
-  const SUPPORTED_LANGS = ["en", "de"];
   const url = new URL(router.asPath, "http://dummy-base");
   let pathSegments = url.pathname.split("/").filter(Boolean);
   // Strip _preview prefix (internal preview route)
   if (pathSegments[0] === "_preview") pathSegments = pathSegments.slice(1);
-  // Detect language prefix so breadcrumbs don't expose it
-  const langPrefix = SUPPORTED_LANGS.includes(pathSegments[0])
-    ? pathSegments[0]
-    : null;
+  // Detect language prefix so breadcrumbs don't expose it. German is the
+  // default language and carries no prefix, so there is nothing to strip there.
+  const pathLanguage = languageOf(pathSegments.join("/"));
+  const langPrefix = languagePrefix(pathLanguage) || null;
   const contentSegments = langPrefix ? pathSegments.slice(1) : pathSegments;
   const breadcrumbItems = contentSegments.map((segment, index) => ({
     label: segment.charAt(0).toUpperCase() + segment.slice(1),
@@ -181,7 +186,7 @@ export default function App({
   if (breadcrumbItems[0]?.label.toLowerCase() !== "home") {
     breadcrumbItems.unshift({
       label: "Home",
-      url: langPrefix ? `/${langPrefix}/home` : "/",
+      url: homePath(pathLanguage),
     });
   }
 
@@ -212,7 +217,7 @@ export default function App({
 
   return (
     <SettingsContext.Provider value={{ logoUrl }}>
-      <LanguageProvider language={language ?? "en"}>
+      <LanguageProvider language={language ?? DEFAULT_LANGUAGE}>
         <AlternatesProvider alternates={story?.alternates ?? []}>
           <BlurHashProvider blurHashes={blurHashes}>
             <DsaProviders>
@@ -252,7 +257,7 @@ export default function App({
                               headerProps?.logo?.src,
                             homepageHref: headerProps?.logo?.homepageHref
                               ? `/${headerProps.logo.homepageHref}`
-                              : `/${language}/`,
+                              : homePath(languageOf(language)),
                           }}
                         />
                       )}

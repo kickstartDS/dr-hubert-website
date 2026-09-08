@@ -6,11 +6,11 @@ import { traverse } from "object-traversal";
 import { isImgUrl } from "@/helpers/apiUtils";
 import { fontClassNames } from "@/helpers/fonts";
 import { HeadlineLevelProvider } from "@/components/headline/HeadlineLevelContext";
-import { locale } from "@/components";
+import { Language, languageOf } from "@/helpers/i18n";
 
 type PageProps = ISbStory["data"] & {
   settings?: ISbStoryData["content"];
-  language: typeof locale;
+  language: Language;
 };
 
 const Page: NextPage<PageProps> = ({ story }) => {
@@ -94,7 +94,12 @@ export const getStaticProps = (async ({ params }) => {
         fontClassNames,
         settings: settingsStory.content || null,
         key: pageData.story.id,
-        language: locale,
+        // UPSTREAM BUG - deviates from monorepo/main, contribute back and
+        // drop. The starter hardcodes this to the `locale` constant ("en"),
+        // so `useLanguage()` never reports the language actually being
+        // rendered: the switcher marks the wrong entry active and dates are
+        // formatted in English on German pages. Derive it from the slug.
+        language: languageOf(slug),
       },
     };
   } catch (e) {
