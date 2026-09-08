@@ -112,3 +112,40 @@
   --dsa-teaser-card__tag--border-radius: var(--ks-border-radius-pill);
   --dsa-teaser-card__tag--border: 0;
 }
+
+// ─── drhubert card chrome ────────────────────────────────────────
+// Also ported from the pre-monorepo website's teaser-card, which the earlier
+// pass skipped: only the `date`/`newTag` half of that file came across. The
+// starter's card is a white, bordered, drop-shadowed tile with an inset image;
+// drhubert's is a flat grey tile with a flush image.
+.dsa-teaser-card {
+  // The old site resolved --ks-background-color-card-interactive to
+  // --ks-color-bg-to-fg-1 (#f2f3f4); this design system's semantic layer
+  // resolves the same token to plain --ks-color-bg, which is why the cards
+  // turned white. Point at the ramp step directly rather than editing
+  // src/token/tokens.css, which `kickstartDS tokens compile` regenerates.
+  --dsa-teaser-card--background: var(--ks-color-bg-to-fg-1);
+  --dsa-teaser-card--border: 0;
+  --dsa-teaser-card--shadow: none;
+
+  // Image sits flush against the card edges instead of inset with its own
+  // radius.
+  --dsa-teaser-card__image--padding: 0;
+  --dsa-teaser-card__image--border-radius: 0;
+}
+
+// `label` reads as a sub-headline above the main headline rather than the
+// starter's floating pill badge - which also freed up the top-right corner
+// the `newTag` pill occupies, where the two were overlapping.
+//
+// Scoped away from the compact layout, which overlays its label on the image
+// and needs to keep the pill treatment.
+.dsa-teaser-card:not(.dsa-teaser-card--compact) {
+  --dsa-teaser-card__label--font: var(--ks-font-copy-s);
+  --dsa-teaser-card__label--font-weight: var(--ks-font-weight-semi-bold);
+  --dsa-teaser-card__label--color: var(--ks-color-fg-to-bg-2);
+  --dsa-teaser-card__label--background-color: transparent;
+  --dsa-teaser-card__label--padding: 0;
+  --dsa-teaser-card__label--border: 0;
+  --dsa-teaser-card__label--border-radius: 0;
+}

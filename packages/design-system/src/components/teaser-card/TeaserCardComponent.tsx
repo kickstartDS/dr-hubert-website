@@ -68,9 +68,6 @@ export const TeaserCardContextDefault = forwardRef<
         )}
       >
         {newTag && <span className="dsa-teaser-card__tag">Neu</span>}
-        {label && layout !== "compact" && (
-          <span className="dsa-teaser-card__label">{label}</span>
-        )}
         <TeaserBoxContextDefault
           {...rest}
           topic={headline}
@@ -78,7 +75,12 @@ export const TeaserCardContextDefault = forwardRef<
           // @ts-expect-error
           renderTopic={() => (
             <>
-              {label && layout === "compact" && (
+              {/* drhubert renders `label` inside the topic, as a
+                  sub-headline above the main headline, for every layout - the
+                  starter only did that for `compact` and floated it as a pill
+                  in the top-right corner otherwise, where it collided with the
+                  `newTag` pill. */}
+              {label && (
                 <span className="dsa-teaser-card__label">{label}</span>
               )}
               {compiler(headline)}

@@ -384,3 +384,27 @@
     background-color: var(--dsa-teaser-card__tag--background-color);
   }
 }
+
+// Card lifts on hover, topic stacks label / headline / date, and the label
+// drops the starter's absolute positioning. All ported from the pre-monorepo
+// website alongside the tokens above.
+.dsa-teaser-card:not(.dsa-teaser-card--compact) {
+  transition: var(--ks-transition-hover);
+  transition-property: transform;
+
+  &:hover {
+    transform: translateY(-0.5em);
+  }
+
+  .c-teaser__topic {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125em;
+  }
+
+  .dsa-teaser-card__label {
+    position: static;
+    transform: none;
+    text-align: inherit;
+  }
+}
