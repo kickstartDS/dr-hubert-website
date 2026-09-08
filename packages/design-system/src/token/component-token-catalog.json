@@ -1722,6 +1722,51 @@
         "valueType": "semantic-ref",
         "referencedToken": "--ks-text-color-default"
       },
+      "--dsa-footer__columns_flat--gap": {
+        "defaultValue": "var(--ks-spacing-stack-s) var(--ks-spacing-inline-m)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-spacing-stack-s"
+      },
+      "--dsa-footer__column-heading_flat--font": {
+        "defaultValue": "var(--ks-font-interface-s)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-font-interface-s"
+      },
+      "--dsa-footer__column-heading_flat--font-family": {
+        "defaultValue": "var(--ks-font-family-display)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-font-family-display"
+      },
+      "--dsa-footer__column-heading_flat--font-weight": {
+        "defaultValue": "var(--ks-font-weight-medium)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-font-weight-medium"
+      },
+      "--dsa-footer__column-heading_flat--text-transform": {
+        "defaultValue": "none",
+        "valueType": "literal",
+        "referencedToken": null
+      },
+      "--dsa-footer__column-heading_flat--letter-spacing": {
+        "defaultValue": "normal",
+        "valueType": "literal",
+        "referencedToken": null
+      },
+      "--dsa-footer__column-heading_flat--color": {
+        "defaultValue": "var(--ks-text-color-interface-interactive)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-text-color-interface-interactive"
+      },
+      "--dsa-footer__column-heading_flat--color_hover": {
+        "defaultValue": "var(--ks-text-color-interface-interactive-hover)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-text-color-interface-interactive-hover"
+      },
+      "--dsa-footer__column-heading-link_flat--text-decoration_hover": {
+        "defaultValue": "none",
+        "valueType": "literal",
+        "referencedToken": null
+      },
       "--dsa-footer__nav-list--gap": {
         "defaultValue": "var(--ks-spacing-stack-xs)",
         "valueType": "semantic-ref",

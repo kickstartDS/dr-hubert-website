@@ -72,6 +72,36 @@
     }
   }
 
+  // A one-dimensional menu: not a single group has a second level, so the
+  // headings are the menu rather than labels above a list. Flow them as a
+  // wrapping row instead of a grid of columns, and drop the column-label look
+  // (bold, uppercase, tracking) for the header's nav-link typography.
+  &__columns--flat {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dsa-footer__columns_flat--gap, var(--ks-spacing-stack-s) var(--ks-spacing-inline-m));
+
+    .dsa-footer__column-heading {
+      font: var(--dsa-footer__column-heading_flat--font, var(--ks-font-interface-s));
+      font-family: var(--dsa-footer__column-heading_flat--font-family, var(--ks-font-family-display));
+      font-weight: var(--dsa-footer__column-heading_flat--font-weight, var(--ks-font-weight-medium));
+      text-transform: var(--dsa-footer__column-heading_flat--text-transform, none);
+      letter-spacing: var(--dsa-footer__column-heading_flat--letter-spacing, normal);
+      color: var(--dsa-footer__column-heading_flat--color, var(--ks-text-color-interface-interactive));
+    }
+
+    .dsa-footer__column-heading-link:hover {
+      color: var(--dsa-footer__column-heading_flat--color_hover, var(--ks-text-color-interface-interactive-hover));
+      text-decoration: var(--dsa-footer__column-heading-link_flat--text-decoration_hover, none);
+    }
+
+    // Keep the social icons at the far end rather than inline with the menu.
+    .dsa-footer__column--social {
+      margin-inline-start: auto;
+    }
+  }
+
   &__nav-list {
     list-style: none;
     margin: 0;
