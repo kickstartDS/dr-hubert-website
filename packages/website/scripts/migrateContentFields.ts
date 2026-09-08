@@ -79,7 +79,7 @@ const MANUAL_REVIEW: Array<{ component: string; field: string; note: string }> =
   {
     component: "footer",
     field: "navItems",
-    note: "became `navGroups` ({ heading, items }); the group's own link has no home — restructure by hand",
+    note: "became `navGroups` ({ heading, items }); handled separately by migrateFooterNav.ts, now that a group can carry its own link",
   },
 ];
 

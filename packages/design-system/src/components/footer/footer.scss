@@ -47,6 +47,31 @@
     color: var(--dsa-footer__column-heading--color, var(--ks-text-color-default));
   }
 
+  // A linked column heading keeps the heading's own typography - it is still a
+  // heading, it just happens to be clickable - and only picks up link
+  // behaviour on hover.
+  &__column-heading-link {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-decoration: var(
+      --dsa-footer__column-heading-link--text-decoration,
+      none
+    );
+
+    &:hover {
+      color: var(
+        --dsa-footer__column-heading-link--color_hover,
+        var(--dsa-link--color_hover)
+      );
+      text-decoration: var(
+        --dsa-footer__column-heading-link--text-decoration_hover,
+        underline
+      );
+    }
+  }
+
   &__nav-list {
     list-style: none;
     margin: 0;

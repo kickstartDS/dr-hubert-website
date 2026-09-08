@@ -33,6 +33,10 @@ export type Inverted = boolean;
  * Heading displayed above the navigation links in this column
  */
 export type ColumnHeading = string;
+/**
+ * Turns the column heading into a link. A column that only sets a heading and a link, with no links below it, becomes a single flat entry - add one per menu entry to build a one-dimensional footer navigation.
+ */
+export type ColumnLink = string;
 export type Label = string;
 export type URL = string;
 export type OpenInNewTab = boolean;
@@ -49,6 +53,7 @@ export type Links = {
  */
 export type NavigationGroups = {
   heading?: ColumnHeading;
+  headingUrl?: ColumnLink;
   items?: Links;
 }[];
 /**

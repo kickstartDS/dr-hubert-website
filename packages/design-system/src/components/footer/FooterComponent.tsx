@@ -25,7 +25,18 @@ export const FooterContextDefault = forwardRef<
           {navGroups?.map((group, groupIdx) => (
             <div className="dsa-footer__column" key={group.heading ?? groupIdx}>
               {group.heading && (
-                <h3 className="dsa-footer__column-heading">{group.heading}</h3>
+                <h3 className="dsa-footer__column-heading">
+                  {group.headingUrl ? (
+                    <Link
+                      className="dsa-footer__column-heading-link"
+                      href={group.headingUrl}
+                    >
+                      {group.heading}
+                    </Link>
+                  ) : (
+                    group.heading
+                  )}
+                </h3>
               )}
               {group.items && group.items.length > 0 && (
                 <ul className="dsa-footer__nav-list">

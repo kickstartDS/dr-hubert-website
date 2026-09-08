@@ -47,6 +47,12 @@
             "title": "Column Heading",
             "description": "Heading displayed above the navigation links in this column"
           },
+          "headingUrl": {
+            "type": "string",
+            "title": "Column Link",
+            "description": "Turns the column heading into a link. A column that only sets a heading and a link, with no links below it, becomes a single flat entry - add one per menu entry to build a one-dimensional footer navigation.",
+            "format": "uri"
+          },
           "items": {
             "type": "array",
             "title": "Links",

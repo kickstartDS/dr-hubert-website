@@ -11,14 +11,14 @@ const SettingsPreview: React.FC<SettingsPreviewProps> = ({ blok }) => (
   <main {...storyblokEditable(blok)}>
     <Section spaceBefore="default" spaceAfter="default">
       <Headline
-        text="Global Settings Preview"
-        sub="This is what your website looks like with the current header, footer, and theme settings applied."
+        text="Vorschau der globalen Einstellungen"
+        sub="So sieht Ihre Website mit den aktuell angewendeten Header-, Footer- und Theme-Einstellungen aus."
         align="center"
         level="h1"
         style="h1"
       />
       <Text
-        text={`The **header** and **footer** shown on this page reflect your current site-wide settings. Use the sidebar to configure navigation items, logo, social links, and other global options.\n\nAny changes you make to the settings will be reflected here in real-time, so you can preview exactly how your site's chrome will appear to visitors.`}
+        text={`Der auf dieser Seite angezeigte **Header** und **Footer** spiegeln Ihre aktuellen, seitenweiten Einstellungen wider. Nutzen Sie die Seitenleiste, um Navigationselemente, Logo, Social-Links und weitere globale Optionen zu konfigurieren.\n\nAlle Änderungen, die Sie an den Einstellungen vornehmen, werden hier in Echtzeit angezeigt, sodass Sie genau sehen können, wie die Rahmenbereiche Ihrer Website für Besucher erscheinen.`}
         layout="singleColumn"
         align="center"
       />
