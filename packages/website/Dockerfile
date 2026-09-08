@@ -25,7 +25,9 @@ COPY packages/storyblok-icon-sprite-picker-field-plugin/package.json ./packages/
 COPY packages/storyblok-mcp/package.json ./packages/storyblok-mcp/
 COPY packages/storyblok-n8n/package.json ./packages/storyblok-n8n/
 COPY packages/storyblok-services/package.json ./packages/storyblok-services/
+COPY packages/storyblok-sharepoint-folder-picker-field-plugin/package.json ./packages/storyblok-sharepoint-folder-picker-field-plugin/
 COPY packages/storyblok-theme-select-field-plugin/package.json ./packages/storyblok-theme-select-field-plugin/
+COPY packages/token-graph/package.json ./packages/token-graph/
 COPY packages/website/package.json ./packages/website/
 RUN pnpm install --frozen-lockfile --ignore-scripts
 # Run only native addon postinstall scripts that were skipped above
