@@ -1,8 +1,17 @@
 :root {
-  --ks-background-color-accent-base: var(--ks-color-fg-to-bg-9);
+  // Both of these sit one or two steps away from the starter's defaults, which
+  // are `fg-to-bg-9` and `primary-to-bg-6`. drhubert's previous build used step
+  // 8 for both, and the page rhythm is built around that: `accent` is a light
+  // grey that still reads as a distinct band against white, and `bold` is a pale
+  // tint of the brand blue rather than a mid blue. At step 6 a `bold` section
+  // turns into a solid colour block, which is a different design.
+  //
+  // Note the dictionary in `dictionary/background-color.json` also maps `bold`
+  // to `primary.to-bg.8`, so upstream's own two sources disagree on that one.
+  --ks-background-color-accent-base: var(--ks-color-fg-to-bg-8);
   --ks-background-color-accent-inverted-base: var(--ks-color-primary-inverted-to-bg-8);
 
-  --ks-background-color-bold-base: var(--ks-color-primary-to-bg-6);
+  --ks-background-color-bold-base: var(--ks-color-primary-to-bg-8);
   --ks-background-color-bold-inverted-base: var(--ks-color-primary-inverted-to-bg-6);
 
   --ks-background-color-clear-base: var(--ks-color-transparent);
