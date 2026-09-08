@@ -89,7 +89,14 @@
 :root {
   --font-size-display-shrink-factor-max: 0.825;
   --font-size-display-grow-factor-max: 1.35;
-  --font-size-display-bp-factor-max: 1.015;
+  // Raised from the starter's 1.015. The breakpoint factor compounds per step
+  // and per breakpoint (`bp^(step * breakpoint)`), so at 1.015 an `xxl` headline
+  // only grows 1.23x by the desktop breakpoint. drhubert's previous type scale
+  // applied a flat 2x there, which is what the brand identity is drawn around,
+  // and 1.05 reproduces it: 20px * 1.225^3 * 1.025^28 = 73.4px, against 73.5px
+  // before. Only `display` is adjusted - copy, interface and mono already land
+  // within a few percent of the old sizes.
+  --font-size-display-bp-factor-max: 1.05;
 
   --font-size-copy-shrink-factor-max: 0.825;
   --font-size-copy-grow-factor-max: 1.35;
