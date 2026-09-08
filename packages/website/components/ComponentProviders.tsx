@@ -63,8 +63,8 @@ import { IconProvider } from "./icon/IconProvider";
 import { DownloadsProvider } from "./downloads/DownloadsProvider";
 
 import { useHeaderButton } from "./HeaderButtonContext";
-import { useLanguage, useAlternates } from "./LanguageContext";
-import { LANGUAGES, alternatePath } from "@/helpers/i18n";
+import { useLanguage } from "./LanguageContext";
+import { LANGUAGES, homePath } from "@/helpers/i18n";
 import { useBlurHashes } from "./BlurHashContext";
 import { useImagePriority } from "./ImagePriorityContext";
 import { useImageSize } from "./ImageSizeContext";
@@ -444,10 +444,15 @@ const StorytellingProvider: FC<PropsWithChildren> = (props) => (
   <StorytellingContext.Provider {...props} value={Storytelling} />
 );
 
-// The starter built the switcher targets by swapping a leading language
-// segment (`/en/contact` -> `/de/contact`) and fell back to `/<lang>/home`.
-// German is unprefixed on this site, so both of those produce URLs that do not
-// exist. helpers/i18n owns the real model - see the notes there.
+// The language switcher always points at the target language's start page.
+//
+// The starter instead rewrote the current path by swapping a leading language
+// segment (`/en/contact` -> `/de/contact`), which cannot work here: German is
+// unprefixed, so that produces URLs that do not exist. Following the story's
+// own `alternates` would be the richer option, but only about half the stories
+// have a translation linked in Storyblok, so the switcher would jump to the
+// matching page on some pages and to the start page on others. A destination
+// that is always the same is the more predictable of the two.
 
 const NavMainWithCta = forwardRef<
   HTMLDivElement,
@@ -455,7 +460,6 @@ const NavMainWithCta = forwardRef<
 >(({ logo, items, flyoutInverted, dropdownInverted }, ref) => {
   const headerButton = useHeaderButton();
   const language = useLanguage();
-  const alternates = useAlternates();
   const hasItems = items && items.length > 0;
   const hasButton = headerButton?.enabled && headerButton?.url;
   return (
@@ -483,7 +487,7 @@ const NavMainWithCta = forwardRef<
             ) : (
               <a
                 key={lang}
-                href={alternatePath(lang, alternates)}
+                href={homePath(lang)}
                 className="dsa-language-switcher__item dsa-language-switcher__item--link"
                 lang={lang}
               >

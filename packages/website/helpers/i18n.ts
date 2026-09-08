@@ -63,23 +63,3 @@ export function pathOf(fullSlug: string): string {
   const trimmed = fullSlug.replace(/^\/+|\/+$/g, "");
   return trimmed ? `/${trimmed}` : "/";
 }
-
-/**
- * Where the language switcher should point for `language`.
- *
- * Prefers the story's own translation, so `/kontakt` switches to `/en/contact`.
- * Most stories have no translation linked in Storyblok, and for those this
- * falls back to the target language's home page - which is what the switcher
- * did before the migration, and is a URL that is guaranteed to exist. Rewriting
- * the current path instead would be a guess that usually 404s.
- */
-export function alternatePath(
-  language: Language,
-  alternates: Array<{ full_slug?: string }> = [],
-): string {
-  const match = alternates.find(
-    (alternate) =>
-      alternate.full_slug && languageOf(alternate.full_slug) === language,
-  );
-  return match?.full_slug ? pathOf(match.full_slug) : homePath(language);
-}
