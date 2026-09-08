@@ -26,5 +26,8 @@
 :root {
   .dsa-stats {
     --dsa-stats__number--backgroud: var(--ks-color-primary);
+    // The starter moved the big number onto the interface scale
+    // (`interface-xxl`). It belongs on the display scale, as a headline.
+    --dsa-stats__number--font: var(--ks-font-display-xl);
   }
 }

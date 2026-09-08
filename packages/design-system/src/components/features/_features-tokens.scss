@@ -30,3 +30,11 @@
   --dsa-feature_medium__icon--gap: var(--ks-spacing-s);
   --dsa-feature_large__icon--gap: var(--ks-spacing-s);
 }
+
+// ─── drhubert overrides ───────────────────────────────────────────
+// The starter puts the feature title on `copy-m`, the body scale. The previous
+// design system used `interface-m`. The family is already pinned separately via
+// `--dsa-topic--font-family`, so this only restores the size.
+.dsa-features {
+  --dsa-feature__title--font: var(--ks-font-interface-m);
+}

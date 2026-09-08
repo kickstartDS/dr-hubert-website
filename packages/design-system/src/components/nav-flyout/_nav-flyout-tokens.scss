@@ -44,5 +44,8 @@
     --dsa-nav-flyout--shadow: 20px 0px 30px var(--ks-color-fg-alpha-7-base);
     --dsa-nav-flyout--background: var(--ks-color-fg-to-bg-9);
     --dsa-nav-flyout--gap: 0.35em;
+    // Sub-items were `interface-m` before; the starter raised them to
+    // `interface-l`, which makes them compete with their own parent label.
+    --dsa-nav-flyout__sublist__label--font: var(--ks-font-interface-m);
   }
 }
