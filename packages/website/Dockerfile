@@ -42,6 +42,12 @@ ARG NEXT_STORYBLOK_OAUTH_TOKEN
 ENV NEXT_STORYBLOK_OAUTH_TOKEN=$NEXT_STORYBLOK_OAUTH_TOKEN
 ARG NEXT_OPENAI_API_KEY
 ENV NEXT_OPENAI_API_KEY=$NEXT_OPENAI_API_KEY
+# UPSTREAM BUG - deviates from monorepo/main, contribute back and drop.
+# `NEXT_PUBLIC_*` values are inlined at build time, so this has to be an ARG.
+# Without it the canonical URLs, the breadcrumb JSON-LD and every entry in
+# sitemap.xml are built against an undefined origin.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 WORKDIR /app
 COPY --from=deps /app ./
 

@@ -48,10 +48,15 @@ builder:
     NEXT_STORYBLOK_API_TOKEN: <%= ENV["NEXT_STORYBLOK_API_TOKEN"] %>
     NEXT_STORYBLOK_OAUTH_TOKEN: <%= ENV["NEXT_STORYBLOK_OAUTH_TOKEN"] %>
     NEXT_STORYBLOK_SPACE_ID: <%= ENV["NEXT_STORYBLOK_SPACE_ID"] %>
+    # Derived from the domain the proxy already serves, so a deploy can never
+    # bake a localhost origin into the canonical URLs or the sitemap.
+    NEXT_PUBLIC_SITE_URL: https://<%= ENV["NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN"] %>
     CACHEBUST: <%= Time.now.to_i %>
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 #
 env:
+  clear:
+    NEXT_PUBLIC_SITE_URL: https://<%= ENV["NEXT_PUBLIC_PRIMARY_PUBLIC_SITE_DOMAIN"] %>
   secret:
     - NEXT_STORYBLOK_API_TOKEN
     - NEXT_STORYBLOK_OAUTH_TOKEN
