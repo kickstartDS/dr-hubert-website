@@ -178,6 +178,19 @@
     color: var(--dsa-footer__copyright--color, var(--ks-text-color-default));
   }
 
+  // The badge sits on its own line under the bottom bar rather than inside it,
+  // so it reads as a mark on the page instead of a third item competing with
+  // the logo and the copyright.
+  &__badge {
+    align-self: var(--dsa-footer__badge--align-self, center);
+    width: var(--dsa-footer__badge--width, 120px);
+    height: auto;
+
+    @media (min-width: 42em) {
+      width: var(--dsa-footer__badge--width_m, 150px);
+    }
+  }
+
   &__legal-link:not(.c-button) {
     font: inherit;
     color: var(--dsa-footer__legal-link--color, var(--dsa-link--color));

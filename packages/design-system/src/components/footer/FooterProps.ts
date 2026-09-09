@@ -26,6 +26,14 @@ export type Width = number;
  */
 export type Height = number;
 /**
+ * Badge image source
+ */
+export type Source2 = string;
+/**
+ * Alt text to display for the badge. Leave empty when the badge is purely decorative
+ */
+export type AltText1 = string;
+/**
  * Invert the color scheme of the footer
  */
 export type Inverted = boolean;
@@ -85,6 +93,7 @@ export type SocialLinks = {
  */
 export interface FooterProps {
   logo: Logo;
+  badge?: Badge;
   inverted?: Inverted;
   navGroups?: NavigationGroups;
   copyright?: Copyright;
@@ -98,6 +107,13 @@ export interface Logo {
   homepageHref?: string;
   width?: Width;
   height?: Height;
+}
+/**
+ * Small image placed on its own line at the very bottom of the footer, for a seal, certification or origin mark
+ */
+export interface Badge {
+  src?: Source2;
+  alt?: AltText1;
 }
 /**
  * Link to the legal/privacy page displayed in the footer bottom bar
