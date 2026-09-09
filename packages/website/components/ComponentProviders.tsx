@@ -36,6 +36,13 @@ import {
 import { NavToggle } from "@kickstartds/design-system/nav-toggle";
 import { NavTopbar } from "@kickstartds/design-system/nav-topbar";
 import { NavFlyout } from "@kickstartds/design-system/nav-flyout";
+import { Icon } from "@kickstartds/base/lib/icon";
+import { SearchModal } from "@kickstartds/design-system/search-modal";
+import {
+  SearchBarContext,
+  SearchBarContextDefault,
+  SearchBarProps,
+} from "@kickstartds/design-system/search-bar";
 import { NavMainProps } from "@kickstartds/design-system/nav-main";
 import { BlogTeaserContext } from "@kickstartds/design-system/blog-teaser";
 import { BlogAsideContext } from "@kickstartds/design-system/blog-aside";
@@ -64,7 +71,7 @@ import { DownloadsProvider } from "./downloads/DownloadsProvider";
 
 import { useHeaderButton } from "./HeaderButtonContext";
 import { useLanguage } from "./LanguageContext";
-import { LANGUAGES, homePath } from "@/helpers/i18n";
+import { DEFAULT_LANGUAGE, LANGUAGES, homePath } from "@/helpers/i18n";
 import { useBlurHashes } from "./BlurHashContext";
 import { useImagePriority } from "./ImagePriorityContext";
 import { useImageSize } from "./ImageSizeContext";
@@ -454,6 +461,61 @@ const StorytellingProvider: FC<PropsWithChildren> = (props) => (
 // matching page on some pages and to the start page on others. A destination
 // that is always the same is the more predictable of the two.
 
+// Copy for the header search. The design system has no i18n of its own - the
+// modal, the trigger and the search bar all fall back to English defaults - so
+// the handful of strings they need live here, next to the other bilingual
+// header pieces.
+type SearchCopy = {
+  trigger: string;
+  headline: string;
+  close: string;
+  placeholder: string;
+  more: string;
+  // The form's `action` is what turns the modal into a quick search: with one
+  // set, the design system swaps inline pagination for a "view all results"
+  // button that submits to this page with the term in the hash.
+  page: string;
+};
+
+const SEARCH_COPY: Record<string, SearchCopy> = {
+  de: {
+    trigger: "Suche öffnen",
+    headline: "Suche",
+    close: "Schließen",
+    placeholder: "Suchbegriff eingeben…",
+    more: "Alle Ergebnisse anzeigen",
+    page: "/suche",
+  },
+  en: {
+    trigger: "Open search",
+    headline: "Search",
+    close: "Close",
+    placeholder: "Type to search…",
+    more: "View all results",
+    page: "/en/search",
+  },
+};
+
+const searchCopy = (language: string): SearchCopy =>
+  SEARCH_COPY[language] ?? SEARCH_COPY[DEFAULT_LANGUAGE];
+
+// `SearchForm` renders its `SearchBar` without props, so the placeholder can
+// only be reached through the context the design system exposes for it.
+const LocalisedSearchBar = forwardRef<
+  HTMLDivElement,
+  SearchBarProps & HTMLAttributes<HTMLDivElement>
+>((props, ref) => {
+  const language = useLanguage();
+
+  return (
+    <SearchBarContextDefault
+      placeholder={searchCopy(language).placeholder}
+      {...props}
+      ref={ref}
+    />
+  );
+});
+
 const NavMainWithCta = forwardRef<
   HTMLDivElement,
   NavMainProps & HTMLAttributes<HTMLDivElement>
@@ -462,10 +524,29 @@ const NavMainWithCta = forwardRef<
   const language = useLanguage();
   const hasItems = items && items.length > 0;
   const hasButton = headerButton?.enabled && headerButton?.url;
+  const search = searchCopy(language);
+  // `SearchFormProps` is generated from the component's own JSON schema, but
+  // the design system spreads whatever else it gets onto the `<form>`, so
+  // plain form attributes like `action` come through. Building the object
+  // outside the JSX keeps TypeScript's excess property check out of the way.
+  const searchFormProps = {
+    component: "dsa.search-form.pagefind",
+    moreButtonLabel: search.more,
+    action: search.page,
+  };
   return (
     <div ref={ref} className="dsa-nav-main">
       {hasItems && <NavToggle />}
       {hasItems && <NavTopbar items={items} inverted={dropdownInverted} />}
+      <button
+        type="button"
+        className="dsa-nav-main__search"
+        aria-label={search.trigger}
+        ks-component="dsa.radio-emit"
+        data-topic="dsa.search-modal.open"
+      >
+        <Icon icon="search" />
+      </button>
       <div className="dsa-language-switcher">
         {LANGUAGES.map((lang, idx) => (
           <>
@@ -508,6 +589,13 @@ const NavMainWithCta = forwardRef<
       {hasItems && (
         <NavFlyout items={items} inverted={flyoutInverted} logo={logo} />
       )}
+      <SearchBarContext.Provider value={LocalisedSearchBar}>
+        <SearchModal
+          headline={search.headline}
+          closeAriaLabel={search.close}
+          form={searchFormProps}
+        />
+      </SearchBarContext.Provider>
     </div>
   );
 });

@@ -12,6 +12,7 @@ import { Cta } from "@kickstartds/design-system/components/cta/index.js";
 import { BlogPost as DsaBlogPost } from "@kickstartds/design-system/components/blog-post/index.js";
 import { SplitWeightedContextDefault as SplitWeighted } from "@kickstartds/design-system/components/split-weighted/index.js";
 import { unflatten } from "@/helpers/unflatten";
+import { pagefindAttributes } from "@/helpers/pagefind";
 
 type PageProps = {
   blok: Omit<ComponentProps<typeof DsaBlogPost>, "section"> &
@@ -20,14 +21,15 @@ type PageProps = {
         _uid: string;
       })[];
     };
+  pagefindUrl?: string;
 };
 
-const BlogPost: React.FC<PageProps> = ({ blok }) => {
+const BlogPost: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
   if (blok) {
     const { cta, aside, head, content } = blok;
 
     return (
-      <main {...storyblokEditable(blok)} data-pagefind-body>
+      <main {...storyblokEditable(blok)} {...pagefindAttributes(pagefindUrl)}>
         <Section width="wide" content={{ mode: "list" }}>
           <SplitWeighted
             main={

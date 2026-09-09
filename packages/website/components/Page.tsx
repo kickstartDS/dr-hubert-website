@@ -6,6 +6,7 @@ import {
 } from "@storyblok/react";
 import { ImagePriorityProvider } from "./ImagePriorityContext";
 import { Page as DsaPage } from "@kickstartds/design-system/components/page/index.js";
+import { pagefindAttributes } from "@/helpers/pagefind";
 
 // import { render } from "storyblok-rich-text-react-renderer";
 // import { RichtextStoryblok } from "@/types/components-schema";
@@ -33,12 +34,13 @@ type PageProps = {
         _uid: string;
       })[];
     };
+  pagefindUrl?: string;
 };
 
-const Page: React.FC<PageProps> = ({ blok }) => (
+const Page: React.FC<PageProps> = ({ blok, pagefindUrl }) => (
   <>
     {/* <StoryblokRichTextProvider> */}
-    <main {...storyblokEditable(blok)} data-pagefind-body>
+    <main {...storyblokEditable(blok)} {...pagefindAttributes(pagefindUrl)}>
       <ImagePriorityProvider priority>
         {blok.section?.slice(0, 1).map((nestedBlok) => (
           <StoryblokComponent blok={nestedBlok} key={nestedBlok._uid} />

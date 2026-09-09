@@ -8,12 +8,14 @@ import { Headline } from "@kickstartds/design-system/components/headline/index.j
 import { Gallery } from "@kickstartds/design-system/components/gallery/index.js";
 import { RichText } from "@kickstartds/base/lib/rich-text";
 import { Downloads } from "@kickstartds/design-system/components/downloads/index.js";
+import { pagefindAttributes } from "@/helpers/pagefind";
 
 type PageProps = {
   blok: ComponentProps<typeof DsaEventDetail> & SbBlokData;
+  pagefindUrl?: string;
 };
 
-const EventDetail: React.FC<PageProps> = ({ blok }) => {
+const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
   if (blok) {
     const {
       title,
@@ -26,7 +28,7 @@ const EventDetail: React.FC<PageProps> = ({ blok }) => {
     } = blok;
 
     return (
-      <main {...storyblokEditable(blok)} data-pagefind-body>
+      <main {...storyblokEditable(blok)} {...pagefindAttributes(pagefindUrl)}>
         <Section width="narrow" spaceAfter="none">
           <EventHeader title={title} categories={categories} intro={intro} />
         </Section>

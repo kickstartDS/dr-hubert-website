@@ -11,7 +11,7 @@
     "dev:next": "BUILD_ENV=preview next dev",
     "dev:proxy": "wait-on http://localhost:3000/ && local-ssl-proxy --source 3010 --target 3000 --cert localhost.pem --key localhost-key.pem",
     "build": "npm run build-tokens && npm run sync-default-theme && npm run extract-tokens && npm run blurhashes && npm run bundle-static-assets && next build",
-    "postbuild": "next-sitemap && pagefind --site .next --output-path public/pagefind",
+    "postbuild": "next-sitemap && pagefind --site .next/server/pages --output-path public/pagefind",
     "export": "next build && next export",
     "build-preview": "BUILD_ENV=preview npm run build",
     "netrc": "plop netrc $STORYBLOK_LOGIN_EMAIL $NEXT_STORYBLOK_OAUTH_TOKEN $STORYBLOK_REGION",

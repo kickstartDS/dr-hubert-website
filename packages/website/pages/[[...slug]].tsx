@@ -6,7 +6,7 @@ import { traverse } from "object-traversal";
 import { isImgUrl } from "@/helpers/apiUtils";
 import { fontClassNames } from "@/helpers/fonts";
 import { HeadlineLevelProvider } from "@/components/headline/HeadlineLevelContext";
-import { Language, languageOf } from "@/helpers/i18n";
+import { Language, languageOf, pathOf } from "@/helpers/i18n";
 
 type PageProps = ISbStory["data"] & {
   settings?: ISbStoryData["content"];
@@ -19,6 +19,7 @@ const Page: NextPage<PageProps> = ({ story }) => {
       <StoryblokComponent
         blok={story.content}
         data-font-class-names={fontClassNames}
+        pagefindUrl={pathOf(story.full_slug)}
       />
     </HeadlineLevelProvider>
   );

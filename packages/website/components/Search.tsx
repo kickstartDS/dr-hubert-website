@@ -12,7 +12,13 @@ type PageProps = {
 
 const Search: React.FC<PageProps> = ({ blok }) => {
   if (blok) {
-    const { headline } = blok;
+    // UPSTREAM BUG - deviates from monorepo/main, contribute back and drop.
+    // The schema's single `headline` becomes a Storyblok `bloks` field, so it
+    // arrives as an array. Spreading that array into `Headline` handed it
+    // numeric keys and rendered an empty heading.
+    const [headline] = Array.isArray(blok.headline)
+      ? blok.headline
+      : [blok.headline];
 
     return (
       <main {...storyblokEditable(blok)}>
