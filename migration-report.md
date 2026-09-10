@@ -16,34 +16,34 @@ Local version differs from the monorepo counterpart.
 
 | Disposition | Local path | Monorepo destination |
 | --- | --- | --- |
-|  | `components/button/button-tokens.scss` | `packages/design-system/src/components/button/_button-tokens.scss` |
-|  | `components/ComponentProviders.tsx` | `packages/website/components/ComponentProviders.tsx` |
-|  | `components/ImageRatioProviders.tsx` | `packages/website/components/ImageRatioProviders.tsx` |
-|  | `components/ImageSizeProviders.tsx` | `packages/website/components/ImageSizeProviders.tsx` |
-|  | `components/index.tsx` | `packages/website/components/index.tsx` |
-|  | `components/Meta.tsx` | `packages/website/components/Meta.tsx` |
-|  | `components/nav-flyout/NavFlyoutComponent.tsx` | `packages/design-system/src/components/nav-flyout/NavFlyoutComponent.tsx` |
-|  | `components/nav-topbar/NavTopbarComponent.tsx` | `packages/design-system/src/components/nav-topbar/NavTopbarComponent.tsx` |
-|  | `components/section/SectionProps.ts` | `packages/design-system/src/components/section/SectionProps.ts` |
-|  | `components/teaser-card/TeaserCardComponent.tsx` | `packages/design-system/src/components/teaser-card/TeaserCardComponent.tsx` |
-|  | `components/teaser-card/TeaserCardProps.ts` | `packages/design-system/src/components/teaser-card/TeaserCardProps.ts` |
-|  | `components/teaser-card/teaser-card.schema.json` | `packages/design-system/src/components/teaser-card/teaser-card.schema.json` |
-|  | `components/teaser-card/teaser-card.scss` | `packages/design-system/src/components/teaser-card/teaser-card.scss` |
-|  | `components/teaser-card/_teaser-card-tokens.scss` | `packages/design-system/src/components/teaser-card/_teaser-card-tokens.scss` |
-|  | `components/umami.client.js` | `packages/website/components/umami.client.js` |
-|  | `config/deploy.yml` | `config/deploy-website.yml` |
-|  | `Dockerfile` | `packages/website/Dockerfile` |
-|  | `.env.local.sample` | `packages/website/.env.local.sample` |
-|  | `.gitignore` | `.gitignore` |
-|  | `helpers/storyblok.ts` | `packages/website/helpers/storyblok.ts` |
-|  | `.kamal/secrets` | `.kamal/secrets` |
-|  | `netlify.toml` | `packages/website/netlify.toml` |
-|  | `next.config.js` | `packages/website/next.config.js` |
-|  | `package.json` | `packages/website/package.json` |
-|  | `pages/_app.tsx` | `packages/website/pages/_app.tsx` |
-|  | `pages/[[...slug]].tsx` | `packages/website/pages/[[...slug]].tsx` |
-|  | `scripts/bundleStaticAssets.js` | `packages/website/scripts/bundleStaticAssets.js` |
-|  | `token/global-token.scss` | `packages/design-system/src/_global-token.scss` |
+| ported | `components/button/button-tokens.scss` | `packages/design-system/src/components/button/_button-tokens.scss` — appended as a trailing override block |
+| superseded | `components/ComponentProviders.tsx` | `packages/website/components/ComponentProviders.tsx` — image-ratio feature already upstream |
+| superseded | `components/ImageRatioProviders.tsx` | `packages/website/components/ImageRatioProviders.tsx` — identical bar DS import paths |
+| ported | `components/ImageSizeProviders.tsx` | `packages/website/components/ImageSizeProviders.tsx` — only the image-story sizing fix; the file itself is an upstream superset |
+| superseded | `components/index.tsx` | `packages/website/components/index.tsx` — only re-pointed teaser-card at the local copy |
+| `superseded` | `components/Meta.tsx` | upstream is our change, env-driven — values → `packages/website/.env` |
+| superseded | `components/nav-flyout/NavFlyoutComponent.tsx` | `packages/design-system/src/components/nav-flyout/NavFlyoutComponent.tsx` — wrapper existed for the DE/EN switcher (now NavMainWithCta) + logo; German aria-label and the missing logo render were ported into the DS |
+| superseded | `components/nav-topbar/NavTopbarComponent.tsx` | `packages/design-system/src/components/nav-topbar/NavTopbarComponent.tsx` — same as nav-flyout; German aria-label and label styling ported into the DS |
+| superseded | `components/section/SectionProps.ts` | `packages/design-system/src/components/section/SectionProps.ts` — generated; only formatting + import paths |
+| ported | `components/teaser-card/TeaserCardComponent.tsx` | `packages/design-system/src/components/teaser-card/TeaserCardComponent.tsx` — `date` + `newTag` merged onto the DS component |
+| superseded | `components/teaser-card/TeaserCardProps.ts` | `packages/design-system/src/components/teaser-card/TeaserCardProps.ts` — generated from the schema by json-schema-to-typescript |
+| ported | `components/teaser-card/teaser-card.schema.json` | `packages/design-system/src/components/teaser-card/teaser-card.schema.json` — `date` + `newTag` added to the DS schema |
+| ported | `components/teaser-card/teaser-card.scss` | `packages/design-system/src/components/teaser-card/teaser-card.scss` — tag/date styles appended, --drh- -> --dsa- |
+| ported | `components/teaser-card/_teaser-card-tokens.scss` | `packages/design-system/src/components/teaser-card/_teaser-card-tokens.scss` — tag/date tokens appended, --drh- -> --dsa- |
+| superseded | `components/umami.client.js` | `packages/website/components/umami.client.js` — upstream adds gallery exclusion + window.umami guard |
+| `superseded` | `config/deploy.yml` | upstream `config/deploy-website.yml` is fully env-driven — values → `.env` |
+| `superseded` | `Dockerfile` | upstream `packages/website/Dockerfile` is a superset (node 24, pnpm, :3030) |
+| `superseded` | `.env.local.sample` | upstream already lists `KAMAL_REGISTRY_PASSWORD` |
+| `superseded` | `.gitignore` | upstream ignores `public/client.js` + `public/_` at package paths |
+| ported | `helpers/storyblok.ts` | `packages/website/helpers/storyblok.ts` — isMissingStoryLinkObject + resolveMissingStoriesInLinks |
+| `superseded` | `.kamal/secrets` | upstream is a strict superset |
+| `ported` | `netlify.toml` | 4 legacy redirects → `next.config.js` `redirects()` (Netlify no longer used) |
+| `ported` | `next.config.js` | CSP: helpdesk/jquery/analytics hosts + legacy redirects; `standalone` & host-redirect superseded |
+| `superseded` | `package.json` | `bundle-static-assets` already upstream; `@github/relative-time-element` deferred → design-system (teaser-card) |
+| superseded | `pages/_app.tsx` | `packages/website/pages/_app.tsx` — already wraps ImageRatioProviders |
+| superseded | `pages/[[...slug]].tsx` | `packages/website/pages/[[...slug]].tsx` — unstable_runtimeJS already set upstream |
+| superseded | `scripts/bundleStaticAssets.js` | `packages/website/scripts/bundleStaticAssets.js` — upstream superset (glide resolve plugin + new DS paths) |
+| ported | `token/global-token.scss` | only `--ks-color-secondary` → DS `_global-token.scss`; rest superseded |
 
 ## Project-specific — 5 file(s)
 
@@ -51,11 +51,11 @@ No counterpart upstream. Decide destination: website package, design system, or 
 
 | Disposition | Local path | Destination |
 | --- | --- | --- |
-|  | `components/bundle-hash.ts` |  |
-|  | `components/table/table.scss` |  |
-|  | `migration-report.md` |  |
-|  | `package-lock.json` |  |
-|  | `scripts/migration-report.sh` |  |
+| `superseded` | `components/bundle-hash.ts` | generated by `bundleStaticAssets.js`; gitignored upstream — must NOT be committed |
+| ported | `components/table/table.scss` | `packages/design-system/src/global.scss` (bare-element styles, --drh- -> --dsa-) |
+| dropped | `migration-report.md` | this report; migration bookkeeping only |
+| superseded | `package-lock.json` | monorepo uses pnpm (pnpm-lock.yaml) |
+| dropped | `scripts/migration-report.sh` | migration tooling, kept on the pre-migration branch for reuse on the next project |
 
 ## Already upstream — 12 file(s)
 
@@ -82,44 +82,44 @@ them with the upstream demo's values. Review every one.
 
 | Decision | Local path | Monorepo path |
 | --- | --- | --- |
-|  | `components/blog-aside/blog-aside-tokens.scss` | `packages/design-system/src/components/blog-aside/_blog-aside-tokens.scss` |
-|  | `components/faq/faq-tokens.scss` | `packages/design-system/src/components/faq/_faq-tokens.scss` |
-|  | `components/footer/footer-tokens.scss` | `packages/design-system/src/components/footer/_footer-tokens.scss` |
-|  | `components/header/header-tokens.scss` | `packages/design-system/src/components/header/_header-tokens.scss` |
-|  | `components/headline/headline-tokens.scss` | `packages/design-system/src/components/headline/_headline-tokens.scss` |
-|  | `components/hero/hero-tokens.scss` | `packages/design-system/src/components/hero/_hero-tokens.scss` |
-|  | `components/lightbox/lightbox-tokens.scss` | `packages/design-system/src/components/lightbox/_lightbox-tokens.scss` |
-|  | `components/nav-flyout/nav-flyout-tokens.scss` | `packages/design-system/src/components/nav-flyout/_nav-flyout-tokens.scss` |
-|  | `components/nav-topbar/nav-topbar-tokens.scss` | `packages/design-system/src/components/nav-topbar/_nav-topbar-tokens.scss` |
-|  | `components/section/section-tokens.scss` | `packages/design-system/src/components/section/_section-tokens.scss` |
-|  | `components/slider/slider-tokens.scss` | `packages/design-system/src/components/slider/_slider-tokens.scss` |
-|  | `components/stats/stats-tokens.scss` | `packages/design-system/src/components/stats/_stats-tokens.scss` |
-|  | `fonts.scss` | `packages/design-system/src/_fonts.scss` |
-|  | `fonts.scss` | `packages/website/fonts.scss` |
-|  | `helpers/fonts.ts` | `packages/website/helpers/fonts.ts` |
-|  | `index.scss` | `packages/website/index.scss` |
-|  | `sd.config.cjs` | `packages/website/sd.config.cjs` |
-|  | `token/branding-token.json` | `packages/website/token/branding-token.json` |
-|  | `token/dictionary/background-color.json` | `packages/design-system/src/token/dictionary/background-color.json` |
-|  | `token/dictionary/background-color.json` | `packages/website/token/dictionary/background-color.json` |
-|  | `token/dictionary/border-color.json` | `packages/design-system/src/token/dictionary/border-color.json` |
-|  | `token/dictionary/border-color.json` | `packages/website/token/dictionary/border-color.json` |
-|  | `token/dictionary/border.json` | `packages/design-system/src/token/dictionary/border.json` |
-|  | `token/dictionary/border.json` | `packages/website/token/dictionary/border.json` |
-|  | `token/dictionary/box-shadow.json` | `packages/design-system/src/token/dictionary/box-shadow.json` |
-|  | `token/dictionary/box-shadow.json` | `packages/website/token/dictionary/box-shadow.json` |
-|  | `token/dictionary/breakpoints.json` | `packages/design-system/src/token/dictionary/breakpoints.json` |
-|  | `token/dictionary/breakpoints.json` | `packages/website/token/dictionary/breakpoints.json` |
-|  | `token/dictionary/color.json` | `packages/design-system/src/token/dictionary/color.json` |
-|  | `token/dictionary/color.json` | `packages/website/token/dictionary/color.json` |
-|  | `token/dictionary/spacing.json` | `packages/design-system/src/token/dictionary/spacing.json` |
-|  | `token/dictionary/spacing.json` | `packages/website/token/dictionary/spacing.json` |
-|  | `token/dictionary/text-color.json` | `packages/design-system/src/token/dictionary/text-color.json` |
-|  | `token/dictionary/text-color.json` | `packages/website/token/dictionary/text-color.json` |
-|  | `token/dictionary/transition.json` | `packages/design-system/src/token/dictionary/transition.json` |
-|  | `token/dictionary/transition.json` | `packages/website/token/dictionary/transition.json` |
-|  | `token/dictionary/typo.json` | `packages/design-system/src/token/dictionary/typo.json` |
-|  | `token/dictionary/typo.json` | `packages/website/token/dictionary/typo.json` |
+| dropped | `components/blog-aside/blog-aside-tokens.scss` | `packages/design-system/src/components/blog-aside/_blog-aside-tokens.scss` — contained only empty rules |
+| ported | `components/faq/faq-tokens.scss` | `packages/design-system/src/components/faq/_faq-tokens.scss` — appended as a trailing override block |
+| dropped | `components/footer/footer-tokens.scss` | `packages/design-system/src/components/footer/_footer-tokens.scss` — contained only empty rules |
+| ported | `components/header/header-tokens.scss` | `packages/design-system/src/components/header/_header-tokens.scss` — appended as a trailing override block |
+| ported | `components/headline/headline-tokens.scss` | `packages/design-system/src/components/headline/_headline-tokens.scss` — appended as a trailing override block |
+| ported | `components/hero/hero-tokens.scss` | `packages/design-system/src/components/hero/_hero-tokens.scss` — appended as a trailing override block |
+| ported | `components/lightbox/lightbox-tokens.scss` | `packages/design-system/src/components/lightbox/_lightbox-tokens.scss` — appended as a trailing override block |
+| ported | `components/nav-flyout/nav-flyout-tokens.scss` | `packages/design-system/src/components/nav-flyout/_nav-flyout-tokens.scss` — appended as a trailing override block |
+| ported | `components/nav-topbar/nav-topbar-tokens.scss` | `packages/design-system/src/components/nav-topbar/_nav-topbar-tokens.scss` — appended as a trailing override block |
+| ported | `components/section/section-tokens.scss` | `packages/design-system/src/components/section/_section-tokens.scss` — appended as a trailing override block |
+| ported | `components/slider/slider-tokens.scss` | `packages/design-system/src/components/slider/_slider-tokens.scss` — appended as a trailing override block |
+| ported | `components/stats/stats-tokens.scss` | `packages/design-system/src/components/stats/_stats-tokens.scss` — appended as a trailing override block |
+| superseded | `fonts.scss` | DS `_fonts.scss` now declares TitilliumWeb; website `fonts.scss` is unused upstream |
+| superseded | `fonts.scss` | DS `_fonts.scss` now declares TitilliumWeb; website `fonts.scss` is unused upstream |
+| ported | `helpers/fonts.ts` | repointed to DS fonts + renamed `--ks-brand-font-family-*`; no copy font (system Helvetica) |
+| superseded | `index.scss` | left at upstream; component overrides handled in design-system bucket |
+| superseded | `sd.config.cjs` | upstream adds icon generation; ours is starter default |
+| superseded | `token/branding-token.json` | brand moved to DS `branding-tokens.json` (ADR-1); website layer is legacy |
+| superseded | `token/dictionary/background-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/background-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/border-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/border-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/border.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/border.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/box-shadow.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/box-shadow.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/breakpoints.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/breakpoints.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/spacing.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/spacing.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/text-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/text-color.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/transition.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/transition.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/typo.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
+| superseded | `token/dictionary/typo.json` | DS token dictionary is authoritative; website dictionary no longer feeds rendered CSS |
 
 ## Upstream-diverged, other — 56 file(s)
 
