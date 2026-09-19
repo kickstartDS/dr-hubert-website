@@ -139,8 +139,18 @@ pnpm --filter website update-storyblok-config  # Full workflow: generate → ren
 pnpm --filter website push-components          # Push merged config from cms/merged/ to Storyblok
 pnpm --filter website pull-content-schema      # Pull schema from Storyblok → types/
 pnpm --filter website create-storyblok-config  # Regenerate CMS config from JSON schemas
+pnpm --filter website check-presets            # Validate the generated presets against the generated component config
 pnpm --filter website generate-content-types   # Pull + generate TypeScript types
 ```
+
+`merge-storyblok-config` keeps the live preset `id` for presets that still exist but takes the
+regenerated body, which carries the local screenshot path (`img/screenshots/…`). Run
+`sync-preset-images` between `merge-storyblok-config` and `push-components` so the push writes
+Storyblok CDN URLs instead of relative paths.
+
+`check-presets` validates `cms/presets.123456.json` against `cms/components.123456.json` and fails
+when a preset references a component or field that the component config does not define. It runs in
+CI after `pnpm -r run build`.
 
 ## Data Flow
 

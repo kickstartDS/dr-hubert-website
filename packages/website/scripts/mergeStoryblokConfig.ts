@@ -480,17 +480,33 @@ function mergePresets(
   // Regenerated presets replace the live body: the live presets predate the
   // current schemas. The live id/component_id are kept so the push updates the
   // existing preset instead of creating a duplicate.
-  const liveByName = new Map<string, StoryblokPreset>();
+  //
+  // Presets are keyed by component + name, not by name alone: preset names are
+  // not unique across components (the regenerated config alone contains 12
+  // presets called `Default`). A name-only key would hand one component's live
+  // id to another component's preset. There is deliberately no name-only
+  // fallback — with the current data it would make `business-card:Centered`
+  // adopt the id of the live `text:Centered` preset.
+  const presetKey = (preset: StoryblokPreset): string => {
+    const component =
+      preset.preset && typeof preset.preset === "object"
+        ? (preset.preset as Record<string, unknown>).component
+        : undefined;
+    return `${typeof component === "string" ? component : ""}:${preset.name}`;
+  };
+
+  const liveByKey = new Map<string, StoryblokPreset>();
   for (const p of livePresets) {
-    liveByName.set(p.name, p);
+    liveByKey.set(presetKey(p), p);
   }
 
-  const generatedNames = new Set<string>();
+  const generatedKeys = new Set<string>();
   const result: StoryblokPreset[] = [];
 
   for (const genPreset of generatedPresets) {
-    generatedNames.add(genPreset.name);
-    const live = liveByName.get(genPreset.name);
+    const key = presetKey(genPreset);
+    generatedKeys.add(key);
+    const live = liveByKey.get(key);
 
     result.push(
       live
@@ -506,7 +522,7 @@ function mergePresets(
   // Presets that only exist live are user-authored — keep them, unless they
   // reference a component that no longer exists: those can never be inserted.
   for (const live of livePresets) {
-    if (generatedNames.has(live.name)) continue;
+    if (generatedKeys.has(presetKey(live))) continue;
 
     const componentName =
       live.preset && typeof live.preset === "object"
