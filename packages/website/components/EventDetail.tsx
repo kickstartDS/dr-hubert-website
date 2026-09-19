@@ -74,17 +74,6 @@ const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
             <Downloads download={download} />
           </Section>
         )}
-        {
-          <Section
-            width="narrow"
-            buttons={[
-              {
-                label: "See all Events",
-                url: "/#",
-              },
-            ]}
-          ></Section>
-        }
       </main>
     );
   }
