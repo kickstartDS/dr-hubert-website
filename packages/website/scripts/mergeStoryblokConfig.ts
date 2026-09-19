@@ -475,6 +475,7 @@ function mergeField(
 function mergePresets(
   generatedPresets: StoryblokPreset[],
   livePresets: StoryblokPreset[],
+  componentNames: Set<string>,
 ): StoryblokPreset[] {
   // Regenerated presets replace the live body: the live presets predate the
   // current schemas. The live id/component_id are kept so the push updates the
@@ -502,11 +503,23 @@ function mergePresets(
     );
   }
 
-  // Presets that only exist live are user-authored — keep them
+  // Presets that only exist live are user-authored — keep them, unless they
+  // reference a component that no longer exists: those can never be inserted.
   for (const live of livePresets) {
-    if (!generatedNames.has(live.name)) {
-      result.push(live);
+    if (generatedNames.has(live.name)) continue;
+
+    const componentName =
+      live.preset && typeof live.preset === "object"
+        ? (live.preset as Record<string, unknown>).component
+        : undefined;
+    if (typeof componentName === "string" && !componentNames.has(componentName)) {
+      console.log(
+        `      dropped stale preset: ${live.name} (${componentName})`,
+      );
+      continue;
     }
+
+    result.push(live);
   }
 
   return result;
@@ -677,7 +690,11 @@ function main() {
   }
 
   // Merge presets and resolve component_id from merged components
-  const mergedPresets = mergePresets(generatedPresets, livePresets);
+  const mergedPresets = mergePresets(
+    generatedPresets,
+    livePresets,
+    new Set(mergedComponents.map((comp) => comp.name)),
+  );
 
   // Build component name → id lookup from merged components (which have real Storyblok IDs)
   const componentIdByName = new Map<string, number>();
