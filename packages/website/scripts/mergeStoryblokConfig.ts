@@ -472,11 +472,68 @@ function mergeField(
 // Preset merge
 // ---------------------------------------------------------------------------
 
+/**
+ * Drop fields a component schema does not define from a kept live preset.
+ *
+ * Live presets predate the schema cleanups and still carry the legacy blok
+ * `type` discriminator (Storyblok content uses `component` only), which the
+ * editor reports as "x items out of schema". Recurses into bloks fields so
+ * nested entries (e.g. a mosaic's tiles) are cleaned too.
+ */
+function cleanPresetFields(
+  node: Record<string, unknown>,
+  schema: Record<string, StoryblokField> | undefined,
+  componentsByName: Map<string, StoryblokComponent>,
+  dropped: Set<string>,
+): void {
+  for (const key of Object.keys(node)) {
+    if (key === "_uid" || key === "component") continue;
+
+    const value = node[key];
+    const field = schema?.[key];
+
+    if (field?.type === "bloks") {
+      const whitelist = field.component_whitelist ?? [];
+      for (const entry of Array.isArray(value) ? value : [value]) {
+        if (!entry || typeof entry !== "object") continue;
+
+        const entryRecord = entry as Record<string, unknown>;
+        const componentName =
+          typeof entryRecord.component === "string"
+            ? entryRecord.component
+            : whitelist.length === 1
+              ? whitelist[0]
+              : undefined;
+
+        cleanPresetFields(
+          entryRecord,
+          componentName
+            ? componentsByName.get(componentName)?.schema
+            : undefined,
+          componentsByName,
+          dropped,
+        );
+      }
+      continue;
+    }
+
+    if (!field) {
+      delete node[key];
+      dropped.add(key);
+    }
+  }
+}
+
 function mergePresets(
   generatedPresets: StoryblokPreset[],
   livePresets: StoryblokPreset[],
-  componentNames: Set<string>,
+  mergedComponents: StoryblokComponent[],
 ): StoryblokPreset[] {
+  const componentsByName = new Map<string, StoryblokComponent>();
+  for (const component of mergedComponents) {
+    componentsByName.set(component.name, component);
+  }
+
   // Regenerated presets replace the live body: the live presets predate the
   // current schemas. The live id/component_id are kept so the push updates the
   // existing preset instead of creating a duplicate.
@@ -528,11 +585,29 @@ function mergePresets(
       live.preset && typeof live.preset === "object"
         ? (live.preset as Record<string, unknown>).component
         : undefined;
-    if (typeof componentName === "string" && !componentNames.has(componentName)) {
+    if (typeof componentName === "string" && !componentsByName.has(componentName)) {
       console.log(
         `      dropped stale preset: ${live.name} (${componentName})`,
       );
       continue;
+    }
+
+    // Live-only presets are user-authored: keep them, but drop fields the
+    // current schema no longer defines (in particular the legacy `type` blok
+    // discriminator) so they insert without "x items out of schema".
+    if (typeof componentName === "string" && live.preset) {
+      const dropped = new Set<string>();
+      cleanPresetFields(
+        live.preset,
+        componentsByName.get(componentName)?.schema,
+        componentsByName,
+        dropped,
+      );
+      if (dropped.size > 0) {
+        console.log(
+          `      cleaned stale preset: ${live.name} (${componentName}) — dropped ${[...dropped].join(", ")}`,
+        );
+      }
     }
 
     result.push(live);
@@ -709,7 +784,7 @@ function main() {
   const mergedPresets = mergePresets(
     generatedPresets,
     livePresets,
-    new Set(mergedComponents.map((comp) => comp.name)),
+    mergedComponents,
   );
 
   // Build component name → id lookup from merged components (which have real Storyblok IDs)
