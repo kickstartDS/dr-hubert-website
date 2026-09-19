@@ -45,9 +45,16 @@
   --dsa-overlay-text--text-color-inverted-base: var(--ks-text-color-display);
 
   // Topic font styles
+  // The upstream default is var(--ks-text-color-display), the foreground
+  // colour (near-black). The pre-monorepo site overrode it back to the brand
+  // blue in its own token layer (token/global-token.scss, loaded after the
+  // design system); the migration dropped that file, which turned every topic
+  // line dark at once (teaser-card, business-card, content-nav, faq, features,
+  // search-filter). Kept as a var() reference so each branding theme resolves
+  // its own primary and [ks-inverted] resolves the inverted primary.
   --dsa-topic--font: var(--ks-font-display-m);
   --dsa-topic--font-weight: var(--ks-font-weight-semi-bold);
-  --dsa-topic--color: var(--ks-text-color-display);
+  --dsa-topic--color: var(--ks-text-color-primary);
   --dsa-topic--font-family: var(--ks-font-family-display);
 
   // Link styles

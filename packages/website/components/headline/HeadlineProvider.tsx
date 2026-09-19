@@ -10,12 +10,20 @@ export const HeadlineProvider: FC<PropsWithChildren> = (props) => {
     const computedLevel = useHeadlineLevel();
     const nextLevel =
       level !== "p" && computedLevel ? "h" + computedLevel : level;
-    const headlineSlug = props.text
-      ? slugify(props.text, { lower: true })
-      : undefined;
+    const explicitId =
+      typeof props.id === "string" && props.id.trim() ? props.id : undefined;
+    const headlineSlug =
+      !explicitId && props.text
+        ? slugify(props.text, { lower: true })
+        : undefined;
     return (
       // @ts-expect-error `content` is in the spread but TS can't see it through `any`
-      <PrevHeadline {...props} level={nextLevel} id={headlineSlug} ref={ref} />
+      <PrevHeadline
+        {...props}
+        level={nextLevel}
+        id={explicitId ?? headlineSlug}
+        ref={ref}
+      />
     );
   });
   return <HeadlineContext.Provider {...props} value={Headline} />;

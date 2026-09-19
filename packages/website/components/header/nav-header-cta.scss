@@ -1,9 +1,7 @@
 .dsa-nav-main {
-  @media (min-width: 62rem) {
-    display: flex;
-    align-items: center;
-    gap: var(--ks-spacing-m);
-  }
+  display: flex;
+  align-items: center;
+  gap: var(--ks-spacing-m);
 
   a.dsa-nav-main__header-cta {
     display: none;
@@ -33,13 +31,22 @@
   }
 
   .dsa-nav-main__search {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
+    // On mobile the trigger sits before the hamburger, which keeps the right
+    // edge of the menu bar to the toggle; the desktop order (nav links,
+    // search, language, CTA) is restored below.
+    order: -1;
+    position: relative;
+    z-index: 1;
     padding: 0;
     border: 0;
     background: none;
-    color: currentColor;
+    // An inverted header only flips the design-system variables, so consuming
+    // the same token as the nav labels is what turns this white - the
+    // inherited page colour it used before never inverts.
+    color: var(--ks-text-color-interface-interactive);
     cursor: pointer;
     line-height: 0;
     transition: opacity 0.2s ease;
@@ -55,7 +62,7 @@
     }
 
     @media (min-width: 62rem) {
-      display: flex;
+      order: 0;
     }
   }
 
@@ -67,30 +74,28 @@
     font-family: var(--ks-font-family-interface);
     font-weight: var(--ks-font-weight-semi-bold);
     letter-spacing: 0.04em;
-    line-height: 1;
+    // Colours the separator, which only inherits; the items set the token
+    // themselves below.
+    color: var(--ks-text-color-interface-interactive);
 
     @media (min-width: 62rem) {
       display: flex;
     }
 
     &__item {
-      display: flex;
-      align-items: center;
-      color: currentColor;
+      // Same inverted-aware token as the nav labels: without it the linked
+      // (inactive) language falls back to the global `a:not(.c-button)` link
+      // colour, which is not what turns white on an inverted menu.
+      color: var(--ks-text-color-interface-interactive);
       text-decoration: none;
-      transition: opacity 0.2s ease, color 0.2s ease;
+      transition: opacity 0.2s ease;
 
-      // Current language: styled like the active main nav item.
       &--active {
-        color: var(--ks-text-color-primary);
-        font-weight: var(--ks-font-weight-bold);
+        color: var(--ks-color-primary);
         pointer-events: none;
       }
 
-      // Other language: dimmed, like the previous active-item treatment.
       &--link {
-        opacity: 0.4;
-
         &:hover,
         &:focus-visible {
           opacity: 0.75;
@@ -100,8 +105,6 @@
     }
 
     &__separator {
-      display: flex;
-      align-items: center;
       opacity: 0.25;
       user-select: none;
       font-weight: var(--ks-font-weight-regular);
