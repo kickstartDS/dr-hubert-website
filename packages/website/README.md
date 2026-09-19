@@ -139,7 +139,7 @@ pnpm --filter website update-storyblok-config  # Full workflow: generate → ren
 pnpm --filter website push-components          # Push merged config from cms/merged/ to Storyblok
 pnpm --filter website pull-content-schema      # Pull schema from Storyblok → types/
 pnpm --filter website create-storyblok-config  # Regenerate CMS config from JSON schemas
-pnpm --filter website check-presets            # Validate the generated presets against the generated component config
+pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter check-presets  # Validate the generated presets against the generated component config
 pnpm --filter website generate-content-types   # Pull + generate TypeScript types
 ```
 
