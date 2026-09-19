@@ -15,6 +15,12 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const {
+  presetIdToComponentName,
+  FIELD_ALIASES,
+} = require("./generatePresets");
+
+const designSystemPresets = require("@kickstartds/design-system/presets.json");
 
 const componentsPath = path.join(
   __dirname,
@@ -88,6 +94,32 @@ const collectErrors = (node, schema, componentsByName, location, errors) => {
   }
 };
 
+/**
+ * A field the component schema defines must survive generation. Flattening
+ * turns nested objects into `key_subkey` pairs and `applySchema` drops every
+ * field it does not know, so a bug there silently empties a field instead of
+ * erroring — check the regenerated body against the design system preset it
+ * came from.
+ */
+const collectDroppedFields = (sourceArgs, preset, component, location, errors) => {
+  const aliases = FIELD_ALIASES[component.name] || {};
+  const bodyKeys = Object.keys(preset);
+
+  for (const key of Object.keys(sourceArgs)) {
+    const fieldName = aliases[key] || key;
+    if (!component.schema[fieldName]) continue; // prop without a schema field
+
+    const present =
+      bodyKeys.includes(fieldName) ||
+      bodyKeys.some((bodyKey) => bodyKey.startsWith(`${fieldName}_`));
+    if (!present) {
+      errors.push(
+        `${location}: schema field "${fieldName}" is missing from the preset body`,
+      );
+    }
+  }
+};
+
 const checkPresets = () => {
   const componentsRaw = JSON.parse(fs.readFileSync(componentsPath, "utf-8"));
   const components = componentsRaw.components || componentsRaw;
@@ -107,6 +139,34 @@ const checkPresets = () => {
       continue;
     }
     collectErrors(preset.preset, component.schema, componentsByName, location, errors);
+  }
+
+  // `generatePresets()` keeps the design system preset order, so the committed
+  // presets line up index by index with the source presets whose component
+  // exists in the config.
+  const sources = designSystemPresets.filter((source) =>
+    componentsByName.has(presetIdToComponentName(source.id)),
+  );
+
+  if (sources.length !== presets.length) {
+    errors.push(
+      `presets: ${presets.length} committed presets but ${sources.length} design system presets match the component config — regenerate with \`pnpm --filter website create-storyblok-config\``,
+    );
+  } else {
+    presets.forEach((preset, index) => {
+      const source = sources[index];
+      const location = `${preset.name} (${preset.preset?.component})`;
+
+      if (presetIdToComponentName(source.id) !== preset.preset?.component) {
+        errors.push(
+          `${location}: out of sync with design system preset "${source.id}" — regenerate with \`pnpm --filter website create-storyblok-config\``,
+        );
+        return;
+      }
+
+      const component = componentsByName.get(preset.preset.component);
+      collectDroppedFields(source.args, preset.preset, component, location, errors);
+    });
   }
 
   if (errors.length > 0) {

@@ -90,7 +90,7 @@ const hashFile = (filePath) =>
 
 const hashRemote = async (url) => {
   try {
-    const response = await fetch(`https:${url}`);
+    const response = await fetch(url.startsWith("//") ? `https:${url}` : url);
     if (!response.ok) return null;
     const buffer = Buffer.from(await response.arrayBuffer());
     return crypto.createHash("sha1").update(buffer).digest("hex");
@@ -110,7 +110,10 @@ const screenshotChanged = async (localImage, liveImage) => {
   if (!isRemote) return true;
 
   const localHash = hashFile(path.join(SCREENSHOT_ROOT, localImage));
-  if (!localHash) return false;
+  if (!localHash) {
+    console.log(`  ${localImage}: local screenshot not found, skipping`);
+    return false;
+  }
 
   const remoteHash = await hashRemote(liveImage);
   return remoteHash !== localHash;

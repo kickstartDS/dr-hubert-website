@@ -126,6 +126,40 @@ const resolveBlokComponent = (entry, whitelist, componentsList) => {
 };
 
 /**
+ * Wrap single-object values of `bloks` fields in arrays. Flattening runs
+ * before the schema pass and would turn such an object into `key_subkey` pairs
+ * that `applySchema` then drops as unknown fields; recursing into each entry
+ * with its component schema keeps nested single-object bloks fields (e.g. a
+ * blog aside's author) intact as well.
+ */
+const normalizeBlokFields = (node, schema, componentsList) => {
+  if (!node || typeof node !== "object" || Array.isArray(node)) return;
+
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "_uid" || key === "component") continue;
+
+    const field = schema ? schema[key] : undefined;
+    if (field?.type !== "bloks") continue;
+
+    const entries = Array.isArray(value) ? value : [value];
+    node[key] = entries;
+
+    const whitelist = field.component_whitelist || [];
+    for (const entry of entries) {
+      if (!entry || typeof entry !== "object") continue;
+
+      const componentName = resolveBlokComponent(
+        entry,
+        whitelist,
+        componentsList,
+      );
+      const child = componentsList.find((c) => c.name === componentName);
+      normalizeBlokFields(entry, child?.schema, componentsList);
+    }
+  }
+};
+
+/**
  * Type blok entries, recurse into their component schemas and drop every
  * field the component schema does not define.
  */
@@ -256,10 +290,14 @@ function generatePresets(options = {}) {
       }
     }
 
-    // 2c. Flatten nested objects to key_subkey format
+    // 2c. Normalise single-object bloks values to arrays, so flattening below
+    //     does not split them into `key_subkey` pairs the schema does not have
+    normalizeBlokFields(preset.preset, component.schema, componentsList);
+
+    // 2d. Flatten nested objects to key_subkey format
     flattenNestedObjects(preset.preset);
 
-    // 2d. Type bloks entries and drop fields the schema does not define
+    // 2e. Type bloks entries and drop fields the schema does not define
     applySchema(preset.preset, component.schema, componentsList);
   }
 
@@ -289,4 +327,5 @@ if (require.main === module) {
 module.exports = {
   generatePresets,
   presetIdToComponentName,
+  FIELD_ALIASES,
 };
