@@ -53,7 +53,11 @@ export const FeaturesContextDefault = forwardRef<
               label: cta?.label,
               url: cta?.url,
               style: ctas.style,
-              toggle: ctas.toggle,
+              // Respect a feature's own CTA toggle (defaults to true when
+              // unset) in addition to the global `ctas.toggle` setting —
+              // an individual feature must be able to opt out even when
+              // CTAs are enabled for the whole block.
+              toggle: (cta?.toggle ?? true) && ctas.toggle,
               icon: cta?.icon,
             }}
           />

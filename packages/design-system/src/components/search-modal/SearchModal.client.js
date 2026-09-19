@@ -7,7 +7,7 @@ export default class SearchModal extends Component {
     super(element);
 
     const form = element.querySelector(".dsa-search-form");
-    const searchInput = element.querySelector(".dsa-search-bar__input");
+    const searchInput = element.querySelector(".dsa-search-bar__input input");
 
     const onBackdropClick = (event) => {
       if (event.target === element)

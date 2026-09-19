@@ -38,7 +38,7 @@
           "type": "string",
           "title": "Source",
           "description": "Badge image source",
-          "format": "uri"
+          "format": "image"
         },
         "alt": {
           "type": "string",

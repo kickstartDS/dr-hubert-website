@@ -1,4 +1,11 @@
 import { Component, define } from "@kickstartds/core/lib/component";
+// GalleryComponent.tsx renders images with a `lightboxImage` config (via
+// @kickstartds/base's TextMedia), which relies on the base `LightboxImage`
+// vanilla-JS behavior (`base.lightbox-image`) for the click-to-zoom/PhotoSwipe
+// popup. That registration is only reachable from the React component bundle
+// normally, so it needs to be re-imported here to ship in the website's
+// React-free static client bundle (see bundleStaticAssets.js).
+import "@kickstartds/base/lib/lightbox-image/lazyLightboxImage.js";
 
 export const identifier = "dsa.gallery";
 
@@ -90,7 +97,7 @@ function initArrows(scrollEl, backBtn, forwardBtn) {
 
   const scrollByItem = (forward) => {
     const gap = Number(
-      getComputedStyle(track).getPropertyValue("gap").split("px")[0],
+      getComputedStyle(track).getPropertyValue("gap").split("px")[0]
     );
     const itemWidth = Math.ceil(firstItem.offsetWidth + gap);
     const pos = scrollEl.scrollLeft / itemWidth;
@@ -146,7 +153,7 @@ function unveilLazyImages(scrollEl) {
 
 function populateLightboxDimensions(galleryEl) {
   const links = galleryEl.querySelectorAll(
-    ".lightbox-image__link[data-gallery]",
+    ".lightbox-image__link[data-gallery]"
   );
   for (const link of links) {
     if (link.dataset.sizeW && link.dataset.sizeH) continue;
@@ -190,7 +197,7 @@ class Gallery extends Component {
     }
 
     const progressBar = element.querySelector(
-      ".dsa-gallery__slider-progress-bar",
+      ".dsa-gallery__slider-progress-bar"
     );
     if (progressBar) {
       cleanups.push(initProgressBar(scrollEl, progressBar));

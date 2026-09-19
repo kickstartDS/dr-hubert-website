@@ -41,7 +41,16 @@ export type Width = "full" | "max" | "wide" | "default" | "narrow";
 /**
  * Style of background
  */
-export type Style = "default" | "framed" | "deko";
+export type Style =
+  | "default"
+  | "framed"
+  | "deko"
+  | "colorful"
+  | "stagelights"
+  | "anchorGlow"
+  | "symmetricGlow"
+  | "horizontalGradient"
+  | "verticalGradient";
 /**
  * Color of background
  */

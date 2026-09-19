@@ -16,7 +16,7 @@
         {
           "component": "section",
           "headerSpacing": true,
-          "style": "accentTransition",
+          "transition": "to-accent",
           "spaceAfter": "small",
           "headline_large": true,
           "headline_sub": "So, you're almost done.",

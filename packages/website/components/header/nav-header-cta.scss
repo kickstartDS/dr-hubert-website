@@ -67,22 +67,30 @@
     font-family: var(--ks-font-family-interface);
     font-weight: var(--ks-font-weight-semi-bold);
     letter-spacing: 0.04em;
+    line-height: 1;
 
     @media (min-width: 62rem) {
       display: flex;
     }
 
     &__item {
+      display: flex;
+      align-items: center;
       color: currentColor;
       text-decoration: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease, color 0.2s ease;
 
+      // Current language: styled like the active main nav item.
       &--active {
-        opacity: 0.4;
+        color: var(--ks-text-color-primary);
+        font-weight: var(--ks-font-weight-bold);
         pointer-events: none;
       }
 
+      // Other language: dimmed, like the previous active-item treatment.
       &--link {
+        opacity: 0.4;
+
         &:hover,
         &:focus-visible {
           opacity: 0.75;
@@ -92,6 +100,8 @@
     }
 
     &__separator {
+      display: flex;
+      align-items: center;
       opacity: 0.25;
       user-select: none;
       font-weight: var(--ks-font-weight-regular);

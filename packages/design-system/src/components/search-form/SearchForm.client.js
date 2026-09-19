@@ -127,7 +127,7 @@ export default class SearchForm extends Component {
   constructor(element) {
     super(element);
 
-    this.$searchInput = this.$(".dsa-search-bar__input");
+    this.$searchInput = this.$(".dsa-search-bar__input input");
     this.$resultTemplate = this.$("[data-template=result]");
     this.$subresultTemplate = this.$("[data-template=subresult]");
     this.$paginationLinkTemplate = this.$("[data-template=pagination-link]");
@@ -273,7 +273,7 @@ export default class SearchForm extends Component {
   }
 
   on(element, type, fn) {
-    const cleanUp = () => element.removeventListener(type, fn);
+    const cleanUp = () => element.removeEventListener(type, fn);
     element.addEventListener(type, fn);
     this.onDisconnect(cleanUp);
     return cleanUp;

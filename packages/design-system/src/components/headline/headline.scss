@@ -14,7 +14,11 @@
     --g-link--text-decoration: none;
     visibility: hidden;
     position: absolute;
-    margin-left: var(--dsa-headline__anchor--margin-left, var(--ks-spacing-inline-s));
+    display: none;
+    margin-left: var(
+      --dsa-headline__anchor--margin-left,
+      var(--ks-spacing-inline-s)
+    );
     transform: var(--dsa-headline__anchor--transform);
 
     .icon {
@@ -23,46 +27,69 @@
     }
   }
 
-  &:hover {
-    .dsa-headline__anchor {
-      visibility: visible;
-    }
-  }
+  // &:hover {
+  //   .dsa-headline__anchor {
+  //     visibility: visible;
+  //   }
+  // }
 
   &--h1 {
-    --subheadline--font-size: var(--dsa-headline_h1__subheadline--font-size, 50%);
-    --headline--space-after_minimum: var(--dsa-headline_h1--space-after_minimum);
+    --subheadline--font-size: var(
+      --dsa-headline_h1__subheadline--font-size,
+      50%
+    );
+    --headline--space-after_minimum: var(
+      --dsa-headline_h1--space-after_minimum
+    );
     --headline--space-after_small: var(--dsa-headline_h1--space-after_small);
     --headline--space-after_large: var(--dsa-headline_h1--space-after_large);
     font: var(--dsa-headline_h1--font, var(--ks-font-display-xxl));
   }
 
   &--h2 {
-    --subheadline--font-size: var(--dsa-headline_h2__subheadline--font-size, 50%);
-    --headline--space-after_minimum: var(--dsa-headline_h2--space-after_minimum);
+    --subheadline--font-size: var(
+      --dsa-headline_h2__subheadline--font-size,
+      50%
+    );
+    --headline--space-after_minimum: var(
+      --dsa-headline_h2--space-after_minimum
+    );
     --headline--space-after_small: var(--dsa-headline_h2--space-after_small);
     --headline--space-after_large: var(--dsa-headline_h2--space-after_large);
     font: var(--dsa-headline_h2--font, var(--ks-font-display-xl));
   }
 
   &--h3 {
-    --subheadline--font-size: var(--dsa-headline_h3__subheadline--font-size, 50%);
-    --headline--space-after_minimum: var(--dsa-headline_h3--space-after_minimum);
+    --subheadline--font-size: var(
+      --dsa-headline_h3__subheadline--font-size,
+      50%
+    );
+    --headline--space-after_minimum: var(
+      --dsa-headline_h3--space-after_minimum
+    );
     --headline--space-after_small: var(--dsa-headline_h3--space-after_small);
     --headline--space-after_large: var(--dsa-headline_h3--space-after_large);
     font: var(--dsa-headline_h3--font, var(--ks-font-display-l));
   }
 
   &--h4 {
-    --subheadline--font-size: var(--dsa-headline_h4__subheadline--font-size, 75%);
-    --headline--space-after_minimum: var(--dsa-headline_h4--space-after_minimum);
+    --subheadline--font-size: var(
+      --dsa-headline_h4__subheadline--font-size,
+      75%
+    );
+    --headline--space-after_minimum: var(
+      --dsa-headline_h4--space-after_minimum
+    );
     --headline--space-after_small: var(--dsa-headline_h4--space-after_small);
     --headline--space-after_large: var(--dsa-headline_h4--space-after_large);
     font: var(--dsa-headline_h4--font, var(--ks-font-display-m));
   }
 
   &--p {
-    --subheadline--font-size: var(--dsa-headline_p__subheadline--font-size, 75%);
+    --subheadline--font-size: var(
+      --dsa-headline_p__subheadline--font-size,
+      75%
+    );
     --headline--space-after_minimum: var(--dsa-headline_p--space-after_minimum);
     --headline--space-after_small: var(--dsa-headline_p--space-after_small);
     --headline--space-after_large: var(--dsa-headline_p--space-after_large);
@@ -82,8 +109,14 @@
     font-size: var(--subheadline--font-size, 50%);
     margin: 0;
     max-width: var(--dsa-content--width_default);
-    color: var(--dsa-headline__subheadline--color, var(--ks-text-color-primary));
-    font-weight: var(--dsa-headline__subheadline--font-weight, var(--ks-font-weight-bold));
+    color: var(
+      --dsa-headline__subheadline--color,
+      var(--ks-text-color-primary)
+    );
+    font-weight: var(
+      --dsa-headline__subheadline--font-weight,
+      var(--ks-font-weight-bold)
+    );
     text-transform: var(--dsa-headline__subheadline--text-transform, none);
     letter-spacing: var(--dsa-headline__subheadline--letter-spacing, 0);
   }

@@ -11,8 +11,12 @@
   --dsa-nav-flyout--transition-delay: var(--ks-duration-immediate);
 
   --dsa-nav-flyout__label--color: var(--ks-color-fg);
-  --dsa-nav-flyout__label--color_hover: var(--ks-text-color-interface-interactive-hover);
-  --dsa-nav-flyout__label--color_active: var(--ks-text-color-interface-interactive-active);
+  --dsa-nav-flyout__label--color_hover: var(
+    --ks-text-color-interface-interactive-hover
+  );
+  --dsa-nav-flyout__label--color_active: var(
+    --ks-text-color-interface-interactive-active
+  );
   --dsa-nav-flyout__label--background-color_hover: unset;
   --dsa-nav-flyout__label--background-color_active: unset;
   --dsa-nav-flyout__label--font: var(--ks-font-interface-l);
@@ -31,7 +35,9 @@
   --dsa-nav-flyout__sublist__label--color: var(--ks-color-fg);
   --dsa-nav-flyout__sublist__label--font: var(--ks-font-interface-l);
   --dsa-nav-flyout__sublist__label--font-family: var(--ks-font-family-display);
-  --dsa-nav-flyout__sublist__label--font-weight: var(--ks-font-weight-semi-bold);
+  --dsa-nav-flyout__sublist__label--font-weight: var(
+    --ks-font-weight-semi-bold
+  );
   --dsa-nav-flyout__sublist__label--padding: 0.25em 0;
 }
 
@@ -47,5 +53,8 @@
     // Sub-items were `interface-m` before; the starter raised them to
     // `interface-l`, which makes them compete with their own parent label.
     --dsa-nav-flyout__sublist__label--font: var(--ks-font-interface-m);
+    // Active (current page) nav item was shown in the brand primary color
+    // pre-monorepo; the design system default only bolds it in --ks-color-fg.
+    --dsa-nav-flyout__label--color_active: var(--ks-text-color-primary);
   }
 }

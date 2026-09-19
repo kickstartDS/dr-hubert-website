@@ -35,6 +35,9 @@
 
   --c-slider_arrow--color: var(--dsa-slider__arrow--color, var(--ks-text-color-interface-interactive));
 
+  --c-slider_arrow--size: var(--dsa-slider__arrow--size);
+  --c-slider_arrow--horizontal-offset: var(--dsa-slider__arrow--offset);
+
   --c-slider--animation-duration: var(--dsa-slider--animation-duration, var(--ks-transition-fade));
   --c-slider--autoplay: var(--dsa-slider--autoplay-duration, 4s);
 
@@ -46,6 +49,10 @@
 
   .c-slider__arrows {
     top: 50%;
+  }
+
+  .c-slider__arrow {
+    border-radius: var(--dsa-slider__arrow--border-radius);
   }
 
   .c-slider__nav {

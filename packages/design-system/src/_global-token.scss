@@ -38,7 +38,8 @@
 
   // Overlay Text styles
   --dsa-overlay-text--shadow-base: 0 0 10px var(--ks-color-fg-alpha-3);
-  --dsa-overlay-text--shadow-inverted-base: 0 0 10px var(--ks-color-fg-alpha-3-inverted);
+  --dsa-overlay-text--shadow-inverted-base: 0 0 10px
+    var(--ks-color-fg-alpha-3-inverted);
 
   --dsa-overlay-text--text-color-base: var(--ks-text-color-display-inverted);
   --dsa-overlay-text--text-color-inverted-base: var(--ks-text-color-display);
@@ -69,8 +70,8 @@
 
   // Content width options (for content displayed in a width constrained container)
   --dsa-content--width_narrow: calc(var(--ks-font-size-copy-m) * 34);
-  --dsa-content--width_default: calc(var(--ks-font-size-copy-m) * 50);
-  --dsa-content--width_wide: calc(var(--ks-font-size-copy-m) * 72);
+  --dsa-content--width_default: calc(var(--ks-font-size-copy-m) * 44);
+  --dsa-content--width_wide: calc(var(--ks-font-size-copy-m) * 68);
   --dsa-content--width_max: 100vw;
   --dsa-content--width_full: 100vw;
 
@@ -82,16 +83,19 @@
   --dsa-tile--width_largest: calc(var(--ks-font-size-copy-m) * 42);
 
   // Logo height
-  --dsa-logo--height: 2rem;
+  --dsa-logo--height: 2.55rem;
 
   @media (min-width: 48em) {
-    --dsa-logo--height: 2.25rem;
+    --dsa-logo--height: 2.86875rem;
   }
 
   @media (min-width: 62em) {
-    --dsa-logo--height: 2.5rem;
+    --dsa-logo--height: 3.1875rem;
   }
 
   // Header height calculation
-  --dsa-header--height: calc(var(--dsa-logo--height) + var(--ks-spacing-stack-m) + var(--ks-spacing-stack-m));
+  --dsa-header--height: calc(
+    var(--dsa-logo--height) + var(--ks-spacing-stack-m) +
+      var(--ks-spacing-stack-m)
+  );
 }

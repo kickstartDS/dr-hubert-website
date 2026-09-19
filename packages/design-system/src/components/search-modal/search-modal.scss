@@ -1,11 +1,16 @@
 .dsa-search-modal {
   &[open] {
     border-radius: var(--ks-border-radius-card);
-    border: var(--ks-border-color-interface) solid var(--ks-border-width-default);
-    box-shadow: var(--dsa-cookie-consent-dialog--box-shadow, var(--ks-box-shadow-card));
+    border: var(--ks-border-color-interface) solid
+      var(--ks-border-width-default);
+    box-shadow: var(
+      --dsa-cookie-consent-dialog--box-shadow,
+      var(--ks-box-shadow-card)
+    );
     background-color: var(--ks-background-color-default);
     padding: 0;
     width: calc(100% - calc(var(--ks-spacing-inset-xs) * 2));
+    max-width: 60rem;
     max-height: calc(100% - calc(var(--ks-spacing-inset-xs) * 2));
     margin-top: var(--ks-spacing-inset-xs);
   }
@@ -16,6 +21,38 @@
 
   &__close {
     --dsa-button--padding: 1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    // !important needed: the base library's `.c-button--clear` variant sets
+    // `padding-left: 0` (assuming icon-only clear buttons sit flush left),
+    // which otherwise wins over --dsa-button--padding and makes the icon
+    // hug the left edge with no padding while the right side keeps 1em.
+    padding-left: var(--dsa-button--padding) !important;
+
+    // !important needed: base .dsa-button.c-button .icon has higher
+    // specificity (3 classes) than this descendant selector, so a plain
+    // override here would otherwise lose the cascade.
+    .icon {
+      margin-left: 0 !important;
+    }
+  }
+
+  .dsa-search-result {
+    justify-content: center;
+
+    // Fill available width like the default styling (flex-grow: 1) up to a
+    // comfortable reading width, instead of the base flex-basis (a much
+    // narrower fixed tile width) or fully unconstrained growth (which fills
+    // the row edge-to-edge and makes the parent's justify-content: center
+    // above have no visible effect). Once the cap is hit, the remaining
+    // space is distributed evenly on both sides by justify-content: center.
+    &__content {
+      flex-grow: 1;
+      flex-basis: 0;
+      max-width: 44rem;
+    }
   }
 
   .l-section__container--headline .dsa-headline {

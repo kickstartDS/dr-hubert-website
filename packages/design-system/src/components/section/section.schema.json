@@ -16,7 +16,17 @@
       "type": "string",
       "title": "Style",
       "description": "Style of background",
-      "enum": ["default", "framed", "deko"],
+      "enum": [
+        "default",
+        "framed",
+        "deko",
+        "colorful",
+        "stagelights",
+        "anchorGlow",
+        "symmetricGlow",
+        "horizontalGradient",
+        "verticalGradient"
+      ],
       "default": "default"
     },
     "backgroundColor": {

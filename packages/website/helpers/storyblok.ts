@@ -31,13 +31,13 @@ export function initStoryblok(accessToken?: string) {
 }
 
 export function isStoryblokComponent(
-  blok: any,
+  blok: any
 ): blok is { content: Record<string, any> } {
   return blok && blok.content !== undefined && blok.id !== undefined;
 }
 
 export function isStoryblokComponentSchema(
-  object: any,
+  object: any
 ): object is IStoryblokBlock {
   return object && object.schema && object.id;
 }
@@ -55,7 +55,7 @@ export function isStoryblokLink(object: any): object is MultilinkStoryblok {
 }
 
 export function isStoryblokStoryLinkObject(
-  object: any,
+  object: any
 ): object is MultilinkStoryblok & {
   story: ISbLinkURLObject;
   linktype: "story";
@@ -80,7 +80,7 @@ export function isStoryblokStoryLinkObject(
 // existed, or when resolve_links didn't cover it). Those links would render
 // with an empty href, so we detect them and resolve them by id below.
 export function isMissingStoryLinkObject(
-  object: any,
+  object: any
 ): object is MultilinkStoryblok & {
   story: ISbLinkURLObject;
   linktype: "story";
@@ -96,7 +96,7 @@ export function isMissingStoryLinkObject(
 
 export function storyProcessing(
   blok: Record<string, any>,
-  preview: boolean = false,
+  preview: boolean = false
 ) {
   function removeEmptyImages({ parent, key, value }: TraversalCallbackContext) {
     if (
@@ -124,6 +124,23 @@ export function storyProcessing(
           parent[key] = `${value.url}${value.anchor ? `#${value.anchor}` : ""}`;
         } else if (value.linktype === "asset") {
           parent[key] = value.url;
+        } else if (value.linktype === "story") {
+          // The Storyblok Bridge sends raw draft content on live "input"
+          // events, which never includes the resolved `story` object (that
+          // only comes from the CDN API's `resolve_links` param). It does,
+          // however, always include `cached_url` - the slug captured when the
+          // link was picked in the editor - so use that as a fallback instead
+          // of collapsing to "#" and hiding the link/button in preview.
+          //
+          // An untouched, optional link field defaults to
+          // `{ linktype: "story", id: "", url: "", cached_url: "" }` - map
+          // that "no link picked" state to an empty string (falsy) instead of
+          // "#", so components that conditionally render based on the link
+          // being set (e.g. the footer's legal link) don't render a link to
+          // nowhere.
+          parent[key] = value.cached_url
+            ? `${value.cached_url}${value.anchor ? `#${value.anchor}` : ""}`
+            : "";
         } else {
           parent[key] = "#";
         }
@@ -218,7 +235,7 @@ export function storyProcessing(
       value !== ""
     ) {
       const componentSchema = componentsSchema.find(
-        (component) => component.name === parent.component,
+        (component) => component.name === parent.component
       );
       if (
         componentSchema &&
@@ -263,7 +280,7 @@ export const resolvableRelations = [
 
 export const sbParams = (
   draft: boolean,
-  params: ISbStoriesParams | ISbStoryParams = {},
+  params: ISbStoriesParams | ISbStoryParams = {}
 ): ISbStoriesParams | ISbStoryParams => ({
   version: draft ? "draft" : "published",
   cv: lastContentVersion,
@@ -277,7 +294,7 @@ export async function fetchUuid(uuid: string, storyblokApi?: StoryblokClient) {
 
   const response: ISbStory = await storyblok.get(
     `cdn/stories/${uuid}`,
-    sbParams(!!storyblokApi, { find_by: "uuid" }),
+    sbParams(!!storyblokApi, { find_by: "uuid" })
   );
 
   return response.data.story;
@@ -285,7 +302,7 @@ export async function fetchUuid(uuid: string, storyblokApi?: StoryblokClient) {
 
 export async function resolveStoryUuids(
   story: ISbStoryData,
-  storyblokApi?: StoryblokClient,
+  storyblokApi?: StoryblokClient
 ) {
   const promises: Promise<any>[] = [];
   traverse(story, ({ parent, key, value }) => {
@@ -295,7 +312,7 @@ export async function resolveStoryUuids(
       !["_uid", "uuid", "group_id", "id"].includes(key) &&
       typeof value === "string" &&
       value.match(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
       )
     ) {
       promises.push(
@@ -303,7 +320,7 @@ export async function resolveStoryUuids(
           parent[key] = data.content;
 
           return resolveStoryUuids(data, storyblokApi);
-        }),
+        })
       );
     }
   });
@@ -313,7 +330,7 @@ export async function resolveStoryUuids(
 
 export async function resolveMissingStoriesInLinks(
   story: ISbStoryData,
-  storyblokApi?: StoryblokClient,
+  storyblokApi?: StoryblokClient
 ) {
   const promises: Promise<any>[] = [];
   traverse(story, ({ parent, key, value }) => {
@@ -329,7 +346,7 @@ export async function resolveMissingStoriesInLinks(
             uuid: data.uuid,
           };
           return resolveMissingStoriesInLinks(data, storyblokApi);
-        }),
+        })
       );
     }
   });
@@ -340,12 +357,12 @@ export async function resolveMissingStoriesInLinks(
 export async function fetchStory(
   slug: string,
   resolveUuids: boolean = false,
-  previewStoryblokApi?: StoryblokClient,
+  previewStoryblokApi?: StoryblokClient
 ) {
   const storyblokApi = previewStoryblokApi || getStoryblokApi();
   const response: ISbStory = await storyblokApi.get(
     `cdn/stories/${slug}`,
-    sbParams(!!previewStoryblokApi),
+    sbParams(!!previewStoryblokApi)
   );
 
   lastContentVersion = response.data.cv;
@@ -361,12 +378,12 @@ export async function fetchStory(
 export async function fetchStories(
   params?: ISbStoriesParams,
   resolveUuids: boolean = false,
-  previewStoryblokApi?: StoryblokClient,
+  previewStoryblokApi?: StoryblokClient
 ) {
   const storyblokApi = previewStoryblokApi || getStoryblokApi();
   const response: ISbStories = await storyblokApi.get(
     `cdn/stories`,
-    sbParams(!!previewStoryblokApi, { per_page: 100, ...params }),
+    sbParams(!!previewStoryblokApi, { per_page: 100, ...params })
   );
 
   for (const story of response.data.stories) {
@@ -400,7 +417,7 @@ export async function fetchPaths() {
 
 export async function fetchPageProps(
   slug: string = INDEX_SLUG,
-  previewStoryblokApi?: StoryblokClient,
+  previewStoryblokApi?: StoryblokClient
 ) {
   const [{ data: pageData }, { data: settingsData }] = await Promise.all([
     fetchStory(slug, true, previewStoryblokApi),
@@ -418,7 +435,7 @@ export async function fetchPageProps(
       const themeStory = await fetchStory(
         `settings/themes/${settings.theme}`,
         false,
-        previewStoryblokApi,
+        previewStoryblokApi
       );
       settings.themeCss = themeStory.data.story?.content?.css || "";
     } catch {
@@ -438,7 +455,7 @@ export async function fetchPageProps(
       const themeStory = await fetchStory(
         `settings/themes/${pageContent.theme}`,
         false,
-        previewStoryblokApi,
+        previewStoryblokApi
       );
       pageContent.themeCss = themeStory.data.story?.content?.css || "";
     } catch {
