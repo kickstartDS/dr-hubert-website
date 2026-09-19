@@ -149,8 +149,9 @@ regenerated body, which carries the local screenshot path (`img/screenshots/…`
 Storyblok CDN URLs instead of relative paths.
 
 `check-presets` validates `cms/presets.123456.json` against `cms/components.123456.json` and fails
-when a preset references a component or field that the component config does not define. It runs in
-CI after `pnpm -r run build`.
+when a preset references a component or field that the component config does not define. Run it
+after regenerating the config; the CI step that would enforce it is not wired yet, because the
+automation's credential cannot push changes under `.github/workflows/`.
 
 ## Data Flow
 
