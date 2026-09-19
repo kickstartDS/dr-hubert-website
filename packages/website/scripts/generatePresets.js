@@ -126,6 +126,18 @@ const resolveBlokComponent = (entry, whitelist, componentsList) => {
 };
 
 /**
+ * The single text field of a component schema. Scalar blok entries (e.g. the
+ * tag labels of `event-list-teaser.tags`) are stored in it.
+ */
+const firstTextField = (component) => {
+  if (!component?.schema) return undefined;
+
+  return Object.keys(component.schema).find(
+    (key) => component.schema[key].type === "text",
+  );
+};
+
+/**
  * Wrap single-object values of `bloks` fields in arrays. Flattening runs
  * before the schema pass and would turn such an object into `key_subkey` pairs
  * that `applySchema` then drops as unknown fields; recursing into each entry
@@ -176,7 +188,39 @@ const applySchema = (node, schema, componentsList) => {
       const whitelist = field.component_whitelist || [];
       node[key] = (Array.isArray(value) ? value : [value])
         .map((entry) => {
-          if (!entry || typeof entry !== "object") return null;
+          if (entry === null || entry === undefined) return null;
+
+          // Scalar entries come from bloks fields whose design system source
+          // is a plain list of labels (e.g. `event-list-teaser.tags`). They can
+          // only be typed when the field allows exactly one component: its
+          // single text field carries the value.
+          if (typeof entry !== "object") {
+            if (whitelist.length !== 1) {
+              throw new Error(
+                `Cannot map scalar blok entry ${JSON.stringify(
+                  entry,
+                )} of "${key}": the field allows ${whitelist.length} components`,
+              );
+            }
+
+            const componentName = whitelist[0];
+            const textField = firstTextField(
+              componentsList.find((c) => c.name === componentName),
+            );
+            if (!textField) {
+              throw new Error(
+                `Cannot map scalar blok entry ${JSON.stringify(
+                  entry,
+                )} of "${key}": component "${componentName}" has no text field`,
+              );
+            }
+
+            return {
+              _uid: uuidv4(),
+              component: componentName,
+              [textField]: entry,
+            };
+          }
 
           const componentName = resolveBlokComponent(
             entry,

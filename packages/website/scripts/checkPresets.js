@@ -95,6 +95,23 @@ const collectErrors = (node, schema, componentsByName, location, errors) => {
 };
 
 /**
+ * Flatten nested objects to `key_subkey` pairs the way `generatePresets()`
+ * does, so a bloks field can be compared with the design system source it came
+ * from.
+ */
+const flattenArgs = (value, prefix = "") => {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const flat = {};
+    for (const [key, child] of Object.entries(value)) {
+      Object.assign(flat, flattenArgs(child, prefix ? `${prefix}_${key}` : key));
+    }
+    return flat;
+  }
+
+  return { [prefix]: value };
+};
+
+/**
  * A field the component schema defines must survive generation. Flattening
  * turns nested objects into `key_subkey` pairs and `applySchema` drops every
  * field it does not know, so a bug there silently empties a field instead of
@@ -115,6 +132,23 @@ const collectDroppedFields = (sourceArgs, preset, component, location, errors) =
     if (!present) {
       errors.push(
         `${location}: schema field "${fieldName}" is missing from the preset body`,
+      );
+    }
+  }
+
+  // Presence alone is not enough: an untypable bloks field keeps its key but
+  // ends up empty (`tags: []`). Compare the entry count with the source list.
+  for (const [key, value] of Object.entries(flattenArgs(sourceArgs))) {
+    const fieldName = aliases[key] || key;
+    const field = component.schema[fieldName];
+    if (field?.type !== "bloks" || !Array.isArray(value)) continue;
+
+    const generated = Array.isArray(preset[fieldName])
+      ? preset[fieldName].length
+      : 0;
+    if (generated !== value.length) {
+      errors.push(
+        `${location}: bloks field "${fieldName}" has ${generated} entries but the design system preset has ${value.length}`,
       );
     }
   }

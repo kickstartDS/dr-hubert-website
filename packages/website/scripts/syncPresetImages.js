@@ -138,6 +138,27 @@ const sync = async () => {
     `Loaded ${localPresets.length} local presets from ${presetsPath}`,
   );
 
+  // The merge keeps the live CDN URL in a preset's `image`, so the local
+  // screenshot path only survives in the generated config —
+  // `update-storyblok-config` renames it to `presets.generated.json`.
+  const generatedPath = [
+    path.join("cms", "presets.generated.json"),
+    path.join("cms", "presets.123456.json"),
+  ].find((candidate) => fs.existsSync(candidate));
+
+  const generatedScreenshots = new Map();
+  if (generatedPath) {
+    const generated = JSON.parse(fs.readFileSync(generatedPath, "utf-8"));
+    for (const preset of generated.presets || generated) {
+      const componentName = preset.preset?.component;
+      generatedScreenshots.set(
+        `${componentName}:${preset.name}`,
+        preset.image || "",
+      );
+    }
+    console.log(`Loaded screenshot paths from ${generatedPath}`);
+  }
+
   // 2. Fetch live presets and components from Storyblok
   console.log("Fetching live presets from Storyblok...");
   const livePresets = await fetchAllPresets();
@@ -175,14 +196,14 @@ const sync = async () => {
     if (!live) continue; // preset not in Storyblok yet (will be pushed next time)
 
     // Check if the screenshot image needs uploading
-    const localImage = local.image || "";
+    const localImage = generatedScreenshots.get(key) ?? local.image ?? "";
     const isLocalPath =
       localImage &&
       !localImage.startsWith("http") &&
       !localImage.startsWith("//");
 
     if (isLocalPath && (await screenshotChanged(localImage, live.image))) {
-      needsUpload.push({ local, live });
+      needsUpload.push({ local, live, localImage });
     }
   }
 
@@ -202,8 +223,7 @@ const sync = async () => {
   let skipped = 0;
 
   for (let i = 0; i < needsUpload.length; i++) {
-    const { local, live } = needsUpload[i];
-    const localImage = local.image;
+    const { local, live, localImage } = needsUpload[i];
     const label = `${local.name} (${local.preset?.component})`;
 
     process.stdout.write(`  [${i + 1}/${needsUpload.length}] ${label}...`);

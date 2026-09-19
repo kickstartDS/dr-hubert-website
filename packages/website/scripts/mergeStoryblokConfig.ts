@@ -565,15 +565,30 @@ function mergePresets(
     generatedKeys.add(key);
     const live = liveByKey.get(key);
 
-    result.push(
-      live
-        ? {
-            ...genPreset,
-            id: live.id,
-            component_id: live.component_id ?? genPreset.component_id,
-          }
-        : genPreset,
-    );
+    if (!live) {
+      result.push(genPreset);
+      continue;
+    }
+
+    // The generated `image` is a local screenshot path (`img/screenshots/…`).
+    // The live preset already points at the Storyblok CDN, and the CLI pushes
+    // the preset record verbatim, so a relative path would break the preset
+    // previews. Keep the live CDN URL and let `sync-preset-images` refresh it
+    // when the local screenshot changed.
+    const generatedImage =
+      typeof genPreset.image === "string" ? genPreset.image : "";
+    const liveImage = typeof live.image === "string" ? live.image : "";
+    const isLocalImage =
+      generatedImage !== "" &&
+      !generatedImage.startsWith("http") &&
+      !generatedImage.startsWith("//");
+
+    result.push({
+      ...genPreset,
+      id: live.id,
+      component_id: live.component_id ?? genPreset.component_id,
+      image: isLocalImage && liveImage ? liveImage : genPreset.image,
+    });
   }
 
   // Presets that only exist live are user-authored — keep them, unless they
