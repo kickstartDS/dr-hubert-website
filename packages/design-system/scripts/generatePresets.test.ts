@@ -39,6 +39,48 @@ type Snippet = {
   screenshot: string;
 };
 
+/**
+ * Resolve a React element's component reference to its display name. Storybook
+ * args can carry React element trees (e.g. the split layout's slot props) whose
+ * `type` is a component object; `JSON.stringify` collapses that to `{}` and the
+ * child component becomes unrecoverable for the Storyblok preset generator.
+ */
+const componentName = (type: unknown): string | undefined => {
+  if (typeof type === "string") return type;
+  if (typeof type === "function") return type.name || undefined;
+  if (type && typeof type === "object") {
+    if ("displayName" in type && typeof type.displayName === "string")
+      return type.displayName;
+    if ("render" in type) {
+      const render = type.render;
+      if (typeof render === "function") return render.name || undefined;
+      if (
+        render &&
+        typeof render === "object" &&
+        "displayName" in render &&
+        typeof render.displayName === "string"
+      )
+        return render.displayName;
+    }
+  }
+  return undefined;
+};
+
+/** Replace React element `type` references with their component display names. */
+const resolveComponentTypes = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(resolveComponentTypes);
+  if (!value || typeof value !== "object") return value;
+
+  const resolved: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    resolved[key] =
+      key === "type"
+        ? componentName(entry) ?? entry
+        : resolveComponentTypes(entry);
+  }
+  return resolved;
+};
+
 describe("Create Snippets", () => {
   const snippets: Snippet[] = [];
   const components: [string, string][] = [];
@@ -63,7 +105,7 @@ describe("Create Snippets", () => {
               group: storyModule.default.title!,
               name: storyName,
               code: reactElementToJSXString(story()),
-              args: unpack(story.args),
+              args: resolveComponentTypes(unpack(story.args)),
               screenshot: `img/screenshots/${story.id}.png`,
             };
             snippets.push(snippet);

@@ -4,7 +4,7 @@
  * Syncs preset screenshot images to Storyblok:
  *   1. Reads merged presets (which have local image paths like "img/screenshots/...")
  *   2. Fetches existing presets from the Storyblok space
- *   3. Uploads missing screenshots to a "Component Screenshots" asset folder
+ *   3. Uploads changed screenshots to a "Component Screenshots" asset folder
  *   4. Updates each preset's `image` field via the Management API
  *
  * Also uploads any content images (img/*, /logo.svg) referenced inside preset
@@ -18,6 +18,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const StoryblokClient = require("storyblok-js-client");
 const PromiseThrottle = require("promise-throttle");
 const { traverse } = require("object-traversal");
@@ -71,6 +72,54 @@ const getOrCreateFolder = async (folderName) =>
   getOrCreateAssetFolder(Storyblok, SPACE_ID, folderName);
 
 // ---------------------------------------------------------------------------
+// Screenshot change detection
+// ---------------------------------------------------------------------------
+
+const SCREENSHOT_ROOT = path.join(
+  "node_modules",
+  "@kickstartds",
+  "design-system",
+  "dist",
+  "static",
+);
+
+const hashFile = (filePath) =>
+  fs.existsSync(filePath)
+    ? crypto.createHash("sha1").update(fs.readFileSync(filePath)).digest("hex")
+    : null;
+
+const hashRemote = async (url) => {
+  try {
+    const response = await fetch(url.startsWith("//") ? `https:${url}` : url);
+    if (!response.ok) return null;
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return crypto.createHash("sha1").update(buffer).digest("hex");
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * A preset screenshot needs uploading when the live preset has no image yet or
+ * when the live image no longer matches the local screenshot. Comparing hashes
+ * keeps re-runs (and unrelated updates) from re-uploading unchanged images.
+ */
+const screenshotChanged = async (localImage, liveImage) => {
+  const isRemote =
+    liveImage && (liveImage.startsWith("http") || liveImage.startsWith("//"));
+  if (!isRemote) return true;
+
+  const localHash = hashFile(path.join(SCREENSHOT_ROOT, localImage));
+  if (!localHash) {
+    console.log(`  ${localImage}: local screenshot not found, skipping`);
+    return false;
+  }
+
+  const remoteHash = await hashRemote(liveImage);
+  return remoteHash !== localHash;
+};
+
+// ---------------------------------------------------------------------------
 // Main sync logic
 // ---------------------------------------------------------------------------
 
@@ -88,6 +137,27 @@ const sync = async () => {
   console.log(
     `Loaded ${localPresets.length} local presets from ${presetsPath}`,
   );
+
+  // The merge keeps the live CDN URL in a preset's `image`, so the local
+  // screenshot path only survives in the generated config —
+  // `update-storyblok-config` renames it to `presets.generated.json`.
+  const generatedPath = [
+    path.join("cms", "presets.generated.json"),
+    path.join("cms", "presets.123456.json"),
+  ].find((candidate) => fs.existsSync(candidate));
+
+  const generatedScreenshots = new Map();
+  if (generatedPath) {
+    const generated = JSON.parse(fs.readFileSync(generatedPath, "utf-8"));
+    for (const preset of generated.presets || generated) {
+      const componentName = preset.preset?.component;
+      generatedScreenshots.set(
+        `${componentName}:${preset.name}`,
+        preset.image || "",
+      );
+    }
+    console.log(`Loaded screenshot paths from ${generatedPath}`);
+  }
 
   // 2. Fetch live presets and components from Storyblok
   console.log("Fetching live presets from Storyblok...");
@@ -126,15 +196,14 @@ const sync = async () => {
     if (!live) continue; // preset not in Storyblok yet (will be pushed next time)
 
     // Check if the screenshot image needs uploading
-    const localImage = local.image || "";
+    const localImage = generatedScreenshots.get(key) ?? local.image ?? "";
     const isLocalPath =
       localImage &&
       !localImage.startsWith("http") &&
       !localImage.startsWith("//");
-    const liveHasImage = live.image && live.image.startsWith("http");
 
-    if (isLocalPath && !liveHasImage) {
-      needsUpload.push({ local, live });
+    if (isLocalPath && (await screenshotChanged(localImage, live.image))) {
+      needsUpload.push({ local, live, localImage });
     }
   }
 
@@ -154,8 +223,7 @@ const sync = async () => {
   let skipped = 0;
 
   for (let i = 0; i < needsUpload.length; i++) {
-    const { local, live } = needsUpload[i];
-    const localImage = local.image;
+    const { local, live, localImage } = needsUpload[i];
     const label = `${local.name} (${local.preset?.component})`;
 
     process.stdout.write(`  [${i + 1}/${needsUpload.length}] ${label}...`);

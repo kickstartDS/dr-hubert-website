@@ -135,12 +135,26 @@ The `build` script runs the following steps in order:
 ## CMS Sync Commands
 
 ```bash
-pnpm --filter website update-storyblok-config  # Full workflow: generate → rename → pull → merge → push
+pnpm --filter website update-storyblok-config  # Full workflow: generate → rename → pull → merge → push → sync
 pnpm --filter website push-components          # Push merged config from cms/merged/ to Storyblok
 pnpm --filter website pull-content-schema      # Pull schema from Storyblok → types/
 pnpm --filter website create-storyblok-config  # Regenerate CMS config from JSON schemas
+pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter check-presets  # Validate the generated presets against the generated component config
 pnpm --filter website generate-content-types   # Pull + generate TypeScript types
 ```
+
+`merge-storyblok-config` keeps the live preset `id` and the live Storyblok CDN `image` for presets
+that still exist, and takes the regenerated body. The generated body must keep the live CDN URL
+because the CLI pushes the preset record verbatim: a local `img/screenshots/…` path would break the
+preset previews. `update-storyblok-config` therefore runs `sync-preset-images` after
+`push-components`: it uploads screenshots that changed and points the live presets at the new CDN
+URLs (the local screenshot path is read from the generated config). It has to run after the push —
+the push writes the merged presets verbatim, so a sync before it would be overwritten.
+
+`check-presets` validates `cms/presets.123456.json` against `cms/components.123456.json` and fails
+when a preset references a component or field that the component config does not define. Run it
+after regenerating the config; the CI step that would enforce it is not wired yet, because the
+automation's credential cannot push changes under `.github/workflows/`.
 
 ## Data Flow
 
