@@ -242,6 +242,26 @@
     );
   }
 
+  &-style--stagelights {
+    background-image: var(--dsa-section_stagelights--background-image);
+  }
+
+  &-style--anchorGlow {
+    background-image: var(--dsa-section_anchor-glow--background-image);
+  }
+
+  &-style--symmetricGlow {
+    background-image: var(--dsa-section_symmetric-glow--background-image);
+  }
+
+  &-style--horizontalGradient {
+    background-image: var(--dsa-section_horizontal-gradient--background-image);
+  }
+
+  &-style--verticalGradient {
+    background-image: var(--dsa-section_vertical-gradient--background-image);
+  }
+
   &--spotlight {
     &:hover {
       &::before {
@@ -317,9 +337,8 @@
     &--slider {
       &:after {
         min-width: calc(
-          50vw - calc(var(--l-section_col--min-width) / 2) - calc(
-              var(--l-section--gutter) * 1.25
-            )
+          50vw - calc(var(--l-section_col--min-width) / 2) -
+            calc(var(--l-section--gutter) * 1.25)
         );
       }
     }

@@ -154,6 +154,12 @@
         );
       }
     }
+
+    // Offset-aligned hero textbox floats over the image without a card-style
+    // drop shadow.
+    &.dsa-hero--content-offset .c-visual__box:not(.c-visual__box--transparent) {
+      box-shadow: none;
+    }
   }
 
   // Headline and subheadline color
@@ -249,7 +255,7 @@
           --dsa-hero_offset__textbox--padding,
           var(--dsa-content--vertical-spacing)
         );
-        margin-top: var(--dsa-hero_offset__textbox--offset, -10%);
+        margin-top: var(--dsa-hero_offset__textbox--offset, -18%);
         .c-visual__box {
           --c-visual_box--max-width: var(
             --dsa-hero_offset__textbox--max-width,
@@ -399,7 +405,7 @@
           --dsa-hero_offset__textbox--padding,
           var(--dsa-content--vertical-spacing)
         );
-        margin-top: var(--dsa-hero_offset__textbox--offset, -10%);
+        margin-top: var(--dsa-hero_offset__textbox--offset, -18%);
 
         .c-visual__box {
           --c-visual_box--max-width: var(

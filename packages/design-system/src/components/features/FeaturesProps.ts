@@ -52,6 +52,10 @@ export type LinkLabel = string;
  * Icon for the link style of the cta
  */
 export type Icon1 = string;
+/**
+ * Activate/disable the CTAs
+ */
+export type CallToActionToggle = boolean;
 
 /**
  * Component used to display a set of features
@@ -73,5 +77,6 @@ export interface Feature {
     url?: CallToActionUrl;
     label?: LinkLabel;
     icon?: Icon1;
+    toggle?: CallToActionToggle;
   };
 }

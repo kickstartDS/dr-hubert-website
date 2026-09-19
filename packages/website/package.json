@@ -46,6 +46,9 @@
     "storyblok-login": "storyblok login",
     "migrate-content-fields": "dotenvx run -f .env.local -- npx tsx scripts/migrateContentFields.ts",
     "migrate-footer-nav": "dotenvx run -f .env.local -- npx tsx scripts/migrateFooterNav.ts",
+    "migrate-section-styles": "dotenvx run -f .env.local -- npx tsx scripts/migrateSectionStyles.ts",
+    "restore-section-styles": "dotenvx run -f .env.local -- npx tsx scripts/restoreSectionStyles.ts",
+    "migrate-product-hero-offset": "dotenvx run -f .env.local -- npx tsx scripts/migrateProductHeroOffset.ts",
     "backup-space": "dotenvx run -f .env.local -- bash scripts/backupSpace.sh",
     "merge-storyblok-config-reset": "dotenvx run -f .env.local -- npx tsx scripts/mergeStoryblokConfig.ts --reset",
     "update-storyblok-config-reset": "npm run create-storyblok-config && npm run rename-generated-config && npm run pull-content-schema && npm run merge-storyblok-config-reset && npm run push-components"

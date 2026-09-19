@@ -62,6 +62,9 @@
               },
               "icon": {
                 "$ref": "http://schema.mydesignsystem.com/feature.schema.json#/properties/cta/properties/icon"
+              },
+              "toggle": {
+                "$ref": "http://schema.mydesignsystem.com/feature.schema.json#/properties/cta/properties/toggle"
               }
             }
           }

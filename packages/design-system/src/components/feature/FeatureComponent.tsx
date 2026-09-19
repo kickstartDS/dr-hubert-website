@@ -17,6 +17,11 @@ export const FeatureContextDefault = forwardRef<
   // `newTab` is resolved at story-processing time from Storyblok's multilink
   // target-blank toggle and isn't part of the generated schema type.
   const ctaWithNewTab = cta as CallToAction & { newTab?: boolean };
+  // Storyblok/schema defaults always populate `cta.url` with a placeholder
+  // ("#") even when a feature has no real link configured, so `cta.toggle`
+  // alone isn't enough to decide whether to render the CTA — also require a
+  // genuine, non-placeholder URL.
+  const hasCtaUrl = Boolean(cta.url) && cta.url !== "#";
 
   return (
     <div
@@ -27,15 +32,15 @@ export const FeatureContextDefault = forwardRef<
           style === `stack`
             ? `stack dsa-feature--large`
             : style === `besideSmall`
-              ? `beside dsa-feature--small`
-              : style === `besideLarge`
-                ? `beside dsa-feature--medium`
-                : style === `intext`
-                  ? `intext dsa-feature--small`
-                  : style === `centered`
-                    ? `centered dsa-feature--large`
-                    : `${style}`
-        }`,
+            ? `beside dsa-feature--small`
+            : style === `besideLarge`
+            ? `beside dsa-feature--medium`
+            : style === `intext`
+            ? `intext dsa-feature--small`
+            : style === `centered`
+            ? `centered dsa-feature--large`
+            : `${style}`
+        }`
       )}
     >
       <div className="dsa-feature__header">
@@ -50,10 +55,10 @@ export const FeatureContextDefault = forwardRef<
         )}
         <span className="dsa-feature__title">{title}</span>
       </div>
-      {text || cta.style === "intext" ? (
+      {text || (cta.style === "intext" && hasCtaUrl) ? (
         <p className="dsa-feature__text">
           <Markdown>{text}</Markdown>
-          {cta.style === "intext" && cta.toggle ? (
+          {cta.style === "intext" && cta.toggle && hasCtaUrl ? (
             <>
               &#32;{" "}
               <Link
@@ -72,36 +77,38 @@ export const FeatureContextDefault = forwardRef<
         ""
       )}
 
-      {cta.toggle && (cta.style === "link" || cta.style === "button") && (
-        <div className="dsa-feature__cta">
-          {cta.style === "link" ? (
-            <Link
-              className="dsa-feature__link"
-              href={cta.url}
-              target={ctaWithNewTab.newTab ? "_blank" : undefined}
-              rel={ctaWithNewTab.newTab ? "noopener noreferrer" : undefined}
-            >
-              {cta.label ? cta.label : "See more"}
-              <Icon
-                aria-hidden
-                role="presentation"
-                focusable={false}
-                icon={cta.icon || "arrow-right"}
+      {cta.toggle &&
+        hasCtaUrl &&
+        (cta.style === "link" || cta.style === "button") && (
+          <div className="dsa-feature__cta">
+            {cta.style === "link" ? (
+              <Link
+                className="dsa-feature__link"
+                href={cta.url}
+                target={ctaWithNewTab.newTab ? "_blank" : undefined}
+                rel={ctaWithNewTab.newTab ? "noopener noreferrer" : undefined}
+              >
+                {cta.label ? cta.label : "See more"}
+                <Icon
+                  aria-hidden
+                  role="presentation"
+                  focusable={false}
+                  icon={cta.icon || "arrow-right"}
+                />
+              </Link>
+            ) : cta.style === "button" ? (
+              <Button
+                className="dsa-feature__button"
+                size="small"
+                url={cta.url}
+                label={cta.label ? cta.label : "See more"}
+                newTab={ctaWithNewTab.newTab}
               />
-            </Link>
-          ) : cta.style === "button" ? (
-            <Button
-              className="dsa-feature__button"
-              size="small"
-              url={cta.url}
-              label={cta.label ? cta.label : "See more"}
-              newTab={ctaWithNewTab.newTab}
-            />
-          ) : (
-            ""
-          )}
-        </div>
-      )}
+            ) : (
+              ""
+            )}
+          </div>
+        )}
     </div>
   );
 });
