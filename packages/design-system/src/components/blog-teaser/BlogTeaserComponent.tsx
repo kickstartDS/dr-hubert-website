@@ -67,10 +67,8 @@ export const BlogTeaserContextDefault = forwardRef<
             items: teaserMetaItems,
           }}
           link={{
-            // The base post teaser forwards this object to the base Button,
-            // whose link prop is `href` - passing `url` rendered a <button>
-            // that neither navigated nor carried the target.
-            href: linkWithNewTab.url,
+            //@ts-expect-error
+            url: linkWithNewTab.url,
             label: linkWithNewTab?.text || "Read article",
             newTab: linkWithNewTab.newTab,
           }}

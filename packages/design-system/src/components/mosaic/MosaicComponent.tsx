@@ -38,10 +38,7 @@ export const MosaicContextDefault = forwardRef<
             textColor: tile?.textColor,
             ...(tile?.button?.toggle && {
               link: {
-                // The storytelling box forwards this object to the base
-                // Button, whose link prop is `href` - passing `url` rendered a
-                // <button> that neither navigated nor carried the target.
-                href: tile?.button?.url,
+                url: tile?.button?.url,
                 label: tile?.button?.label,
                 icon: tile?.button?.icon,
                 newTab: buttonWithNewTab?.newTab,
