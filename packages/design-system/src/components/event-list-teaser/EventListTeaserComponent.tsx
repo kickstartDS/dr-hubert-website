@@ -29,9 +29,15 @@ export const EventListTeaserContextDefault = forwardRef<
       ctaText,
       url,
       ariaLabel,
+      // `newTab` is resolved at story-processing time from Storyblok's
+      // multilink target-blank toggle and isn't part of the generated schema
+      // type. It has to be destructured here, otherwise it would be spread
+      // onto the anchor as an invalid `newtab` attribute.
+      newTab,
       className,
       ...rest
-    },
+    }: EventListTeaserProps &
+      HTMLAttributes<HTMLAnchorElement> & { newTab?: boolean },
     ref
   ) => {
     return (
@@ -42,6 +48,7 @@ export const EventListTeaserContextDefault = forwardRef<
           href={url}
           ref={ref}
           aria-label={ariaLabel}
+          {...(newTab && { target: "_blank", rel: "noopener noreferrer" })}
         >
           <div className="dsa-event-list-teaser__content">
             <div className="dsa-event-list-teaser__header">

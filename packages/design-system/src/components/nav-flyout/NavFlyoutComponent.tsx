@@ -8,11 +8,31 @@ import defaults from "./NavFlyoutDefaults";
 
 export type { NavFlyoutProps };
 
+type NavFlyoutSubItem = NonNullable<
+  NonNullable<NavFlyoutProps["items"]>[number]["items"]
+>[number] & {
+  // `newTab` is resolved at story-processing time from Storyblok's multilink
+  // target-blank toggle and isn't part of the generated schema type.
+  newTab?: boolean;
+};
+
+type NavFlyoutItem = Omit<
+  NonNullable<NavFlyoutProps["items"]>[number],
+  "items"
+> & {
+  // `newTab` is resolved at story-processing time from Storyblok's multilink
+  // target-blank toggle and isn't part of the generated schema type.
+  newTab?: boolean;
+  items?: NavFlyoutSubItem[];
+};
+
 export const NavFlyoutContextDefault = forwardRef<
   HTMLElement,
   NavFlyoutProps & HTMLAttributes<HTMLElement>
->(({ items, inverted }, ref) =>
-  items && items.length > 0 ? (
+>(({ items, inverted }, ref) => {
+  const itemsWithNewTab = items as NavFlyoutItem[];
+
+  return itemsWithNewTab && itemsWithNewTab.length > 0 ? (
     <nav
       className="dsa-nav-flyout"
       ks-inverted={inverted.toString()}
@@ -21,54 +41,64 @@ export const NavFlyoutContextDefault = forwardRef<
       ref={ref}
     >
       <ul className="dsa-nav-flyout__list">
-        {items.map(({ label, url, active, items: subItems }) => {
-          return (
-            <li
-              className={classnames(
-                "dsa-nav-flyout__item",
-                active && "dsa-nav-flyout__item--active"
-              )}
-              key={url}
-            >
-              {subItems?.length ? (
-                <span className="dsa-nav-flyout__label">{label}</span>
-              ) : (
-                <Link
-                  href={url}
-                  className={`dsa-nav-flyout__label dsa-nav-flyout__link`}
-                >
-                  {label}
-                </Link>
-              )}
-              {subItems && subItems.length > 0 && (
-                <ul className="dsa-nav-flyout__sublist">
-                  {subItems.map(({ label, url, active }) => {
-                    return (
-                      <li
-                        className={classnames(
-                          "dsa-nav-flyout__item",
-                          active && "dsa-nav-flyout__item--active"
-                        )}
-                        key={url}
-                      >
-                        <Link
-                          href={url}
-                          className={`dsa-nav-flyout__label dsa-nav-flyout__link`}
+        {itemsWithNewTab.map(
+          ({ label, url, active, items: subItems, newTab }) => {
+            return (
+              <li
+                className={classnames(
+                  "dsa-nav-flyout__item",
+                  active && "dsa-nav-flyout__item--active"
+                )}
+                key={url}
+              >
+                {subItems?.length ? (
+                  <span className="dsa-nav-flyout__label">{label}</span>
+                ) : (
+                  <Link
+                    href={url}
+                    className={`dsa-nav-flyout__label dsa-nav-flyout__link`}
+                    {...(newTab && {
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                    })}
+                  >
+                    {label}
+                  </Link>
+                )}
+                {subItems && subItems.length > 0 && (
+                  <ul className="dsa-nav-flyout__sublist">
+                    {subItems.map(({ label, url, active, newTab }) => {
+                      return (
+                        <li
+                          className={classnames(
+                            "dsa-nav-flyout__item",
+                            active && "dsa-nav-flyout__item--active"
+                          )}
+                          key={url}
                         >
-                          {label}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-          );
-        })}
+                          <Link
+                            href={url}
+                            className={`dsa-nav-flyout__label dsa-nav-flyout__link`}
+                            {...(newTab && {
+                              target: "_blank",
+                              rel: "noopener noreferrer",
+                            })}
+                          >
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </li>
+            );
+          }
+        )}
       </ul>
     </nav>
-  ) : null
-);
+  ) : null;
+});
 
 export const NavFlyoutContext = createContext(NavFlyoutContextDefault);
 export const NavFlyout = forwardRef<

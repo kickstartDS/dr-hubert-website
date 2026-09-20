@@ -145,6 +145,23 @@ export function storyProcessing(
           parent[key] = "#";
         }
       }
+
+      // Storyblok stores the "open in new tab" toggle of a multilink as
+      // `target`; the components read it as a flattened `newTab` boolean.
+      // Derive it here, before the link collapses into a string, using the
+      // same key split `unflatten()` uses: `cta_url` becomes `cta_newTab` and
+      // therefore `cta.newTab`, right next to the URL it belongs to. Only
+      // `true` is ever written, so explicit `newTab` fields of bloks like
+      // `links`, `dates`, `contact` or the footer items keep working.
+      if (
+        isStoryblokLink(value) &&
+        value.target === "_blank" &&
+        /(url|link|href)$/i.test(key)
+      ) {
+        const segments = key.split("_");
+        segments[segments.length - 1] = "newTab";
+        parent[segments.join("_")] = true;
+      }
     }
   }
 

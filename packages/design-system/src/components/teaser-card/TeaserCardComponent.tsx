@@ -100,7 +100,10 @@ export const TeaserCardContextDefault = forwardRef<
             hidden: button?.hidden || !hasLink,
             label: button.label,
             variant: "primary",
-            url: url,
+            // The base teaser forwards this object to the base Button, whose
+            // link prop is `href` - passing `url` rendered a <button> that
+            // neither navigated nor carried the target.
+            href: url,
             icon: button?.chevron ? "chevron-right" : undefined,
             // `newTab` isn't part of the base package's generated `link` type
             // resolved here, but the underlying Button primitive supports it.

@@ -19,10 +19,19 @@ export const FooterContextDefault = forwardRef<
     { logo, badge, inverted, navGroups, socialLinks, copyright, legalLink },
     ref,
   ) => {
+    // `newTab` is resolved at story-processing time from Storyblok's multilink
+    // target-blank toggle and isn't part of the generated schema type.
+    const navGroupsWithNewTab = navGroups as (NonNullable<
+      FooterProps["navGroups"]
+    >[number] & { newTab?: boolean })[];
+    const legalLinkWithNewTab = legalLink as FooterProps["legalLink"] & {
+      newTab?: boolean;
+    };
+
     // When not a single group has a second level, the headings are not column
     // labels above a list of links - they are the menu. Lay them out as a flat,
     // one-dimensional row instead of as columns, and style them accordingly.
-    const flat = !navGroups?.some(
+    const flat = !navGroupsWithNewTab?.some(
       (group) => group.items && group.items.length > 0,
     );
 
@@ -33,13 +42,13 @@ export const FooterContextDefault = forwardRef<
         ref={ref}
       >
         <div className="dsa-footer__content">
-          {navGroups?.length || socialLinks?.length ? (
+          {navGroupsWithNewTab?.length || socialLinks?.length ? (
             <div
               className={classnames("dsa-footer__columns", {
                 "dsa-footer__columns--flat": flat,
               })}
             >
-              {navGroups?.map((group, groupIdx) => (
+              {navGroupsWithNewTab?.map((group, groupIdx) => (
                 <div
                   className="dsa-footer__column"
                   key={group.heading ?? groupIdx}
@@ -50,6 +59,10 @@ export const FooterContextDefault = forwardRef<
                         <Link
                           className="dsa-footer__column-heading-link"
                           href={group.headingUrl}
+                          {...(group.newTab && {
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                          })}
                         >
                           {group.heading}
                         </Link>
@@ -114,17 +127,21 @@ export const FooterContextDefault = forwardRef<
 
           <div className="dsa-footer__bottom">
             <Logo {...logo} inverted={inverted} />
-            {(copyright || legalLink?.url) && (
+            {(copyright || legalLinkWithNewTab?.url) && (
               <p className="dsa-footer__copyright">
                 {copyright}
-                {legalLink?.url ? (
+                {legalLinkWithNewTab?.url ? (
                   <>
                     {" "}
                     <Link
                       className="dsa-footer__legal-link"
-                      href={legalLink.url}
+                      href={legalLinkWithNewTab.url}
+                      {...(legalLinkWithNewTab.newTab && {
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                      })}
                     >
-                      {legalLink.label || "Legal"}
+                      {legalLinkWithNewTab.label || "Legal"}
                     </Link>
                   </>
                 ) : null}

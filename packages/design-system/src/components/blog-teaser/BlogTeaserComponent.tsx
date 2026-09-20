@@ -29,6 +29,12 @@ export const BlogTeaserContextDefault = forwardRef<
     },
     ref
   ) => {
+    // `newTab` is resolved at story-processing time from Storyblok's multilink
+    // target-blank toggle and isn't part of the generated schema type.
+    const linkWithNewTab = link as BlogTeaserProps["link"] & {
+      newTab?: boolean;
+    };
+
     const teaserMetaItems = [];
 
     if (date)
@@ -61,9 +67,12 @@ export const BlogTeaserContextDefault = forwardRef<
             items: teaserMetaItems,
           }}
           link={{
-            //@ts-expect-error
-            url: link.url,
-            label: link?.text || "Read article",
+            // The base post teaser forwards this object to the base Button,
+            // whose link prop is `href` - passing `url` rendered a <button>
+            // that neither navigated nor carried the target.
+            href: linkWithNewTab.url,
+            label: linkWithNewTab?.text || "Read article",
+            newTab: linkWithNewTab.newTab,
           }}
           title={headline}
           body={teaserText}
