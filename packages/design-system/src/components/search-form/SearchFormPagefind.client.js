@@ -19,7 +19,9 @@ const pagefindResult2searchResult = ({ sub_results, ...result }) => {
   // of its first heading, whose text repeats the page title. Rendering it puts
   // a second copy of the primary hit into the list, so drop every entry that
   // repeats the page title - what remains are the page's other headings, each
-  // linking to its own section.
+  // linking to its own section. Those anchors exist because the headline
+  // component renders its `id` on the heading element itself (Pagefind only
+  // records anchors on h1-h6).
   const subResults = (
     hasRootSubResult ? sub_results.slice(1) : sub_results || []
   ).filter(
