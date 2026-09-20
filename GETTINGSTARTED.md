@@ -124,7 +124,7 @@ capture-previews → build-storybook → test-storybook --updateSnapshot (record
 
 > **Important:** The `presets` step in the build generates a screenshot path for _every_ story, but the actual `.png` files only exist if the capture has been run after those stories were added. New or renamed stories will have missing screenshots until the pipeline is re-run.
 
-`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%. Use `capture-previews` to record intended changes.
+`pnpm run test` is the render smoke test: it installs the Chromium build (`pretest`), builds Storybook, runs every story and fails on render errors. It does **not** compare images — captured pixels are only reproducible in a canonical environment, so visual regression stays with the existing Chromatic CI job. `capture-previews` is the only command that writes `__snapshots__/*.png`.
 
 ### Prerequisites
 
