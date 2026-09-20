@@ -5,6 +5,8 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+import type {ButtonProps} from "../button/ButtonProps";
+
 /**
  * Headline for the visual
  */
@@ -25,18 +27,6 @@ export type HighlightText = boolean;
  * Make the text and buttons color neutral
  */
 export type ColorNeutral = boolean;
-/**
- * Text content to display inside the button
- */
-export type Label = string;
-/**
- * Choose an icon
- */
-export type Icon = string;
-/**
- * The URL to link to when the button is clicked
- */
-export type URL = string;
 /**
  * Enable grid layer
  */
@@ -67,15 +57,10 @@ export interface VideoCurtainProps {
   text?: ModuleText;
   highlightText?: HighlightText;
   colorNeutral?: ColorNeutral;
-  buttons?: Button[];
+  buttons?: ButtonProps[];
   overlay?: GridLayer;
   video?: BackgroundVideo;
   textPosition?: ModuleAligment;
-}
-export interface Button {
-  label?: Label;
-  icon?: Icon;
-  url?: URL;
 }
 /**
  * Sources of background videos for different screen sizes
