@@ -8,6 +8,14 @@ import { toMatchImageSnapshot } from "jest-image-snapshot";
 
 const customSnapshotsDir = `${process.cwd()}/__snapshots__`;
 
+// Upper bound for the lazy image settle step: a request that fires neither `load` nor
+// `error` must not stall the suite.
+const lazyImageSettleTimeout = 10000;
+
+type LazySizesWindow = Window & {
+  lazySizes?: { loader?: { unveil?: (element: Element) => void } };
+};
+
 const config: TestRunnerConfig = {
   setup() {
     expect.extend({ toMatchImageSnapshot });
@@ -17,6 +25,39 @@ const config: TestRunnerConfig = {
     const context = await getStoryContext(page, story);
     await waitForPageReady(page);
     await page.setViewportSize(context.parameters.viewport);
+
+    await page.evaluate(async (settleTimeout) => {
+      // lazysizes only unveils elements that have a layout box, so an image the
+      // viewport change left without one is never requested, and the slider's
+      // autoheight then waits forever for its `lazyloaded` event. Start those loads
+      // explicitly and wait for them, plus for the images already in flight.
+      const lazySizes = (window as LazySizesWindow).lazySizes;
+      const pending = Array.from(
+        document.querySelectorAll(".lazyload, .lazyloading"),
+      );
+      const waiting = [
+        ...pending,
+        ...Array.from(document.images).filter((image) => !image.complete),
+      ].map(
+        (element) =>
+          new Promise<void>((resolve) => {
+            element.addEventListener("load", () => resolve(), { once: true });
+            element.addEventListener("error", () => resolve(), { once: true });
+            element.addEventListener("lazyloaded", () => resolve(), {
+              once: true,
+            });
+          }),
+      );
+      pending.forEach((element) => lazySizes?.loader?.unveil?.(element));
+
+      // `error` resolves as well: an image that fails to load must fail the image
+      // comparison below instead of hanging the run.
+      await Promise.race([
+        Promise.all(waiting),
+        new Promise<void>((resolve) => setTimeout(resolve, settleTimeout)),
+      ]);
+    }, lazyImageSettleTimeout);
+
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
