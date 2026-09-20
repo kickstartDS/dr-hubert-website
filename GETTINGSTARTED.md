@@ -128,7 +128,7 @@ capture-previews → build-storybook → test-storybook --updateSnapshot (record
 
 ### Prerequisites
 
-The screenshot pipeline uses `@storybook/test-runner` which runs Playwright under the hood. On first run (or after updating Playwright), you need to install browser binaries:
+The screenshot pipeline uses `@storybook/test-runner` which runs Playwright under the hood. `pnpm run test` and `capture-previews` install the Chromium build themselves (`playwright install chromium`), so nothing has to be prepared beforehand; only when calling `test-storybook` directly do you need the browser binaries:
 
 ```bash
 pnpm exec playwright install

@@ -414,7 +414,7 @@ pnpm --filter @kickstartds/design-system capture-previews
 
 Then commit the updated `__snapshots__/` and `static/img/screenshots/` files.
 
-`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%. `create-component-previews` is kept as an alias for `capture-previews`.
+`pnpm run test` is the visual regression check: it installs the Chromium build (`pretest`), builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%. `capture-previews` installs the browser the same way. `create-component-previews` is kept as an alias for `capture-previews`.
 
 ### Component Architecture
 
