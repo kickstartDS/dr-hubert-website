@@ -95,7 +95,8 @@ pnpm run build
 | `pnpm run branding-tokens` | Build branding token CSS from JSON source files                            |
 | `pnpm run search`          | Generate Pagefind search index from Storybook stories                      |
 | `pnpm run presets`         | Generate component presets (JSX snippets) from stories                     |
-| `pnpm run test`            | Run visual regression tests against Storybook                              |
+| `pnpm run test`            | Install Chromium, build Storybook, then compare every story against its committed snapshot |
+| `pnpm run capture-previews` | Build Storybook, record `__snapshots__/` and copy them to `static/img/screenshots/` |
 | `pnpm run chromatic`       | Run Chromatic visual testing                                               |
 
 ## Components

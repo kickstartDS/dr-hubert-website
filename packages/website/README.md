@@ -187,22 +187,23 @@ The design system (now inlined in `packages/design-system/`) includes a screensh
 ### How it works
 
 ```
-build-storybook → test-storybook (captures __snapshots__/*.png)
-               → create-component-previews (copies to static/img/screenshots/)
-               → build (Rollup copies static/ → dist/static/)
-               → presets (generates snippets.json referencing img/screenshots/{story.id}.png)
+capture-previews → build-storybook → test-storybook --updateSnapshot (records __snapshots__/*.png)
+                                   → previews:copy (copies to static/img/screenshots/)
+                                   → build (Rollup copies static/ → dist/static/)
+                                   → presets (generates snippets.json referencing img/screenshots/{story.id}.png)
 ```
 
 ### Regenerate after adding or renaming stories
 
 ```bash
 cd packages/design-system
-pnpm run build-storybook
-pnpm run create-component-previews
+pnpm run capture-previews
 pnpm -r run build
 ```
 
 Commit the updated files in `__snapshots__/` and `static/img/screenshots/` (tracked via Git LFS).
+
+`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%.
 
 ### Update previews in Storyblok
 
