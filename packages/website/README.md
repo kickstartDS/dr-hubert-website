@@ -151,6 +151,20 @@ preset previews. `update-storyblok-config` therefore runs `sync-preset-images` a
 URLs (the local screenshot path is read from the generated config). It has to run after the push —
 the push writes the merged presets verbatim, so a sync before it would be overwritten.
 
+`sync-preset-images` fails loudly instead of finishing silently. Before it touches the API it checks
+that every screenshot referenced by the generated presets exists under
+`node_modules/@kickstartds/design-system/dist/static` (the directory `signedUpload()` reads) and
+aborts with the missing paths; at the end it exits non-zero, listing the presets, when a preset that
+needs a preview ends the run without a CDN image. A preset whose preview was never captured or
+uploaded is a failed sync, not a warning — the editor only shows a thumbnail once this credentialed
+run has uploaded the screenshot. The required order is therefore: design system build
+(`capture-previews` → `build`) → `update-storyblok-config` (merge → push → `sync-preset-images`).
+The `presets` step of the design system build asserts that every story has a captured screenshot
+under `static/img/screenshots`, so a new or renamed story without refreshed previews fails the build
+instead of shipping a preset without a thumbnail. The preflight runs before the first API call, so
+`NEXT_STORYBLOK_SPACE_ID=123456 NEXT_STORYBLOK_OAUTH_TOKEN=<dummy> node scripts/syncPresetImages.js`
+rehearses it offline without touching the space.
+
 `check-presets` validates `cms/presets.123456.json` against `cms/components.123456.json` and fails
 when a preset references a component or field that the component config does not define. Run it
 after regenerating the config; the CI step that would enforce it is not wired yet, because the

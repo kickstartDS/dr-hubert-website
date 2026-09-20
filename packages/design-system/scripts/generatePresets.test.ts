@@ -4,7 +4,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import fg from "fast-glob";
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { ReactRenderer, composeStories } from "@storybook/react";
 import { Store_CSFExports } from "@storybook/types";
 import reactElementToJSXString from "react-element-to-jsx-string";
@@ -128,5 +128,18 @@ describe("Create Snippets", () => {
         )
         .join("\n")
     );
+  });
+
+  // The website preset generator copies every `screenshot` path into a preset's
+  // `image`, so a story without a captured preview ships a preset without a
+  // thumbnail. Fail here (the presets step of the design system build) instead
+  // of in the Storyblok space, and name the stories whose previews are missing.
+  test("🖼 every preset screenshot has been captured", () => {
+    const missing = snippets
+      .filter(
+        ({ screenshot }) => !fs.existsSync(path.join("static", screenshot))
+      )
+      .map(({ id }) => id);
+    expect(missing).toEqual([]);
   });
 });
