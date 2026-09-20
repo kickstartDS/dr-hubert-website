@@ -90,6 +90,15 @@ const RENAMES: Record<string, Record<string, string>> = {
 const DROPS: string[] = ["type"];
 
 /**
+ * Components whose current schema declares one of the `DROPS` fields itself, so
+ * the key is live content there rather than the leftover field. The canonical
+ * `button` has a `type` option of its own (button/submit/reset) and is the only
+ * component in the generated config that does, so its `type` — whether
+ * converted from `button_type` or authored in the editor — survives the drop.
+ */
+const DROPS_EXEMPT: Record<string, string[]> = { button: ["type"] };
+
+/**
  * Changes this script deliberately does NOT make, because they are not
  * mechanical renames. Counted, never modified, so the manual effort left
  * over is a number rather than a guess.
@@ -182,6 +191,7 @@ function migrateContent(
     countManual(component, obj, stats, slug);
 
     for (const field of DROPS) {
+      if (DROPS_EXEMPT[component]?.includes(field)) continue;
       if (field in obj) {
         delete obj[field];
         const key = `${component}.${field}`;
