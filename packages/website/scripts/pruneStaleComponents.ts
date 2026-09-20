@@ -89,7 +89,7 @@ async function main(): Promise<void> {
     console.log(
       `  ${apply ? "deleting" : "would delete"} ${component.name} (id ${component.id}, "${component.display_name}")`,
     );
-    if (apply) await client.delete(`spaces/${spaceId}/components/${component.id}`);
+    if (apply) await client.delete(`spaces/${spaceId}/components/${component.id}`, {});
     await delay(200);
   }
 
