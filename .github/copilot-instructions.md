@@ -401,19 +401,20 @@ pnpm --filter @kickstartds/design-system build
 Preset screenshots are visual snapshots captured from a built Storybook via `@storybook/test-runner`. They live in `__snapshots__/` (source) and `static/img/screenshots/` (committed via Git LFS), and are copied to `dist/static/` by Rollup.
 
 ```
-build-storybook → test-storybook (captures __snapshots__/*.png)
-               → create-component-previews (copies to static/img/screenshots/)
-               → build (Rollup copies static/ → dist/static/)
+capture-previews → build-storybook → test-storybook --updateSnapshot (records __snapshots__/*.png)
+                                   → previews:copy (copies to static/img/screenshots/)
+                                   → build (Rollup copies static/ → dist/static/)
 ```
 
-The `presets` step generates a screenshot path (`img/screenshots/{story.id}.png`) for **every** story, but the actual `.png` files only exist if `create-component-previews` has been run after those stories were added. After adding or renaming stories, run:
+The `presets` step generates a screenshot path (`img/screenshots/{story.id}.png`) for **every** story, but the actual `.png` files only exist if the capture has been run after those stories were added. After adding or renaming stories, run:
 
 ```bash
-pnpm --filter @kickstartds/design-system build-storybook
-pnpm --filter @kickstartds/design-system create-component-previews
+pnpm --filter @kickstartds/design-system capture-previews
 ```
 
 Then commit the updated `__snapshots__/` and `static/img/screenshots/` files.
+
+`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%. `create-component-previews` is kept as an alias for `capture-previews`.
 
 ### Component Architecture
 

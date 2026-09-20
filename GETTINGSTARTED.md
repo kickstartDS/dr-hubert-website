@@ -116,13 +116,15 @@ Preset screenshots are visual snapshots of each Storybook story, uploaded to Sto
 ### How the pipeline works
 
 ```
-build-storybook → test-storybook (captures __snapshots__/*.png via @storybook/test-runner)
-               → create-component-previews (copies __snapshots__/ → static/img/screenshots/)
-               → build (Rollup copies static/ → dist/static/)
-               → presets (generates snippets.json referencing img/screenshots/{story.id}.png)
+capture-previews → build-storybook → test-storybook --updateSnapshot (records __snapshots__/*.png via @storybook/test-runner)
+                                   → previews:copy (copies __snapshots__/ → static/img/screenshots/)
+                                   → build (Rollup copies static/ → dist/static/)
+                                   → presets (generates snippets.json referencing img/screenshots/{story.id}.png)
 ```
 
-> **Important:** The `presets` step in the build generates a screenshot path for _every_ story, but the actual `.png` files only exist if `create-component-previews` has been run after those stories were added. New or renamed stories will have missing screenshots until the pipeline is re-run.
+> **Important:** The `presets` step in the build generates a screenshot path for _every_ story, but the actual `.png` files only exist if the capture has been run after those stories were added. New or renamed stories will have missing screenshots until the pipeline is re-run.
+
+`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%. Use `capture-previews` to record intended changes.
 
 ### Prerequisites
 
@@ -136,12 +138,13 @@ pnpm exec playwright install
 
 ```bash
 cd packages/design-system
-pnpm run build-storybook     # Build static Storybook
-pnpm run create-component-previews  # Run test-runner → copy snapshots → static/img/screenshots/
+pnpm run capture-previews    # Build Storybook → record snapshots → copy to static/img/screenshots/
 pnpm -r run build            # Rebuild to include new screenshots in dist/
 ```
 
 After regenerating, commit the updated files in `__snapshots__/` and `static/img/screenshots/` (both tracked via Git LFS).
+
+`create-component-previews` is kept as an alias for `capture-previews`.
 
 ## 8. Updating Components After Schema Changes
 
