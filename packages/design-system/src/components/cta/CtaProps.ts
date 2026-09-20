@@ -5,6 +5,8 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+import type {ButtonProps} from "../button/ButtonProps";
+
 /**
  * Headline for the Component element
  */
@@ -29,18 +31,6 @@ export type ColorNeutral = boolean;
  * Invert the text and button colors for use on dark backgrounds
  */
 export type Inverted = boolean;
-/**
- * Text content to display inside the button
- */
-export type Label = string;
-/**
- * Choose an icon
- */
-export type Icon = string;
-/**
- * The URL to link to when the button is clicked
- */
-export type URL = string;
 /**
  * Background color for the whole element
  */
@@ -96,7 +86,7 @@ export interface CtaProps {
   highlightText?: HighlightText;
   colorNeutral?: ColorNeutral;
   inverted?: Inverted;
-  buttons?: Button[];
+  buttons?: ButtonProps[];
   backgroundColor?: BackgroundColor;
   backgroundImage?: BackgroundImage;
   image?: Image;
@@ -104,11 +94,6 @@ export interface CtaProps {
   textAlign?: TextAlignment;
   align?: VerticalAlignmentOfTheContent;
   padding?: Padding1;
-}
-export interface Button {
-  label?: Label;
-  icon?: Icon;
-  url?: URL;
 }
 /**
  * Image displayed alongside the text content

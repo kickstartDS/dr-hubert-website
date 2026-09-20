@@ -112,6 +112,8 @@ interface ComponentReport {
   fieldsReset: string[];
   tabsMapped: number;
   whitelistEntriesAdded: string[];
+  /** Live whitelist entries dropped because the generated config no longer emits them. */
+  whitelistEntriesRemoved: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -451,10 +453,25 @@ function mergeField(
     merged.component_group_whitelist = live.component_group_whitelist;
   }
 
-  // component_whitelist: additive-only merge
+  // component_whitelist: additive-only merge, minus the generator artifacts a
+  // live entry can no longer be. `button` used to be missing from the
+  // generator's `--components` list, so it was treated as a plain object: one
+  // throwaway `tab-<uuid>` clone per whitelist position (section.components,
+  // the split components' main/aside/first/second) and, for the inline
+  // `buttons` shape the hero/cta/video-curtain/image-story/section share, one
+  // blok named after the property itself. Both are generator artifacts — the
+  // additive merge then kept them forever, which is why the editor offered
+  // several "Button" entries. Entries the generated config does not contain and
+  // that are neither of those stay, so a hand-added component survives.
   if (live.component_whitelist || generated.component_whitelist) {
-    const liveList = live.component_whitelist ?? [];
     const genList = generated.component_whitelist ?? [];
+    const genSet = new Set(genList);
+    const liveList = (live.component_whitelist ?? []).filter((entry) => {
+      if (genSet.has(entry)) return true;
+      if (!entry.startsWith("tab-") && entry !== generated.key) return true;
+      report.whitelistEntriesRemoved.push(`${generated.key ?? "?"}: -${entry}`);
+      return false;
+    });
     const mergedSet = new Set(liveList);
     for (const entry of genList) {
       if (!mergedSet.has(entry)) {
@@ -714,6 +731,7 @@ function main() {
       fieldsReset: [],
       tabsMapped: 0,
       whitelistEntriesAdded: [],
+      whitelistEntriesRemoved: [],
     };
 
     const merged = mergeComponent(
@@ -731,7 +749,8 @@ function main() {
         compReport.fieldsReplaced.length > 0 ||
         compReport.fieldsDropped.length > 0 ||
         compReport.fieldsReset.length > 0 ||
-        compReport.whitelistEntriesAdded.length > 0;
+        compReport.whitelistEntriesAdded.length > 0 ||
+        compReport.whitelistEntriesRemoved.length > 0;
       if (!hasChanges && compReport.fieldsPreserved.length === 0) {
         compReport.status = "unchanged";
       }
@@ -772,6 +791,13 @@ function main() {
     if (compReport.whitelistEntriesAdded.length > 0) {
       console.log(
         `      whitelist additions: ${compReport.whitelistEntriesAdded.join(
+          ", ",
+        )}`,
+      );
+    }
+    if (compReport.whitelistEntriesRemoved.length > 0) {
+      console.log(
+        `      whitelist removals (generator artifacts): ${compReport.whitelistEntriesRemoved.join(
           ", ",
         )}`,
       );

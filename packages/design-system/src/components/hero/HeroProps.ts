@@ -5,6 +5,8 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+import type {ButtonProps} from "../button/ButtonProps";
+
 /**
  * Headline for the visual
  */
@@ -38,18 +40,6 @@ export type MobileTextBelow = boolean;
  * Invert the text color for better contrast against the background
  */
 export type InvertText = boolean;
-/**
- * Text content to display inside the button
- */
-export type Label = string;
-/**
- * Choose an icon
- */
-export type Icon = string;
-/**
- * The URL to link to when the button is clicked
- */
-export type URL = string;
 /**
  * Add a skip button to the hero module
  */
@@ -100,16 +90,11 @@ export interface HeroProps {
   textbox?: Textbox;
   mobileTextBelow?: MobileTextBelow;
   invertText?: InvertText;
-  buttons?: Button[];
+  buttons?: ButtonProps[];
   skipButton?: SkipButton;
   overlay?: GridLayer;
   image?: BackgroundImage;
   textPosition?: ModuleAligment;
-}
-export interface Button {
-  label?: Label;
-  icon?: Icon;
-  url?: URL;
 }
 /**
  * Sources of background images for different screen sizes
