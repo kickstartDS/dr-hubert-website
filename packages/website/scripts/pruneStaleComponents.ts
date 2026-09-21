@@ -75,6 +75,9 @@ async function main(): Promise<void> {
   for (let page = 1; ; page++) {
     const res = await client.get(`spaces/${spaceId}/presets`, { page, per_page: 100 });
     const batch = res.data.presets as Array<{ component_id?: number }>;
+    // A page past the end answers empty for ever, so this is the loop's only exit: without it
+    // the script polls the Management API indefinitely and never reaches the deletion lines.
+    if (batch.length === 0) break;
     for (const preset of batch) {
       if (preset.component_id) presetComponentIds.add(preset.component_id);
     }
