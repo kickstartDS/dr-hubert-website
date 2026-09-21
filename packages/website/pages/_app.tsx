@@ -226,6 +226,7 @@ export default function App({
                   enabled: settings?.headerButton_enabled,
                   label: settings?.headerButton_label,
                   url: settings?.headerButton_url,
+                  newTab: settings?.headerButton_newTab,
                 }}
               >
                 <ComponentProviders>

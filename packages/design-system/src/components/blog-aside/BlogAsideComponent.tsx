@@ -17,10 +17,15 @@ export const BlogAsideContextDefault = forwardRef<
   BlogAsideProps & HTMLAttributes<HTMLDivElement>
 >(({ author, socialSharing, readingTime, date, className, ...props }, ref) => {
   const socialLinks = socialSharing?.map((link) => {
+    // `newTab` is resolved at story-processing time from Storyblok's multilink
+    // target-blank toggle and isn't part of the generated schema type.
+    const linkWithNewTab = link as typeof link & { newTab?: boolean };
+
     return {
-      icon: link.icon,
-      href: link.url,
-      title: link.title,
+      icon: linkWithNewTab.icon,
+      href: linkWithNewTab.url,
+      title: linkWithNewTab.title,
+      newTab: linkWithNewTab.newTab,
     };
   });
 

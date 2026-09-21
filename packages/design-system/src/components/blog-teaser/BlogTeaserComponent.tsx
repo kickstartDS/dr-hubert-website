@@ -29,6 +29,12 @@ export const BlogTeaserContextDefault = forwardRef<
     },
     ref
   ) => {
+    // `newTab` is resolved at story-processing time from Storyblok's multilink
+    // target-blank toggle and isn't part of the generated schema type.
+    const linkWithNewTab = link as BlogTeaserProps["link"] & {
+      newTab?: boolean;
+    };
+
     const teaserMetaItems = [];
 
     if (date)
@@ -62,8 +68,9 @@ export const BlogTeaserContextDefault = forwardRef<
           }}
           link={{
             //@ts-expect-error
-            url: link.url,
-            label: link?.text || "Read article",
+            url: linkWithNewTab.url,
+            label: linkWithNewTab?.text || "Read article",
+            newTab: linkWithNewTab.newTab,
           }}
           title={headline}
           body={teaserText}

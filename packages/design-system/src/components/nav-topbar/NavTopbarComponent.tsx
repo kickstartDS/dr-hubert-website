@@ -13,8 +13,14 @@ export type { NavTopbarProps };
 export const NavTopbarContextDefault = forwardRef<
   HTMLElement,
   NavTopbarProps & HTMLAttributes<HTMLElement>
->(({ items, inverted }, ref) =>
-  items && items.length > 0 ? (
+>(({ items, inverted }, ref) => {
+  // `newTab` is resolved at story-processing time from Storyblok's multilink
+  // target-blank toggle and isn't part of the generated schema type.
+  const itemsWithNewTab = items as (NonNullable<
+    NavTopbarProps["items"]
+  >[number] & { newTab?: boolean })[];
+
+  return itemsWithNewTab && itemsWithNewTab.length > 0 ? (
     <nav
       className="dsa-nav-topbar"
       id="dsa-nav-topbar"
@@ -22,50 +28,56 @@ export const NavTopbarContextDefault = forwardRef<
       ref={ref}
     >
       <ul className="dsa-nav-topbar__list">
-        {items.map(({ label, url, active, items: subItems }) => {
-          return (
-            <li
-              className={classnames(
-                "dsa-nav-topbar__item",
-                active && "dsa-nav-topbar__item--active",
-                subItems?.length && "dsa-nav-topbar__item--dropdown"
-              )}
-              key={url}
-            >
-              {subItems?.length ? (
-                <span className="dsa-nav-topbar__label">
-                  {label}
-                  {subItems?.length ? (
-                    <Icon
-                      className="dsa-nav-topbar__label__icon"
-                      icon="chevron-down"
-                      role="presentation"
-                      aria-hidden
-                      focusable={false}
-                    />
-                  ) : (
-                    ""
-                  )}
-                </span>
-              ) : (
-                <Link
-                  href={url}
-                  className={`dsa-nav-topbar__label dsa-nav-topbar__link`}
-                >
-                  {label}
-                </Link>
-              )}
+        {itemsWithNewTab.map(
+          ({ label, url, active, items: subItems, newTab }) => {
+            return (
+              <li
+                className={classnames(
+                  "dsa-nav-topbar__item",
+                  active && "dsa-nav-topbar__item--active",
+                  subItems?.length && "dsa-nav-topbar__item--dropdown"
+                )}
+                key={url}
+              >
+                {subItems?.length ? (
+                  <span className="dsa-nav-topbar__label">
+                    {label}
+                    {subItems?.length ? (
+                      <Icon
+                        className="dsa-nav-topbar__label__icon"
+                        icon="chevron-down"
+                        role="presentation"
+                        aria-hidden
+                        focusable={false}
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </span>
+                ) : (
+                  <Link
+                    href={url}
+                    className={`dsa-nav-topbar__label dsa-nav-topbar__link`}
+                    {...(newTab && {
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                    })}
+                  >
+                    {label}
+                  </Link>
+                )}
 
-              {subItems?.length ? (
-                <NavDropdown items={subItems} inverted={inverted} />
-              ) : null}
-            </li>
-          );
-        })}
+                {subItems?.length ? (
+                  <NavDropdown items={subItems} inverted={inverted} />
+                ) : null}
+              </li>
+            );
+          }
+        )}
       </ul>
     </nav>
-  ) : null
-);
+  ) : null;
+});
 
 export const NavTopbarContext = createContext(NavTopbarContextDefault);
 export const NavTopbar = forwardRef<
