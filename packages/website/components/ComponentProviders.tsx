@@ -582,6 +582,10 @@ const NavMainWithCta = forwardRef<
         <a
           href={headerButton.url}
           className="dsa-button dsa-nav-main__header-cta"
+          {...(headerButton.newTab && {
+            target: "_blank",
+            rel: "noopener noreferrer",
+          })}
         >
           {headerButton.label || "Contact Us"}
         </a>

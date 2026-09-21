@@ -57,6 +57,15 @@ const BUTTON_GROUP_COMPONENTS: string[] = [
 const BUTTON_CLONE_PREFIX = "button_";
 
 /**
+ * The clone's component name: `tab-` plus the uuid the generator minted for it
+ * (`pruneStaleComponents.ts` matches the same shape). The name is the detector
+ * — not the presence of `button_label` — because a clone whose label field was
+ * stored empty is still a clone, and the website registers no `tab-*` type.
+ * Tab *fields* share the prefix but are schema keys, never a `component` value.
+ */
+const CLONE_NAME = /^tab-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/**
  * Pure renames only: same field type, same option values, same semantics.
  * Verified by diffing the old and new generated cms/components.*.json.
  */
@@ -202,7 +211,7 @@ function migrateContent(
 
     // `tab-<uuid>` clones of the button schema, and the shared label+url
     // `buttons` blok in the fields that now take the canonical `button`.
-    const isButtonClone = component.startsWith("tab-") && "button_label" in obj;
+    const isButtonClone = CLONE_NAME.test(component);
     const isButtonGroupEntry =
       component === "buttons" &&
       parent?.key === "buttons" &&

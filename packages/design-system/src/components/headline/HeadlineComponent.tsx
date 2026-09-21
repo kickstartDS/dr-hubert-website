@@ -27,6 +27,7 @@ export const Headline = forwardRef<
     align = "left",
     switchOrder = false,
     level = "h2",
+    id,
     // @ts-expect-error: Some kDS Components set the `styleAs`Props (e.g. https://github.com/kickstartDS/content/blob/next/source/storytelling/StorytellingComponent.tsx#L146)
     styleAs,
     style = styleAs || "h2",
@@ -54,12 +55,15 @@ export const Headline = forwardRef<
         <p className="dsa-headline__subheadline">{renderSubheadline(sub)}</p>
       )}
 
-      <TagName className={classnames("dsa-headline__headline")}>
+      {/* The id belongs on the heading element, not on the `header` wrapper:
+          Pagefind only creates section anchors for headings (h1-h6), so an id
+          on the wrapper never yields a deep link to the section. */}
+      <TagName id={id} className={classnames("dsa-headline__headline")}>
         <span className="dsa-headline__inner">
           {renderContent(text)}
-          {props.id && level === "h2" && (
+          {id && level === "h2" && (
             <a
-              href={`#${props.id}`}
+              href={`#${id}`}
               className="dsa-headline__anchor"
               aria-label="Link to this section"
               title="Link to this section"

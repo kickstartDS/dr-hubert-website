@@ -27,12 +27,20 @@ export const LogoContextDefault = forwardRef<
       width,
       height,
       homepageHref,
+      // `newTab` is resolved at story-processing time from Storyblok's
+      // multilink target-blank toggle and isn't part of the generated schema
+      // type.
+      newTab,
       className,
-    },
+    }: LogoProps & ImgHTMLAttributes<HTMLImageElement> & { newTab?: boolean },
     ref
   ) => {
     return (
-      <Link className={classnames("dsa-logo", className)} href={homepageHref}>
+      <Link
+        className={classnames("dsa-logo", className)}
+        href={homepageHref}
+        {...(newTab && { target: "_blank", rel: "noopener noreferrer" })}
+      >
         <Picture
           ref={ref}
           className="dsa-logo__img"

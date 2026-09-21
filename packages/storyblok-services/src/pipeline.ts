@@ -23,6 +23,7 @@ import {
   injectRootFieldComponentTypes,
   type TransformedContent,
 } from "./transform.js";
+import { collectStandaloneComponents } from "./validate.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 
@@ -272,7 +273,8 @@ export async function generateRootFieldContent(
     // Full pipeline: inject component types → processForStoryblok
     const withTypes = injectRootFieldComponentTypes(
       structuredClone(rawResponse),
-      originalFieldSchema
+      originalFieldSchema,
+      collectStandaloneComponents(contentTypeSchema)
     );
     const processed = processForStoryblok(withTypes);
     storyblokContent = [processed];

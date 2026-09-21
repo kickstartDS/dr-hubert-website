@@ -8,6 +8,12 @@ import { toMatchImageSnapshot } from "jest-image-snapshot";
 
 const customSnapshotsDir = `${process.cwd()}/__snapshots__`;
 
+// Pixel comparison is only reproducible in the canonical Chromatic environment, so the
+// render smoke test (`test`) must not assert on images: comparisons there fail on
+// environment drift. `previews:capture` is the one command that sets this, because it
+// needs the assertion to write the snapshot PNGs.
+const imageSnapshotsEnabled = process.env.STORYBOOK_IMAGE_SNAPSHOTS === "1";
+
 // Upper bound for the lazy image settle step: a request that fires neither `load` nor
 // `error` must not stall the suite.
 const lazyImageSettleTimeout = 10000;
@@ -50,8 +56,8 @@ const config: TestRunnerConfig = {
       );
       pending.forEach((element) => lazySizes?.loader?.unveil?.(element));
 
-      // `error` resolves as well: an image that fails to load must fail the image
-      // comparison below instead of hanging the run.
+      // `error` resolves as well: an image that fails to load must not stall the run —
+      // when image snapshots are enabled it then fails the comparison below.
       await Promise.race([
         Promise.all(waiting),
         new Promise<void>((resolve) => setTimeout(resolve, settleTimeout)),
@@ -59,6 +65,8 @@ const config: TestRunnerConfig = {
     }, lazyImageSettleTimeout);
 
     await page.waitForTimeout(1000);
+
+    if (!imageSnapshotsEnabled) return;
 
     await page.evaluate(() => {
       if (!document.querySelectorAll(".preview--wrapper").length) {

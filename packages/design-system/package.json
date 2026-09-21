@@ -72,7 +72,7 @@
     "storybook": "pnpm run copy-theme-css && storybook dev -p 6006",
     "create-component-previews": "pnpm run capture-previews",
     "capture-previews": "pnpm run build-storybook && run-p -r test:server previews:capture && pnpm run previews:copy",
-    "previews:capture": "playwright install chromium && npx wait-on http://127.0.0.1:6006 && test-storybook --maxWorkers=8 --updateSnapshot",
+    "previews:capture": "playwright install chromium && npx wait-on http://127.0.0.1:6006 && STORYBOOK_IMAGE_SNAPSHOTS=1 test-storybook --maxWorkers=8 --updateSnapshot",
     "previews:copy": "test -n \"$(ls __snapshots__/*.png)\" && rm -rf static/img/screenshots && mkdir -p static/img/screenshots && cp __snapshots__/*.png static/img/screenshots",
     "pretest": "playwright install chromium",
     "test": "pnpm run build-storybook && run-p -r test:*",

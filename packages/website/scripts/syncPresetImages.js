@@ -3,9 +3,15 @@
  *
  * Syncs preset screenshot images to Storyblok:
  *   1. Reads merged presets (which have local image paths like "img/screenshots/...")
- *   2. Fetches existing presets from the Storyblok space
- *   3. Uploads changed screenshots to a "Component Screenshots" asset folder
- *   4. Updates each preset's `image` field via the Management API
+ *   2. Verifies every referenced screenshot exists in the built design system
+ *   3. Fetches existing presets from the Storyblok space
+ *   4. Uploads changed screenshots to a "Component Screenshots" asset folder
+ *   5. Updates each preset's `image` field via the Management API
+ *
+ * Exits non-zero when a referenced screenshot is missing from the built design
+ * system (before any Storyblok call) or when a preset that needs a preview ends
+ * the run without a CDN image — a preset without a thumbnail is a failure, not
+ * a warning.
  *
  * Also uploads any content images (img/*, /logo.svg) referenced inside preset
  * args to a "Demo Content" asset folder — so preset previews render correctly.
@@ -83,6 +89,10 @@ const SCREENSHOT_ROOT = path.join(
   "static",
 );
 
+/** A preset image is local when it is neither a CDN URL nor protocol-relative. */
+const isLocalPath = (image) =>
+  Boolean(image) && !image.startsWith("http") && !image.startsWith("//");
+
 const hashFile = (filePath) =>
   fs.existsSync(filePath)
     ? crypto.createHash("sha1").update(fs.readFileSync(filePath)).digest("hex")
@@ -159,7 +169,36 @@ const sync = async () => {
     console.log(`Loaded screenshot paths from ${generatedPath}`);
   }
 
-  // 2. Fetch live presets and components from Storyblok
+  // 2. Preflight: every referenced screenshot must exist in the built design
+  // system, before any Storyblok call — `signedUpload()` tolerates an absent
+  // file (it returns an empty URL), so without this guard a capture that was
+  // never produced only surfaces as a preset without a thumbnail in the editor.
+  const referencedScreenshots = new Set(
+    [
+      ...generatedScreenshots.values(),
+      ...localPresets.map((preset) => preset.image),
+    ].filter(isLocalPath),
+  );
+  const missingScreenshots = [...referencedScreenshots].filter(
+    (image) => !fs.existsSync(path.join(SCREENSHOT_ROOT, image)),
+  );
+  if (missingScreenshots.length > 0) {
+    console.error(
+      `\n${missingScreenshots.length} preset screenshot(s) missing under ${SCREENSHOT_ROOT}:`,
+    );
+    for (const image of missingScreenshots) console.error(`  ${image}`);
+    console.error(
+      "\nBuild the design system and refresh the Storybook previews first:\n" +
+        "  pnpm --filter @kickstartds/design-system capture-previews\n" +
+        "  pnpm --filter @kickstartds/design-system build",
+    );
+    process.exit(1);
+  }
+  console.log(
+    `Verified ${referencedScreenshots.size} local screenshots in ${SCREENSHOT_ROOT}`,
+  );
+
+  // 3. Fetch live presets and components from Storyblok
   console.log("Fetching live presets from Storyblok...");
   const livePresets = await fetchAllPresets();
   console.log(`  Found ${livePresets.length} live presets`);
@@ -179,7 +218,7 @@ const sync = async () => {
     liveByKey.set(key, lp);
   }
 
-  // 3. Determine which presets need image uploads
+  // 4. Determine which presets need image uploads
   const imageCache = new Map(); // local path → Storyblok CDN URL
   let screenshotFolderId = null;
   let demoContentFolderId = null;
@@ -197,12 +236,7 @@ const sync = async () => {
 
     // Check if the screenshot image needs uploading
     const localImage = generatedScreenshots.get(key) ?? local.image ?? "";
-    const isLocalPath =
-      localImage &&
-      !localImage.startsWith("http") &&
-      !localImage.startsWith("//");
-
-    if (isLocalPath && (await screenshotChanged(localImage, live.image))) {
+    if (isLocalPath(localImage) && (await screenshotChanged(localImage, live.image))) {
       needsUpload.push({ local, live, localImage });
     }
   }
@@ -211,16 +245,16 @@ const sync = async () => {
     `\n${needsUpload.length} presets need screenshot uploads (${localPresets.length - needsUpload.length} already have images or are not live yet)`,
   );
 
-  // 4. Ensure asset folders exist
+  // 5. Ensure asset folders exist
   if (needsUpload.length > 0) {
     console.log("\nEnsuring asset folders...");
     screenshotFolderId = await getOrCreateFolder(SCREENSHOT_FOLDER_NAME);
     console.log(`  ${SCREENSHOT_FOLDER_NAME}: folder ${screenshotFolderId}`);
   }
 
-  // 5. Upload screenshots and update presets
+  // 6. Upload screenshots and update presets
   let uploaded = 0;
-  let skipped = 0;
+  const skipped = [];
 
   for (let i = 0; i < needsUpload.length; i++) {
     const { local, live, localImage } = needsUpload[i];
@@ -244,8 +278,8 @@ const sync = async () => {
 
     const cdnUrl = imageCache.get(localImage);
     if (!cdnUrl) {
-      console.log(" skipped (not found)");
-      skipped++;
+      console.log(" upload failed");
+      skipped.push(`${label} → ${localImage}`);
       continue;
     }
 
@@ -257,7 +291,7 @@ const sync = async () => {
     console.log(" ✓");
   }
 
-  // 6. Sync content images inside preset args
+  // 7. Sync content images inside preset args
   //    Find all local image paths in preset data and upload them
   const contentImages = [];
   for (const local of localPresets) {
@@ -348,7 +382,7 @@ const sync = async () => {
     }
   }
 
-  // 7. Sync component images (set each component's image to its first preset screenshot)
+  // 8. Sync component images (set each component's image to its first preset screenshot)
   console.log("\nSyncing component preview images...");
   const liveComponentsByName = new Map();
   for (const comp of liveComponents) {
@@ -396,9 +430,22 @@ const sync = async () => {
   // Summary
   console.log("\n--- Summary ---");
   console.log(`  Screenshots uploaded: ${uploaded}`);
-  console.log(`  Screenshots skipped:  ${skipped}`);
+  console.log(`  Screenshots skipped:  ${skipped.length}`);
   console.log(`  Content images:       ${imageCache.size}`);
   console.log(`  Component images:     ${componentImagesUpdated}`);
+
+  if (skipped.length > 0) {
+    console.error(
+      `\n${skipped.length} preset(s) ended the run without a screenshot:`,
+    );
+    for (const entry of skipped) console.error(`  ${entry}`);
+    console.error(
+      "\nFix the missing uploads and re-run the sync; see the preset image" +
+        " section of the README.",
+    );
+    process.exit(1);
+  }
+
   console.log("Done!");
 };
 

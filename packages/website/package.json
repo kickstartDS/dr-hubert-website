@@ -43,6 +43,8 @@
     "check-presets": "node scripts/checkPresets.js",
     "create-storyblok-config": "node scripts/seedCmsConfig.js && kickstartDS cms storyblok --schema-paths node_modules/@kickstartds/design-system/dist/components components --layer-order cms schema --configuration-path cms --templates page blog-post blog-overview settings event-detail event-list search token-theme --components blog-teaser business-card button contact content-nav cta divider downloads event-latest-teaser event-list-teaser faq features gallery headline hero html image-story image-text info-table logos mosaic prompter section slider split-even split-weighted stats teaser-card testimonials text video-curtain && node scripts/generatePresets.js",
     "bundle-static-assets": "node scripts/bundleStaticAssets.js",
+    "build-site": "npm run build-tokens && npm run extract-tokens && npm run bundle-static-assets && next build && pagefind --site .next/server/pages --output-path public/pagefind",
+    "capture-site": "playwright install chromium && npm run build-site && node scripts/captureSite.js",
     "storyblok-logout": "storyblok logout",
     "storyblok-login": "storyblok login",
     "migrate-content-fields": "dotenvx run -f .env.local -- npx tsx scripts/migrateContentFields.ts",

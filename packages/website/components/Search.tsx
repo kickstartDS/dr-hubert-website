@@ -22,7 +22,12 @@ const Search: React.FC<PageProps> = ({ blok }) => {
 
     return (
       <main {...storyblokEditable(blok)}>
+        {/* The search sits on the bold (brand blue) background with inverted
+            colours, the same treatment the imprint page gives its headline
+            section. */}
         <Section
+          backgroundColor="bold"
+          inverted
           content={{
             mode: "list",
             gutter: "none",
