@@ -76,6 +76,8 @@ async function main(): Promise<void> {
   // paging it loops for ever on the same batch. syncPresetImages.js reads it the same way.
   const presetsRes = await client.get(`spaces/${spaceId}/presets`);
   const livePresets = (presetsRes.data?.presets || []) as Array<{ component_id?: number }>;
+  // Printed so a truncated read is visible rather than silently narrowing what may be deleted.
+  console.log(`  the space has ${livePresets.length} presets\n`);
   for (const preset of livePresets) {
     if (preset.component_id) presetComponentIds.add(preset.component_id);
   }
