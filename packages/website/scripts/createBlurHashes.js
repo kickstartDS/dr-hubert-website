@@ -7,10 +7,17 @@ const PromiseThrottle = require("promise-throttle");
 
 require("@dotenvx/dotenvx").config({ path: ".env.local" });
 
-if (!process.env.NEXT_STORYBLOK_SPACE_ID)
-  throw new Error("Missing NEXT_STORYBLOK_SPACE_ID env variable");
-if (!process.env.NEXT_STORYBLOK_OAUTH_TOKEN)
-  throw new Error("Missing NEXT_STORYBLOK_OAUTH_TOKEN env variable");
+// Skips with a warning if the credentials are missing (safe for CI/preview
+// builds) — the blurhashes are only needed for the Storyblok asset images.
+if (
+  !process.env.NEXT_STORYBLOK_SPACE_ID ||
+  !process.env.NEXT_STORYBLOK_OAUTH_TOKEN
+) {
+  console.warn(
+    "⚠️  createBlurHashes: skipping — missing NEXT_STORYBLOK_SPACE_ID or NEXT_STORYBLOK_OAUTH_TOKEN"
+  );
+  return;
+}
 
 const Storyblok = new StoryblokClient({
   oauthToken: process.env.NEXT_STORYBLOK_OAUTH_TOKEN,
