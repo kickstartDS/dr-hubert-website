@@ -2,6 +2,7 @@
 import {
   AnchorHTMLAttributes,
   FC,
+  Fragment,
   HTMLAttributes,
   ImgHTMLAttributes,
   PropsWithChildren,
@@ -516,6 +517,44 @@ const LocalisedSearchBar = forwardRef<
   );
 });
 
+// The DE/EN pair is rendered twice: in the header bar, which only exists from
+// 62rem up, and - through `NavFlyout`'s content slot - in the mobile menu that
+// replaces the bar below 62rem. Both instances read the same `useLanguage()`
+// value, so they cannot disagree about which language is current.
+const LanguageSwitcher = () => {
+  const language = useLanguage();
+
+  return (
+    <div className="dsa-language-switcher">
+      {LANGUAGES.map((lang, idx) => (
+        <Fragment key={lang}>
+          {idx > 0 && (
+            <span
+              className="dsa-language-switcher__separator"
+              aria-hidden="true"
+            >
+              |
+            </span>
+          )}
+          {lang === language ? (
+            <span className="dsa-language-switcher__item dsa-language-switcher__item--active">
+              {lang.toUpperCase()}
+            </span>
+          ) : (
+            <a
+              href={homePath(lang)}
+              className="dsa-language-switcher__item dsa-language-switcher__item--link"
+              lang={lang}
+            >
+              {lang.toUpperCase()}
+            </a>
+          )}
+        </Fragment>
+      ))}
+    </div>
+  );
+};
+
 const NavMainWithCta = forwardRef<
   HTMLDivElement,
   NavMainProps & HTMLAttributes<HTMLDivElement>
@@ -547,37 +586,7 @@ const NavMainWithCta = forwardRef<
       >
         <Icon icon="search" />
       </button>
-      <div className="dsa-language-switcher">
-        {LANGUAGES.map((lang, idx) => (
-          <>
-            {idx > 0 && (
-              <span
-                className="dsa-language-switcher__separator"
-                aria-hidden="true"
-              >
-                |
-              </span>
-            )}
-            {lang === language ? (
-              <span
-                key={lang}
-                className="dsa-language-switcher__item dsa-language-switcher__item--active"
-              >
-                {lang.toUpperCase()}
-              </span>
-            ) : (
-              <a
-                key={lang}
-                href={homePath(lang)}
-                className="dsa-language-switcher__item dsa-language-switcher__item--link"
-                lang={lang}
-              >
-                {lang.toUpperCase()}
-              </a>
-            )}
-          </>
-        ))}
-      </div>
+      <LanguageSwitcher />
       {hasButton && (
         <a
           href={headerButton.url}
@@ -591,7 +600,9 @@ const NavMainWithCta = forwardRef<
         </a>
       )}
       {hasItems && (
-        <NavFlyout items={items} inverted={flyoutInverted} logo={logo} />
+        <NavFlyout items={items} inverted={flyoutInverted} logo={logo}>
+          <LanguageSwitcher />
+        </NavFlyout>
       )}
       <SearchBarContext.Provider value={LocalisedSearchBar}>
         <SearchModal
