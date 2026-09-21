@@ -225,6 +225,52 @@ Commit the updated files in `__snapshots__/` and `static/img/screenshots/` (trac
 pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter run update-previews
 ```
 
+## Capturing a Page for a Pull Request
+
+The pull-request automation pictures a change by running the repository's own command for the
+surface it touched — the design system's `capture-previews` for stories, and this one for a route
+of the built site:
+
+```bash
+OMP_VISUAL_ROUTE=/suche OMP_VISUAL_OUT=/tmp/omp-visual \
+  npx --yes pnpm@10.30.3 --filter @kickstartds/ruhmesmeile-storyblok-starter run capture-site
+```
+
+The automation names it in the `[visual]` section of the automation config:
+
+```toml
+[visual]
+web_command = "npx --yes pnpm@10.30.3 --filter @kickstartds/ruhmesmeile-storyblok-starter run capture-site"
+```
+
+The command owns the whole capture. It builds the site (`build-site` is `build` without its two
+CMS-writing steps, `sync-default-theme` and `blurhashes`, which need an
+`NEXT_STORYBLOK_OAUTH_TOKEN`), serves the build on `127.0.0.1:3210`, screenshots the route as a
+full page at 1440x900, and stops the server again. Nothing is written into the repository and
+nothing is compared: a page has no committed baseline, so the image is an illustration that the
+pull request shows as it is.
+
+| Variable           | Meaning                                     |
+| ------------------ | ------------------------------------------- |
+| `OMP_VISUAL_ROUTE` | the route to capture; empty means the site root |
+| `OMP_VISUAL_OUT`   | the directory the PNG is written into           |
+
+The file is named after the route with the leading slash dropped and everything unsafe replaced:
+`/suche` becomes `suche.png`, `/` becomes `index.png`. One PNG is written per captured view. The
+command exits non-zero with a message on stderr when nothing could be captured — the automation
+reports that as "no illustration" instead of failing the run.
+
+`NEXT_STORYBLOK_API_TOKEN` has to be in the environment (or in the local env file): without it
+`next build` cannot fetch a single route. The browser comes from the workspace's `playwright`,
+which the design system declares — the website does not carry a second declaration of it.
+
+A route whose changed state only exists after an interaction is reached through the hook the page
+declares itself, never through a URL parameter invented for the capture: `/suche` and
+`/en/search` use the search form's own `#q=<term>` hash, the mechanism `SearchForm` wires to
+`hashchange`, and a panel is reached by clicking the element the page marks as its trigger, e.g.
+`[data-topic="dsa.search-modal.open"]` in the header. A hook that never materialises fails the
+command rather than writing a picture of the wrong state.
+
 ## Content Schema & Migrations
 
 ### TypeScript Types
