@@ -21,9 +21,49 @@
  *
  * Stories that were published are re-published after the update; drafts stay
  * drafts. Run the dry run first and read the report.
+ *
+ * It also carries the `button` fix: the config generator used to emit one
+ * throwaway `tab-<uuid>` clone of the button schema per whitelist position
+ * (`section.components`, the split components) and a shared label+url
+ * `buttons` blok for the inline shape the hero/cta/video-curtain/image-story/
+ * section `buttons` fields used. Both are gone — those positions now take the
+ * canonical `button` component — so content has to follow, or the editor flags
+ * every existing button as "component not allowed".
  */
 
 import StoryblokClient from "storyblok-js-client";
+
+/**
+ * Components whose `buttons` field was re-pointed at the canonical `button`
+ * component. Their content still carries `component: "buttons"`, the shared
+ * label+url blok the generator emitted for the inline shape. `business-card`
+ * keeps its own `buttons` shape and is deliberately absent.
+ */
+const BUTTON_GROUP_COMPONENTS: string[] = [
+  "cta",
+  "hero",
+  "image-story",
+  "section",
+  "video-curtain",
+];
+
+/**
+ * The generator prefixes every field of a blok it emitted for a schema it had
+ * not been told about, so a `tab-<uuid>` clone of the button schema stores
+ * `button_label` where the canonical `button` component reads `label`.
+ * Un-prefixing keeps the values: a leftover key is silently ignored by the
+ * website, but the editor would show the field as empty.
+ */
+const BUTTON_CLONE_PREFIX = "button_";
+
+/**
+ * The clone's component name: `tab-` plus the uuid the generator minted for it
+ * (`pruneStaleComponents.ts` matches the same shape). The name is the detector
+ * — not the presence of `button_label` — because a clone whose label field was
+ * stored empty is still a clone, and the website registers no `tab-*` type.
+ * Tab *fields* share the prefix but are schema keys, never a `component` value.
+ */
+const CLONE_NAME = /^tab-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /**
  * Pure renames only: same field type, same option values, same semantics.
@@ -57,6 +97,15 @@ const RENAMES: Record<string, Record<string, string>> = {
  * rich text field in the space.
  */
 const DROPS: string[] = ["type"];
+
+/**
+ * Components whose current schema declares one of the `DROPS` fields itself, so
+ * the key is live content there rather than the leftover field. The canonical
+ * `button` has a `type` option of its own (button/submit/reset) and is the only
+ * component in the generated config that does, so its `type` — whether
+ * converted from `button_type` or authored in the editor — survives the drop.
+ */
+const DROPS_EXEMPT: Record<string, string[]> = { button: ["type"] };
 
 /**
  * Changes this script deliberately does NOT make, because they are not
@@ -129,11 +178,16 @@ function countManual(component: string, obj: Record<string, unknown>, stats: Sta
   }
 }
 
-function migrateContent(node: unknown, stats: Stats, slug: string): boolean {
+function migrateContent(
+  node: unknown,
+  stats: Stats,
+  slug: string,
+  parent?: { component: string; key: string },
+): boolean {
   let changed = false;
 
   if (Array.isArray(node)) {
-    for (const child of node) if (migrateContent(child, stats, slug)) changed = true;
+    for (const child of node) if (migrateContent(child, stats, slug, parent)) changed = true;
     return changed;
   }
 
@@ -146,11 +200,38 @@ function migrateContent(node: unknown, stats: Stats, slug: string): boolean {
     countManual(component, obj, stats, slug);
 
     for (const field of DROPS) {
+      if (DROPS_EXEMPT[component]?.includes(field)) continue;
       if (field in obj) {
         delete obj[field];
         const key = `${component}.${field}`;
         stats.drops[key] = (stats.drops[key] || 0) + 1;
         changed = true;
+      }
+    }
+
+    // `tab-<uuid>` clones of the button schema, and the shared label+url
+    // `buttons` blok in the fields that now take the canonical `button`.
+    const isButtonClone = CLONE_NAME.test(component);
+    const isButtonGroupEntry =
+      component === "buttons" &&
+      parent?.key === "buttons" &&
+      BUTTON_GROUP_COMPONENTS.includes(parent.component);
+
+    if (isButtonClone || isButtonGroupEntry) {
+      obj.component = "button";
+      const key = isButtonClone ? "tab-* -> button" : "buttons -> button";
+      stats.renames[key] = (stats.renames[key] || 0) + 1;
+      changed = true;
+
+      if (isButtonClone) {
+        const unPrefixedKey = `${BUTTON_CLONE_PREFIX}* -> *`;
+        for (const field of Object.keys(obj)) {
+          if (!field.startsWith(BUTTON_CLONE_PREFIX)) continue;
+          const canonical = field.slice(BUTTON_CLONE_PREFIX.length);
+          if (!(canonical in obj)) obj[canonical] = obj[field];
+          delete obj[field];
+          stats.renames[unPrefixedKey] = (stats.renames[unPrefixedKey] || 0) + 1;
+        }
       }
     }
   }
@@ -170,8 +251,9 @@ function migrateContent(node: unknown, stats: Stats, slug: string): boolean {
     }
   }
 
-  for (const value of Object.values(obj)) {
-    if (value && typeof value === "object" && migrateContent(value, stats, slug)) changed = true;
+  for (const [key, value] of Object.entries(obj)) {
+    if (value && typeof value === "object" && migrateContent(value, stats, slug, component ? { component, key } : undefined))
+      changed = true;
   }
 
   return changed;
@@ -271,7 +353,12 @@ async function main(): Promise<void> {
   if (!apply && touched.length > 0) console.log("\nRe-run with --apply to commit these changes.");
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  // The Storyblok client keeps its socket open, so without an explicit exit the process
+  // outlives the work and the command looks like it hangs. Same reason
+  // syncPresetImages.js ends with `.then(() => process.exit(0))`.
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

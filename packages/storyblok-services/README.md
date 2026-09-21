@@ -94,7 +94,7 @@ import {
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `processOpenAiResponse(response, schemaMap?, defaults?, merge?)` | Reverses `type__X` → `type: X` mangling, merges component defaults. Returns Design System–shaped props                                                                                                                                    |
 | `processForStoryblok(page)`                                      | Flattens nested objects to `key_subKey`, moves `type` → `component` (and removes `type`), adds `aiDraft: true`. Guarantees Storyblok output never carries both `type` and `component`                                                     |
-| `injectRootFieldComponentTypes(content, fieldSchema)`            | Injects `type` discriminators into root field content using the original schema's `$id` values, so `processForStoryblok` can convert them to `component` identifiers. Wraps single component objects in arrays for Storyblok bloks fields |
+| `injectRootFieldComponentTypes(content, fieldSchema, standaloneComponents?)` | Injects `type` discriminators into root field content using the original schema's `$id` values, so `processForStoryblok` can convert them to `component` identifiers. Array items are named after their item schema only when that schema is one of `standaloneComponents` (`collectStandaloneComponents()`), else after the property. Wraps single component objects in arrays for Storyblok bloks fields |
 | `flattenNestedObjects(obj)`                                      | Utility: flattens one level of nested objects using `_` separator. Skips objects with `type` or `component` (component blocks)                                                                                                            |
 | `unflattenNestedObjects(obj)`                                    | Reverse utility: `key_subKey` → `{ key: { subKey } }`                                                                                                                                                                                     |
 
@@ -164,6 +164,7 @@ Schema-driven validation for content before writing to Storyblok:
 ```typescript
 import {
   buildValidationRules,
+  collectStandaloneComponents,
   validateSections,
   validatePageContent,
   formatValidationErrors,
@@ -174,6 +175,7 @@ import {
 | Function                                              | Description                                                                                                                                                                                                           |
 | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------- |
 | `buildValidationRules(schema)`                        | Build validation rules from a dereffed schema (component hierarchy, container slots, root array fields)                                                                                                               |
+| `collectStandaloneComponents(schema)`                 | Names of the components the content type offers as a choice — the ones the Storyblok config generator emits as their own components. Array item schemas outside this set are emitted under their property name         |
 | `validateSections(sections, rules)`                   | Validate an array of sections against rules. Returns `{ valid, errors }`                                                                                                                                              |
 | `validatePageContent(content, rules)`                 | Validate full page content (detects `component` discriminator). Returns `{ valid, errors }`                                                                                                                           |
 | `formatValidationErrors(errors)`                      | Format validation errors as human-readable string                                                                                                                                                                     |

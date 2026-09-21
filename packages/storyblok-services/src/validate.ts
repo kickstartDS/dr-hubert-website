@@ -258,6 +258,37 @@ export function buildValidationRules(
 }
 
 /**
+ * Collect the names of the components a content type offers as a choice —
+ * the components the Storyblok config generator emits as their own named
+ * components.
+ *
+ * A container that offers more than one type (`section.components`, the
+ * `split-*` containers) is a component whitelist in the editor, and every
+ * schema it references is emitted as a standalone component in the space. A
+ * container that offers a single type is a nested bloks field instead: the
+ * generator names its blok after the **property**, so `blog-head.tags` items
+ * (a `$ref` to `blog-tag.schema.json`) are emitted as a component named
+ * `tags` — the space has no `blog-tag` component. Names only reachable
+ * through those single-type slots must therefore not be used as component
+ * discriminators.
+ *
+ * @param derefSchema - A fully dereferenced content type schema.
+ */
+export function collectStandaloneComponents(
+  derefSchema: Record<string, any>
+): Set<string> {
+  const names = new Set<string>();
+
+  for (const allowedTypes of buildValidationRules(derefSchema).containerSlots
+    .values()) {
+    if (allowedTypes.size < 2) continue;
+    for (const name of allowedTypes) names.add(name);
+  }
+
+  return names;
+}
+
+/**
  * Recursively walk a schema node, discovering container arrays and the
  * component types they accept.
  *

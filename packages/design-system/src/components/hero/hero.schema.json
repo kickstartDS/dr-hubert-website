@@ -62,19 +62,7 @@
     "buttons": {
       "type": "array",
       "items": {
-        "title": "Button",
-        "type": "object",
-        "properties": {
-          "label": {
-            "$ref": "http://schema.mydesignsystem.com/button.schema.json#/properties/label"
-          },
-          "icon": {
-            "$ref": "http://schema.mydesignsystem.com/button.schema.json#/properties/icon"
-          },
-          "url": {
-            "$ref": "http://schema.mydesignsystem.com/button.schema.json#/properties/url"
-          }
-        }
+        "$ref": "http://schema.mydesignsystem.com/button.schema.json"
       }
     },
     "skipButton": {

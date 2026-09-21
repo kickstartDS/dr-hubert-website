@@ -112,6 +112,7 @@ export type {
 // ─── Schema validation ──────────────────────────────────────────────
 export {
   buildValidationRules,
+  collectStandaloneComponents,
   validateContent,
   validateSections,
   validatePageContent,
