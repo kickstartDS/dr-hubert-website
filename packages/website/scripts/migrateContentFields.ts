@@ -344,7 +344,12 @@ async function main(): Promise<void> {
   if (!apply && touched.length > 0) console.log("\nRe-run with --apply to commit these changes.");
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  // The Storyblok client keeps its socket open, so without an explicit exit the process
+  // outlives the work and the command looks like it hangs. Same reason
+  // syncPresetImages.js ends with `.then(() => process.exit(0))`.
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
