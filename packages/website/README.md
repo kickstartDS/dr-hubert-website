@@ -203,7 +203,7 @@ pnpm -r run build
 
 Commit the updated files in `__snapshots__/` and `static/img/screenshots/` (tracked via Git LFS).
 
-`pnpm run test` is the visual regression check: it builds Storybook and compares every story against the committed baselines in `__snapshots__/`, failing when a story differs by more than 0.2%.
+`pnpm run test` in `packages/design-system` is the render smoke test: it builds and serves Storybook, runs every story and fails on render errors. It does not compare images — visual regression stays with the Chromatic CI job, which renders in a canonical environment.
 
 ### Update previews in Storyblok
 
