@@ -45,20 +45,18 @@ const SERVER_START_TIMEOUT_MS = 30_000;
 const SETTLE_TIMEOUT_MS = 10_000;
 
 /**
- * States a route only shows after an interaction, reached through the hook the page declares
- * itself — never through a query parameter invented for the capture.
- *
- * `hash` is the search pages' own `#q=<term>` hook: `SearchForm.updateFromHash()` fills the
- * field and runs the same search a visitor's typing runs, and the form's own submit writes the
- * same hash. `click` is an element the page marks as a panel's trigger, e.g.
- * `[data-topic="dsa.search-modal.open"]` on the header's search button.
+ * The search pages' own `#q=<term>` hook, one term per route: `SearchForm.updateFromHash()`
+ * fills the field and runs the same search a visitor's typing runs, and the form's own submit
+ * writes the same hash. A route reached this way is the page's own state, never a query
+ * parameter invented for the capture.
  *
  * The terms are page names the site itself carries (`/kontakt`, `/en/contact`), so Pagefind has
- * something to match and the capture shows results instead of the empty form.
+ * something to match; the capture fails when a term returns no hits instead of writing a picture
+ * of an empty result list.
  */
-const ROUTE_STATES = {
-  "/suche": { hash: "q=Kontakt" },
-  "/en/search": { hash: "q=Contact" },
+const SEARCH_TERMS = {
+  "/suche": "Kontakt",
+  "/en/search": "Contact",
 };
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -133,8 +131,7 @@ const waitForRuntime = async (page) => {
 };
 
 /** Proof that the page's own hook ran: the field it fills carries the term. */
-const waitForHashState = async (page, hash) => {
-  const term = new URLSearchParams(hash).get("q");
+const waitForHashState = async (page, term) => {
   try {
     await page.waitForFunction(
       (value) => document.querySelector(".dsa-search-bar__input input")?.value === value,
@@ -142,7 +139,27 @@ const waitForHashState = async (page, hash) => {
       { timeout: NAVIGATION_TIMEOUT_MS }
     );
   } catch {
-    throw new Error(`the page's own #${hash} hook never filled the search field`);
+    throw new Error(`the page's own #q=${term} hook never filled the search field`);
+  }
+};
+
+/**
+ * Proof that Pagefind answered with hits. `SearchForm.renderResults()` appends one `li` per
+ * result into `ol.dsa-search-form__results` and leaves it empty for a term that matches nothing,
+ * so a term without hits would still capture the search state — just with an empty result list.
+ * The capture fails instead of writing a picture of an empty search.
+ */
+const waitForSearchResults = async (page, term) => {
+  try {
+    await page.waitForFunction(
+      () => document.querySelectorAll(".dsa-search-form__results > li").length > 0,
+      undefined,
+      { timeout: NAVIGATION_TIMEOUT_MS }
+    );
+  } catch {
+    throw new Error(
+      `Pagefind returned no hits for "${term}", so the captured search would be empty`
+    );
   }
 };
 
@@ -175,7 +192,7 @@ const settleImages = async (page) => {
   await page.waitForTimeout(1_000);
 };
 
-const capture = async (url, state, outDir, route) => {
+const capture = async (url, term, outDir, route) => {
   const browser = await chromium.launch();
   try {
     const context = await browser.newContext({ viewport: VIEWPORT });
@@ -195,8 +212,10 @@ const capture = async (url, state, outDir, route) => {
 
     await page.evaluate(() => document.fonts.ready);
     await waitForRuntime(page);
-    if (state?.click) await page.click(state.click, { timeout: NAVIGATION_TIMEOUT_MS });
-    if (state?.hash) await waitForHashState(page, state.hash);
+    if (term) {
+      await waitForHashState(page, term);
+      await waitForSearchResults(page, term);
+    }
     await settleImages(page);
 
     const shot = path.join(outDir, fileNameFor(route));
@@ -213,21 +232,22 @@ const capture = async (url, state, outDir, route) => {
 const main = async () => {
   const outDir = process.env.OMP_VISUAL_OUT;
   if (!outDir) fail("OMP_VISUAL_OUT is not set");
-  if (!process.env.NEXT_STORYBLOK_API_TOKEN) {
-    fail(
-      "NEXT_STORYBLOK_API_TOKEN is not set; the site cannot be built, so there is nothing to picture"
-    );
-  }
   if (!fs.existsSync(path.join(packageRoot, ".next/BUILD_ID"))) {
     fail("there is no site build in .next; `npm run capture-site` builds it first");
   }
 
   const route = (process.env.OMP_VISUAL_ROUTE || "").trim() || "/";
-  const state = ROUTE_STATES[route];
-  const url = `http://${HOST}:${PORT}${route}${state?.hash ? `#${state.hash}` : ""}`;
+  const term = SEARCH_TERMS[route];
+  const url = `http://${HOST}:${PORT}${route}${term ? `#q=${encodeURIComponent(term)}` : ""}`;
   fs.mkdirSync(outDir, { recursive: true });
 
   await assertPortFree();
+  // `output: "standalone"` (next.config.js) makes `next start` warn on the pinned Next 13.5.6
+  // and fail outright from Next 14. The replacement is the standalone server the Dockerfile
+  // runs — `node .next/standalone/packages/website/server.js` (outputFileTracingRoot is the
+  // monorepo root, so the standalone tree mirrors the repo), with `.next/static` and `public`
+  // copied beside it (the Pagefind index lives in `public/pagefind`) and PORT/HOSTNAME set.
+  // The switch has to be exercised in a publish run: no other environment can build the site.
   server = spawn("next", ["start", "-p", String(PORT), "-H", HOST], {
     cwd: packageRoot,
     detached: true,
@@ -239,7 +259,7 @@ const main = async () => {
 
   try {
     await waitForServer(url);
-    console.log(await capture(url, state, outDir, route));
+    console.log(await capture(url, term, outDir, route));
   } finally {
     await stopServer();
   }

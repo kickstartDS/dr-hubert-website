@@ -261,15 +261,21 @@ command exits non-zero with a message on stderr when nothing could be captured �
 reports that as "no illustration" instead of failing the run.
 
 `NEXT_STORYBLOK_API_TOKEN` has to be in the environment (or in the local env file): without it
-`next build` cannot fetch a single route. The browser comes from the workspace's `playwright`,
-which the design system declares — the website does not carry a second declaration of it.
+`next build` cannot fetch a single route. `checkBuildToken.js` runs before the build in the
+`capture-site` chain and fails with that message, so a missing token never surfaces as Next's own
+build error. The browser comes from the website's own `playwright` dependency.
 
 A route whose changed state only exists after an interaction is reached through the hook the page
 declares itself, never through a URL parameter invented for the capture: `/suche` and
 `/en/search` use the search form's own `#q=<term>` hash, the mechanism `SearchForm` wires to
-`hashchange`, and a panel is reached by clicking the element the page marks as its trigger, e.g.
-`[data-topic="dsa.search-modal.open"]` in the header. A hook that never materialises fails the
-command rather than writing a picture of the wrong state.
+`hashchange`. A hook that never materialises fails the command rather than writing a picture of
+the wrong state.
+
+The search terms are the site's own page names — `Kontakt` for `/suche`, `Contact` for
+`/en/search` (`/kontakt`, `/en/contact` in `helpers/i18n.ts`) — and the capture asserts Pagefind
+returned at least one result for the term. A term that stops matching fails the command with the
+term named, instead of writing a picture of an empty result list; pick a new term from the page's
+content and put it in `SEARCH_TERMS` when the site's copy or the Pagefind index changes.
 
 ## Content Schema & Migrations
 
