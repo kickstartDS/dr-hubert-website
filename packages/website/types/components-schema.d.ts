@@ -113,19 +113,30 @@ export interface BlogTeaserStoryblok {
 
 export interface BusinessCardStoryblok {
   centered: boolean;
-  image_src?: MultilinkStoryblok;
+  image_src?: AssetStoryblok;
   image_alt?: string;
-  logo_src?: MultilinkStoryblok;
+  logo_src?: AssetStoryblok;
   logo_alt?: string;
   logo_url?: MultilinkStoryblok;
   topic?: string;
   address?: string;
-  avatar_src?: MultilinkStoryblok;
+  avatar_src?: AssetStoryblok;
   avatar_alt?: string;
-  contact?: ContactStoryblok[];
+  contactLinks?: ContactLinksStoryblok[];
   buttons?: ButtonsStoryblok[];
   _uid: string;
   component: "business-card";
+}
+
+export interface ButtonStoryblok {
+  label?: string;
+  url?: MultilinkStoryblok;
+  variant?: "" | "primary" | "secondary" | "tertiary";
+  size?: "" | "small" | "medium" | "large";
+  disabled: boolean;
+  type?: "" | "button" | "submit" | "reset";
+  _uid: string;
+  component: "button";
 }
 
 export interface ButtonsStoryblok {
@@ -154,11 +165,24 @@ export interface ComponentTypesStoryblok {
 }
 
 export interface ContactStoryblok {
+  image_src?: AssetStoryblok;
+  image_alt?: string;
+  image_fullWidth: boolean;
+  image_aspectRatio?: "" | "wide" | "square" | "vertical";
+  title?: string;
+  subtitle?: string;
+  links?: LinksStoryblok[];
+  copy?: string;
+  className?: string;
+  component: "contact";
+  _uid: string;
+}
+
+export interface ContactLinksStoryblok {
   label?: string;
-  icon?: string;
   url?: MultilinkStoryblok;
   _uid: string;
-  component: "contact";
+  component: "contactLinks";
 }
 
 export interface ContentNavStoryblok {
@@ -178,7 +202,7 @@ export interface CtaStoryblok {
   highlightText: boolean;
   colorNeutral: boolean;
   inverted: boolean;
-  buttons?: ButtonsStoryblok[];
+  buttons?: ButtonStoryblok[];
   backgroundColor?: string;
   backgroundImage?: AssetStoryblok;
   image_src?: AssetStoryblok;
@@ -245,8 +269,26 @@ export interface EventDetailStoryblok {
 
 export interface EventFilterStoryblok {
   datePicker_title?: string;
-  "datePicker_tab-4d25ed9c-b100-404a-b7df-d9140557f8ad"?: unknown;
-  "datePicker_tab-47e8f094-9c31-4b0d-ac27-4097ad2cb926"?: unknown;
+  "datePicker_tab-29f0b886-746f-440e-8de7-607c7bd9b89c"?: unknown;
+  "datePicker_tab-ee3c01e0-0f51-40de-8183-cf0874db91fc"?: unknown;
+  "datePicker_tab-321060e6-529c-4634-ae06-ce8739f0fcbd"?: unknown;
+  "datePicker_tab-364a7dc2-4cf2-4383-8885-c0d75e483d40"?: unknown;
+  "datePicker_tab-38bd8b45-1316-4b40-a70e-3291e915d4df"?: unknown;
+  "datePicker_tab-88d918e9-a7c7-414d-82e5-6b00d4c4b1fd"?: unknown;
+  "datePicker_tab-dd4133f1-3e7b-4825-8f36-d9a363e2901a"?: unknown;
+  "datePicker_tab-0c1c1bd2-1359-48e5-873e-010dba14cfa7"?: unknown;
+  "datePicker_tab-34d8e4f1-fd69-4c71-b06d-3eacaf43721b"?: unknown;
+  "datePicker_tab-515c7a2f-86fd-43dc-bc5d-914c9cedeae8"?: unknown;
+  "datePicker_tab-6ff9d1ca-40ec-4996-8354-5ab1adf84df0"?: unknown;
+  "datePicker_tab-0b24e9b5-7cfd-4a11-9754-ad167753b70d"?: unknown;
+  "datePicker_tab-457cf842-f1d9-4ab0-9680-d1bdf3c41402"?: unknown;
+  "datePicker_tab-f8f7aff7-14bf-4e84-b30f-21872646d1b4"?: unknown;
+  "datePicker_tab-5648e397-e963-4137-a963-b4ad1bfe81a1"?: unknown;
+  "datePicker_tab-6f08c3f9-ca3a-4823-9b0e-baa23f4618ee"?: unknown;
+  "datePicker_tab-64549e29-53e7-41db-b7f5-163043e09e7c"?: unknown;
+  "datePicker_tab-c8e41d9a-332a-4252-b9c2-1b92a8de548d"?: unknown;
+  "datePicker_tab-e28d6adf-c7dd-424a-b2d6-130ee7f06427"?: unknown;
+  "datePicker_tab-91ab33c8-a983-4bf8-b364-9fe8d4acebaa"?: unknown;
   datePicker_toggle: boolean;
   categories_title?: string;
   categories_categoryCheckboxes?: CategoryCheckboxesStoryblok[];
@@ -310,6 +352,7 @@ export interface FeatureStoryblok {
   text?: string;
   cta_url?: MultilinkStoryblok;
   cta_label?: string;
+  cta_toggle: boolean;
   _uid: string;
   component: "feature";
 }
@@ -331,16 +374,21 @@ export interface FooterStoryblok {
   logo_homepageHref?: MultilinkStoryblok;
   logo_width?: string;
   logo_height?: string;
-  byline?: string;
+  badge_src?: AssetStoryblok;
+  badge_alt?: string;
   inverted: boolean;
-  navItems?: NavItemsStoryblok[];
+  navGroups?: NavGroupsStoryblok[];
+  copyright?: string;
+  legalLink_label?: string;
+  legalLink_url?: MultilinkStoryblok;
+  socialLinks?: SocialLinksStoryblok[];
   _uid: string;
   component: "footer";
 }
 
 export interface GalleryStoryblok {
   images?: ImagesStoryblok[];
-  layout?: "" | "stack" | "smallTiles" | "largeTiles";
+  layout?: "" | "stack" | "smallTiles" | "largeTiles" | "slider";
   aspectRatio?: "" | "unset" | "square" | "wide" | "landscape";
   lightbox: boolean;
   _uid: string;
@@ -356,8 +404,6 @@ export interface GlobalStoryblok {
     | CtaStoryblok
     | DividerStoryblok
     | DownloadsStoryblok
-    | EventLatestTeaserStoryblok
-    | EventListTeaserStoryblok
     | FaqStoryblok
     | FeaturesStoryblok
     | GalleryStoryblok
@@ -366,6 +412,7 @@ export interface GlobalStoryblok {
     | HtmlStoryblok
     | ImageStoryStoryblok
     | ImageTextStoryblok
+    | InfoTableStoryblok
     | LogosStoryblok
     | MosaicStoryblok
     | SliderStoryblok
@@ -376,9 +423,6 @@ export interface GlobalStoryblok {
     | TestimonialsStoryblok
     | TextStoryblok
     | VideoCurtainStoryblok
-    | InfoTableStoryblok
-    | PrompterStoryblok
-    | TimelineStoryblok
   )[];
   _uid: string;
   component: "global";
@@ -431,7 +475,7 @@ export interface HeroStoryblok {
   textbox: boolean;
   mobileTextBelow: boolean;
   invertText: boolean;
-  buttons?: ButtonsStoryblok[];
+  buttons?: ButtonStoryblok[];
   skipButton: boolean;
   overlay: boolean;
   image_srcMobile?: AssetStoryblok;
@@ -473,7 +517,7 @@ export interface ImageStoryStoryblok {
   text?: string;
   layout?: "" | "textLeft" | "imageLeft";
   padding: boolean;
-  buttons?: ButtonsStoryblok[];
+  buttons?: ButtonStoryblok[];
   image_src?: AssetStoryblok;
   image_aspectRatio?: "" | "unset" | "square" | "wide" | "landscape";
   image_alt?: string;
@@ -580,6 +624,14 @@ export interface MosaicStoryblok {
   component: "mosaic";
 }
 
+export interface NavGroupsStoryblok {
+  heading?: string;
+  headingUrl?: MultilinkStoryblok;
+  items?: ItemsStoryblok[];
+  _uid: string;
+  component: "navGroups";
+}
+
 export interface NavItemsStoryblok {
   url?: MultilinkStoryblok;
   label?: string;
@@ -599,6 +651,8 @@ export interface PageStoryblok {
   token?: string;
   hidePageBreadcrumbs: boolean;
   seo?: SeoStoryblok[];
+  theme?: string;
+  hideBookDemoButton: boolean;
   _uid: string;
   component: "page";
   uuid?: string;
@@ -673,7 +727,17 @@ export interface SearchResultsStoryblok {
 
 export interface SectionStoryblok {
   width?: "" | "full" | "max" | "wide" | "default" | "narrow";
-  style?: "" | "default" | "framed" | "deko";
+  style?:
+    | ""
+    | "default"
+    | "framed"
+    | "deko"
+    | "colorful"
+    | "stagelights"
+    | "anchorGlow"
+    | "symmetricGlow"
+    | "horizontalGradient"
+    | "verticalGradient";
   backgroundColor?: "" | "default" | "accent" | "bold";
   transition?: "" | "none" | "to_default" | "to_accent" | "to_bold" | "to_inverted";
   backgroundImage?: AssetStoryblok;
@@ -702,8 +766,6 @@ export interface SectionStoryblok {
     | CtaStoryblok
     | DividerStoryblok
     | DownloadsStoryblok
-    | EventLatestTeaserStoryblok
-    | EventListTeaserStoryblok
     | FaqStoryblok
     | FeaturesStoryblok
     | GalleryStoryblok
@@ -723,12 +785,15 @@ export interface SectionStoryblok {
     | TextStoryblok
     | VideoCurtainStoryblok
     | InfoTableStoryblok
-    | PrompterStoryblok
-    | TimelineStoryblok
     | GlobalReferenceStoryblok
+    | EventLatestTeaserStoryblok
+    | EventListTeaserStoryblok
+    | PrompterStoryblok
+    | ButtonStoryblok
   )[];
-  buttons?: ButtonsStoryblok[];
+  buttons?: ButtonStoryblok[];
   aiDraft: boolean;
+  anchorId?: string;
   _uid: string;
   component: "section";
 }
@@ -750,6 +815,14 @@ export interface SettingsStoryblok {
   iconSprite?: string;
   token?: string;
   hideBreadcrumbs: boolean;
+  theme?: string;
+  headerButton_enabled: boolean;
+  headerButton_label?: string;
+  headerButton_url?: MultilinkStoryblok;
+  bookDemoButton_enabled: boolean;
+  bookDemoButton_label?: string;
+  bookDemoButton_url?: MultilinkStoryblok;
+  bookDemoButton_variant?: "" | "primary" | "secondary" | "tertiary";
   _uid: string;
   component: "settings";
 }
@@ -774,9 +847,18 @@ export interface SliderStoryblok {
     | TeaserCardStoryblok
     | TestimonialsStoryblok
     | TextStoryblok
+    | GlobalReferenceStoryblok
   )[];
   _uid: string;
   component: "slider";
+}
+
+export interface SocialLinksStoryblok {
+  icon?: string;
+  url?: MultilinkStoryblok;
+  ariaLabel?: string;
+  _uid: string;
+  component: "socialLinks";
 }
 
 export interface SocialSharingStoryblok {
@@ -802,7 +884,6 @@ export interface SplitEvenStoryblok {
   firstComponents?: (
     | BlogTeaserStoryblok
     | BusinessCardStoryblok
-    | Tab3E667Fa3306841A0869DCb8B09EadaecStoryblok
     | ContactStoryblok
     | ContentNavStoryblok
     | CtaStoryblok
@@ -826,6 +907,8 @@ export interface SplitEvenStoryblok {
     | TestimonialsStoryblok
     | TextStoryblok
     | VideoCurtainStoryblok
+    | GlobalReferenceStoryblok
+    | ButtonStoryblok
   )[];
   secondComponents?: (
     | BlogTeaserStoryblok
@@ -840,6 +923,7 @@ export interface SplitEvenStoryblok {
     | FaqStoryblok
     | FeaturesStoryblok
     | GalleryStoryblok
+    | HeadlineStoryblok
     | HeroStoryblok
     | HtmlStoryblok
     | ImageStoryStoryblok
@@ -852,6 +936,8 @@ export interface SplitEvenStoryblok {
     | TestimonialsStoryblok
     | TextStoryblok
     | VideoCurtainStoryblok
+    | GlobalReferenceStoryblok
+    | ButtonStoryblok
   )[];
   _uid: string;
   component: "split-even";
@@ -884,6 +970,7 @@ export interface SplitWeightedStoryblok {
     | FaqStoryblok
     | FeaturesStoryblok
     | GalleryStoryblok
+    | HeadlineStoryblok
     | HeroStoryblok
     | HtmlStoryblok
     | ImageStoryStoryblok
@@ -896,11 +983,12 @@ export interface SplitWeightedStoryblok {
     | TestimonialsStoryblok
     | TextStoryblok
     | VideoCurtainStoryblok
+    | GlobalReferenceStoryblok
+    | ButtonStoryblok
   )[];
   asideComponents?: (
     | BlogTeaserStoryblok
     | BusinessCardStoryblok
-    | TabD44F2B2754A248E4Bf6F97E1Aafe7570Storyblok
     | ContactStoryblok
     | ContentNavStoryblok
     | CtaStoryblok
@@ -924,6 +1012,8 @@ export interface SplitWeightedStoryblok {
     | TestimonialsStoryblok
     | TextStoryblok
     | VideoCurtainStoryblok
+    | GlobalReferenceStoryblok
+    | ButtonStoryblok
   )[];
   _uid: string;
   component: "split-weighted";
@@ -944,7 +1034,7 @@ export interface StatsStoryblok {
   component: "stats";
 }
 
-export interface Tab2Ba8B3E51D90411E9110C976E680983FStoryblok {
+export interface Tab66B2A4548Ed542EdA77AC4Cef1876725Storyblok {
   button_label?: string;
   button_url?: MultilinkStoryblok;
   button_variant?: "" | "primary" | "secondary" | "tertiary";
@@ -952,62 +1042,7 @@ export interface Tab2Ba8B3E51D90411E9110C976E680983FStoryblok {
   button_disabled: boolean;
   button_type?: "" | "button" | "submit" | "reset";
   _uid: string;
-  component: "tab-2ba8b3e5-1d90-411e-9110-c976e680983f";
-}
-
-export interface Tab3E667Fa3306841A0869DCb8B09EadaecStoryblok {
-  button_label?: string;
-  button_url?: MultilinkStoryblok;
-  button_variant?: "" | "primary" | "secondary" | "tertiary";
-  button_size?: "" | "small" | "medium" | "large";
-  button_disabled: boolean;
-  button_type?: "" | "button" | "submit" | "reset";
-  _uid: string;
-  component: "tab-3e667fa3-3068-41a0-869d-cb8b09eadaec";
-}
-
-export interface Tab62E98D1F7D8147B0B8EaD0F9F992Fa93Storyblok {
-  button_label?: string;
-  button_url?: MultilinkStoryblok;
-  button_variant?: "" | "primary" | "secondary" | "tertiary";
-  button_size?: "" | "small" | "medium" | "large";
-  button_disabled: boolean;
-  button_type?: "" | "button" | "submit" | "reset";
-  _uid: string;
-  component: "tab-62e98d1f-7d81-47b0-b8ea-d0f9f992fa93";
-}
-
-export interface TabD44F2B2754A248E4Bf6F97E1Aafe7570Storyblok {
-  button_label?: string;
-  button_url?: MultilinkStoryblok;
-  button_variant?: "" | "primary" | "secondary" | "tertiary";
-  button_size?: "" | "small" | "medium" | "large";
-  button_disabled: boolean;
-  button_type?: "" | "button" | "submit" | "reset";
-  _uid: string;
-  component: "tab-d44f2b27-54a2-48e4-bf6f-97e1aafe7570";
-}
-
-export interface TabDd9Fb6134B494262Bebe665E6333Fcd1Storyblok {
-  button_label?: string;
-  button_url?: MultilinkStoryblok;
-  button_variant?: "" | "primary" | "secondary" | "tertiary";
-  button_size?: "" | "small" | "medium" | "large";
-  button_disabled: boolean;
-  button_type?: "" | "button" | "submit" | "reset";
-  _uid: string;
-  component: "tab-dd9fb613-4b49-4262-bebe-665e6333fcd1";
-}
-
-export interface TabFad75E0F1C794F01B0D6A3C93A0Dc934Storyblok {
-  button_label?: string;
-  button_url?: MultilinkStoryblok;
-  button_variant?: "" | "primary" | "secondary" | "tertiary";
-  button_size?: "" | "small" | "medium" | "large";
-  button_disabled: boolean;
-  button_type?: "" | "button" | "submit" | "reset";
-  _uid: string;
-  component: "tab-fad75e0f-1c79-4f01-b0d6-a3c93a0dc934";
+  component: "tab-66b2a454-8ed5-42ed-a77a-c4cef1876725";
 }
 
 export interface TagsStoryblok {
@@ -1029,6 +1064,9 @@ export interface TeaserCardStoryblok {
   image?: AssetStoryblok;
   imageAlt?: string;
   imageRatio?: "" | "wide" | "landscape" | "square" | "unset";
+  imageHoverEffect: boolean;
+  date?: string;
+  newTag: boolean;
   _uid: string;
   component: "teaser-card";
 }
@@ -1077,26 +1115,11 @@ export interface TileStoryblok {
   component: "tile";
 }
 
-export interface TimelineStoryblok {
-  timelineItems?: TimelineItemsStoryblok[];
-  _uid: string;
-  component: "timeline";
-}
-
-export interface TimelineItemsStoryblok {
-  year?: string;
-  textLeft?: string;
-  textRight?: string;
-  image_src?: AssetStoryblok;
-  image_alt?: string;
-  _uid: string;
-  component: "timelineItems";
-}
-
 export interface TokenThemeStoryblok {
   name: string;
   tokens?: string;
   css?: string;
+  system: boolean;
   _uid: string;
   component: "token-theme";
 }
@@ -1107,7 +1130,7 @@ export interface VideoCurtainStoryblok {
   text?: string;
   highlightText: boolean;
   colorNeutral: boolean;
-  buttons?: ButtonsStoryblok[];
+  buttons?: ButtonStoryblok[];
   overlay: boolean;
   video_srcMobile?: AssetStoryblok;
   video_srcTablet?: AssetStoryblok;
