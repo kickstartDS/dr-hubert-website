@@ -2,6 +2,7 @@ import { describe, it, expect } from "@jest/globals";
 import {
   ensureSubItemComponents,
   ensureRootFieldBloks,
+  injectRootFieldComponentTypes,
 } from "../src/transform.js";
 import { buildValidationRules } from "../src/validate.js";
 
@@ -582,6 +583,62 @@ describe("ensureRootFieldBloks", () => {
 
     expect((result.seo as any[])[0].component).toBe("seo");
     expect((result.head as any[])[0].component).toBe("blog-head");
+  });
+});
+
+// ─── injectRootFieldComponentTypes ────────────────────────────────────
+
+/**
+ * A root field (`cta`) whose `buttons` items are a `$ref` to their own
+ * component schema — the shape the dereferenced content-type schemas have
+ * since `hero`/`cta`/`video-curtain` point at `button.schema.json` — next to
+ * an anonymous array whose items carry no `$id`.
+ */
+const rootFieldSchema = {
+  $id: "http://schema.test/cta.schema.json",
+  type: "object",
+  properties: {
+    headline: { type: "string" },
+    buttons: {
+      type: "array",
+      items: {
+        $id: "http://schema.test/button.schema.json",
+        type: "object",
+        properties: {
+          label: { type: "string" },
+          url: { type: "string" },
+        },
+      },
+    },
+    tags: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          label: { type: "string" },
+        },
+      },
+    },
+  },
+};
+
+describe("injectRootFieldComponentTypes — array item component names", () => {
+  it("names array items from the item schema $id, not the property", () => {
+    const result = injectRootFieldComponentTypes(
+      { headline: "Headline", buttons: [{ label: "Go", url: "/go" }] },
+      rootFieldSchema
+    );
+
+    expect(result.buttons[0].type).toBe("button");
+  });
+
+  it("falls back to the property name when the item schema has no $id", () => {
+    const result = injectRootFieldComponentTypes(
+      { tags: [{ label: "One" }] },
+      rootFieldSchema
+    );
+
+    expect(result.tags[0].type).toBe("tags");
   });
 });
 

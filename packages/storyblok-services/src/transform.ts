@@ -217,11 +217,13 @@ export function processForStoryblok(
  * 2. **Nested single objects with `$id`** — Adds `type` from `$id` and
  *    wraps the object in an array (Storyblok bloks fields are always arrays).
  *
- * 3. **Nested array-of-objects items** — Adds `type` using the **property
- *    name** as the component name. This matches the Storyblok convention
- *    where sub-component bloks fields are named after their component
- *    (e.g. `tags[]` items → `component: "tags"`, `buttons[]` items →
- *    `component: "buttons"`).
+ * 3. **Nested array-of-objects items** — Adds `type` using the item
+ *    schema's `$id` (e.g. `hero.buttons[]` items → `component: "button"`,
+ *    the schema those items are a `$ref` to), falling back to the
+ *    **property name** for item schemas the generator cannot name
+ *    (e.g. `tags[]` items → `component: "tags"`). This keeps the
+ *    discriminator identical to the one the validation rules derive for
+ *    the same slot.
  *
  * After this function, call `processForStoryblok()` to convert `type` →
  * `component`, flatten nested value objects, and strip leftover `type`.
@@ -269,14 +271,19 @@ function injectNestedComponentTypes(
       propSchema.items?.properties
     ) {
       // Array of objects → each item is a sub-component.
-      // Component name = property name (matches Storyblok bloks convention).
+      // Component name = the item schema's name when it declares an `$id`
+      // (its own component, e.g. `buttons[]` → `button`), else the property
+      // name (matches the Storyblok bloks convention for anonymous items).
       const items = obj[propName];
       if (Array.isArray(items)) {
+        const itemSchema = propSchema.items;
+        const componentName =
+          (itemSchema.$id && getSchemaName(itemSchema.$id)) || propName;
         for (const item of items) {
           if (typeof item === "object" && item !== null) {
-            item.type = propName;
+            item.type = componentName;
             // Recurse into item's own nested properties
-            injectNestedComponentTypes(item, propSchema.items);
+            injectNestedComponentTypes(item, itemSchema);
           }
         }
       }

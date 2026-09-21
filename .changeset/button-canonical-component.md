@@ -1,5 +1,6 @@
 ---
 "@kickstartds/design-system": minor
+"@kickstartds/storyblok-services": patch
 ---
 
 Point the `buttons` array of `hero`, `cta` and `video-curtain` at the canonical
@@ -11,4 +12,11 @@ blok named after the property (`buttons`) rather than to the canonical `button`
 component — which is why the hero's buttons lost the `icon` the button schema
 already exposed. The generated prop types follow: the item type is now
 `ButtonProps`, so `variant`, `size`, `disabled` and `type` become available on
-hero/cta/video-curtain buttons. No runtime behaviour changes.
+hero/cta/video-curtain buttons.
+
+`injectRootFieldComponentTypes` now names array-of-objects items after the item
+schema's `$id` where there is one, falling back to the property name. With the
+`$ref` above, root-field generation (`generate_root_field`) emits
+`component: "button"` for `cta.buttons` instead of `component: "buttons"`, which
+is what the schema-derived validation rules for that slot require. No runtime
+behaviour changes.
