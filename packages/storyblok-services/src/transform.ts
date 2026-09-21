@@ -218,12 +218,13 @@ export function processForStoryblok(
  *    wraps the object in an array (Storyblok bloks fields are always arrays).
  *
  * 3. **Nested array-of-objects items** — Adds `type` using the item
- *    schema's `$id` (e.g. `hero.buttons[]` items → `component: "button"`,
- *    the schema those items are a `$ref` to), falling back to the
- *    **property name** for item schemas the generator cannot name
- *    (e.g. `tags[]` items → `component: "tags"`). This keeps the
- *    discriminator identical to the one the validation rules derive for
- *    the same slot.
+ *    schema's `$id` when that schema is one of `standaloneComponents`
+ *    (e.g. `cta.buttons[]` items → `component: "button"`, the schema
+ *    those items are a `$ref` to), else the **property name** — the
+ *    Storyblok convention for nested bloks fields the generator emits
+ *    under their property (`blog-head.tags[]` items are a `$ref` to
+ *    `blog-tag.schema.json`, but the space only knows the `tags` component
+ *    they are emitted as).
  *
  * After this function, call `processForStoryblok()` to convert `type` →
  * `component`, flatten nested value objects, and strip leftover `type`.
@@ -231,12 +232,18 @@ export function processForStoryblok(
  * @param content - The raw generated content (from OpenAI).
  * @param fieldSchema - The **original** field schema with `$id` values
  *   intact (before `UNSUPPORTED_KEYWORDS` cleanup).
+ * @param standaloneComponents - The content type's standalone component
+ *   names, from `collectStandaloneComponents()` — the names the Storyblok
+ *   config generator emits as their own components, and therefore the only
+ *   ones an array item schema may be named after. Without it every array
+ *   item is named after its property.
  * @returns A new object with `type` fields injected and single component
  *   objects wrapped in arrays.
  */
 export function injectRootFieldComponentTypes(
   content: Record<string, any>,
-  fieldSchema: Record<string, any>
+  fieldSchema: Record<string, any>,
+  standaloneComponents?: ReadonlySet<string>
 ): Record<string, any> {
   const result = structuredClone(content);
 
@@ -245,7 +252,7 @@ export function injectRootFieldComponentTypes(
     result.type = getSchemaName(fieldSchema.$id);
   }
 
-  injectNestedComponentTypes(result, fieldSchema);
+  injectNestedComponentTypes(result, fieldSchema, standaloneComponents);
 
   return result;
 }
@@ -258,7 +265,8 @@ export function injectRootFieldComponentTypes(
  */
 function injectNestedComponentTypes(
   obj: Record<string, any>,
-  schema: Record<string, any>
+  schema: Record<string, any>,
+  standaloneComponents?: ReadonlySet<string>
 ): void {
   const schemaProps = schema.properties || {};
 
@@ -271,19 +279,23 @@ function injectNestedComponentTypes(
       propSchema.items?.properties
     ) {
       // Array of objects → each item is a sub-component.
-      // Component name = the item schema's name when it declares an `$id`
-      // (its own component, e.g. `buttons[]` → `button`), else the property
-      // name (matches the Storyblok bloks convention for anonymous items).
+      // Component name = the item schema's own name when it is a standalone
+      // component (`buttons[]` → `button`), else the property name — the name
+      // the Storyblok config generator gives a nested bloks field
+      // (`tags[]` items are `blog-tag.schema.json` but emitted as `tags`).
       const items = obj[propName];
       if (Array.isArray(items)) {
         const itemSchema = propSchema.items;
+        const schemaName = itemSchema.$id ? getSchemaName(itemSchema.$id) : "";
         const componentName =
-          (itemSchema.$id && getSchemaName(itemSchema.$id)) || propName;
+          schemaName && standaloneComponents?.has(schemaName)
+            ? schemaName
+            : propName;
         for (const item of items) {
           if (typeof item === "object" && item !== null) {
             item.type = componentName;
             // Recurse into item's own nested properties
-            injectNestedComponentTypes(item, itemSchema);
+            injectNestedComponentTypes(item, itemSchema, standaloneComponents);
           }
         }
       }
@@ -297,7 +309,7 @@ function injectNestedComponentTypes(
       const child = obj[propName];
       if (typeof child === "object" && !Array.isArray(child)) {
         child.type = getSchemaName(propSchema.$id);
-        injectNestedComponentTypes(child, propSchema);
+        injectNestedComponentTypes(child, propSchema, standaloneComponents);
         // Storyblok bloks fields are always arrays
         obj[propName] = [child];
       }

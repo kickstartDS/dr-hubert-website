@@ -1,10 +1,15 @@
 import { describe, it, expect } from "@jest/globals";
+import { readFileSync } from "node:fs";
 import {
   ensureSubItemComponents,
   ensureRootFieldBloks,
   injectRootFieldComponentTypes,
 } from "../src/transform.js";
-import { buildValidationRules } from "../src/validate.js";
+import {
+  buildValidationRules,
+  collectStandaloneComponents,
+} from "../src/validate.js";
+import { getSchemaName } from "../src/schema.js";
 
 // ─── Minimal schema fixtures ──────────────────────────────────────────
 
@@ -588,34 +593,70 @@ describe("ensureRootFieldBloks", () => {
 
 // ─── injectRootFieldComponentTypes ────────────────────────────────────
 
+const dsComponentsDir = new URL(
+  "../../design-system/src/components/",
+  import.meta.url
+);
+
+const dsSchemaCache = new Map<string, any>();
+
+/** Read a Design System component schema (`hero` → `hero/hero.schema.json`). */
+function dsSchema(name: string): Record<string, any> {
+  const cached = dsSchemaCache.get(name);
+  if (cached) return cached;
+
+  const schema = JSON.parse(
+    readFileSync(new URL(`${name}/${name}.schema.json`, dsComponentsDir), "utf8")
+  );
+  dsSchemaCache.set(name, schema);
+
+  return schema;
+}
+
 /**
- * A root field (`cta`) whose `buttons` items are a `$ref` to their own
- * component schema — the shape the dereferenced content-type schemas have
- * since `hero`/`cta`/`video-curtain` point at `button.schema.json` — next to
- * an anonymous array whose items carry no `$id`.
+ * The **dereferenced** shapes the runtime works on: the design system build
+ * inlines every `$ref` before the CMS generator and the schema registry read
+ * the schemas, so `cta.buttons` items are the `button` schema itself and
+ * `blog-head.tags` items the `blog-tag` schema.
  */
-const rootFieldSchema = {
-  $id: "http://schema.test/cta.schema.json",
+const cta = dsSchema("cta");
+const ctaField = {
+  ...cta,
+  properties: {
+    ...cta.properties,
+    buttons: { ...cta.properties.buttons, items: dsSchema("button") },
+  },
+};
+
+const blogHead = dsSchema("blog-head");
+const blogHeadField = {
+  ...blogHead,
+  properties: {
+    ...blogHead.properties,
+    tags: { ...blogHead.properties.tags, items: dsSchema("blog-tag") },
+  },
+};
+
+/** A content type schema holding the real `section.components` whitelist. */
+const section = dsSchema("section");
+const contentSchema = {
+  $id: "http://schema.mydesignsystem.com/blog-post.schema.json",
   type: "object",
   properties: {
-    headline: { type: "string" },
-    buttons: {
+    section: {
       type: "array",
       items: {
-        $id: "http://schema.test/button.schema.json",
-        type: "object",
+        ...section,
         properties: {
-          label: { type: "string" },
-          url: { type: "string" },
-        },
-      },
-    },
-    tags: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          label: { type: "string" },
+          ...section.properties,
+          components: {
+            ...section.properties.components,
+            items: {
+              anyOf: section.properties.components.items.anyOf.map(
+                ({ $ref }: { $ref: string }) => dsSchema(getSchemaName($ref))
+              ),
+            },
+          },
         },
       },
     },
@@ -623,21 +664,32 @@ const rootFieldSchema = {
 };
 
 describe("injectRootFieldComponentTypes — array item component names", () => {
-  it("names array items from the item schema $id, not the property", () => {
+  const standaloneComponents = collectStandaloneComponents(contentSchema);
+
+  it("names items of a standalone component after the item schema", () => {
+    // `cta.buttons` items are a `$ref` to `button.schema.json`, which the
+    // Storyblok config generator emits as the standalone `button` component.
     const result = injectRootFieldComponentTypes(
       { headline: "Headline", buttons: [{ label: "Go", url: "/go" }] },
-      rootFieldSchema
+      ctaField,
+      standaloneComponents
     );
 
+    expect(result.type).toBe("cta");
     expect(result.buttons[0].type).toBe("button");
   });
 
-  it("falls back to the property name when the item schema has no $id", () => {
+  it("names items of a nested bloks field after the property (real blog-head shape)", () => {
+    // `blog-head.tags` items are a `$ref` to `blog-tag.schema.json`, a schema
+    // the generator only emits as the property-named `tags` component — the
+    // space has no `blog-tag` component to point the whitelist at.
     const result = injectRootFieldComponentTypes(
-      { tags: [{ label: "One" }] },
-      rootFieldSchema
+      { tags: [{ entry: "One" }] },
+      blogHeadField,
+      standaloneComponents
     );
 
+    expect(result.type).toBe("blog-head");
     expect(result.tags[0].type).toBe("tags");
   });
 });

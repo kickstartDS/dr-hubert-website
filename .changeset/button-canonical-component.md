@@ -15,8 +15,11 @@ already exposed. The generated prop types follow: the item type is now
 hero/cta/video-curtain buttons.
 
 `injectRootFieldComponentTypes` now names array-of-objects items after the item
-schema's `$id` where there is one, falling back to the property name. With the
+schema's `$id` when that schema is one the Storyblok config generator emits as a
+standalone component, and after the property name otherwise — the same rule the
+generator applies (a nested bloks field like `blog-head.tags` is emitted as
+`tags`, not as the `blog-tag` schema it references). The set comes from the new
+`collectStandaloneComponents()`, derived from the content type schema. With the
 `$ref` above, root-field generation (`generate_root_field`) emits
 `component: "button"` for `cta.buttons` instead of `component: "buttons"`, which
-is what the schema-derived validation rules for that slot require. No runtime
-behaviour changes.
+is what the schema-derived validation rules for that slot require.
