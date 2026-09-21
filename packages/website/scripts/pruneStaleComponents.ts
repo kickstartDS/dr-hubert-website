@@ -72,14 +72,12 @@ async function main(): Promise<void> {
   // nothing. `update-storyblok-config` re-points the button presets at the
   // canonical component, so this only fires when that push was skipped.
   const presetComponentIds = new Set<number>();
-  for (let page = 1; ; page++) {
-    const res = await client.get(`spaces/${spaceId}/presets`, { page, per_page: 100 });
-    const batch = res.data.presets as Array<{ component_id?: number }>;
-    for (const preset of batch) {
-      if (preset.component_id) presetComponentIds.add(preset.component_id);
-    }
-    if (batch.length < 100) break;
-    await delay(200);
+  // The Management API returns every preset from this endpoint and ignores `page`/`per_page`, so
+  // paging it loops for ever on the same batch. syncPresetImages.js reads it the same way.
+  const presetsRes = await client.get(`spaces/${spaceId}/presets`);
+  const livePresets = (presetsRes.data?.presets || []) as Array<{ component_id?: number }>;
+  for (const preset of livePresets) {
+    if (preset.component_id) presetComponentIds.add(preset.component_id);
   }
 
   const deletable = clones.filter((component) => !presetComponentIds.has(component.id!));
