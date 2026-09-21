@@ -237,8 +237,9 @@ const main = async () => {
   const viewport = process.env.OMP_VISUAL_VIEWPORT
     ? parseViewport(process.env.OMP_VISUAL_VIEWPORT)
     : DEFAULT_VIEWPORT;
-  // A selector on the command line wins over the route's own state: it is the
-  // caller saying which panel of *this* route they want pictured.
+  // A selector on the command line replaces the route's own click hook: it is
+  // the caller saying which panel of *this* route they want pictured. The
+  // route's own hash state is not a click and stays as it is.
   const click = (process.env.OMP_VISUAL_CLICK || "").trim();
   const state = { ...ROUTE_STATES[route], ...(click ? { click } : {}) };
   const url = `http://${HOST}:${PORT}${route}${state?.hash ? `#${state.hash}` : ""}`;

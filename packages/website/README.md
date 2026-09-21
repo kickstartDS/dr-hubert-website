@@ -250,12 +250,12 @@ full page at 1440x900, and stops the server again. Nothing is written into the r
 nothing is compared: a page has no committed baseline, so the image is an illustration that the
 pull request shows as it is.
 
-| Variable               | Meaning                                     |
-| ---------------------- | ------------------------------------------- |
-| `OMP_VISUAL_ROUTE`     | the route to capture; empty means the site root |
-| `OMP_VISUAL_OUT`       | the directory the PNG is written into           |
-| `OMP_VISUAL_VIEWPORT`  | the viewport to capture at, `WIDTHxHEIGHT`; `1440x900` by default |
-| `OMP_VISUAL_CLICK`     | a selector clicked once the page's runtime is up, for state that only exists after an interaction |
+| Variable              | Meaning                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------- |
+| `OMP_VISUAL_ROUTE`    | the route to capture; empty means the site root                                                   |
+| `OMP_VISUAL_OUT`      | the directory the PNG is written into                                                             |
+| `OMP_VISUAL_VIEWPORT` | the viewport to capture at, `WIDTHxHEIGHT`; `1440x900` by default                                 |
+| `OMP_VISUAL_CLICK`    | a selector clicked once the page's runtime is up, for state that only exists after an interaction |
 
 The file is named after the route with the leading slash dropped and everything unsafe replaced:
 `/suche` becomes `suche.png`, `/` becomes `index.png`. One PNG is written per captured view. The
