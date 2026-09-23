@@ -5,7 +5,8 @@
  * uploads a changed screenshot must point the owning component at the URL it
  * just uploaded — not at the preset's previous CDN URL — so one run leaves the
  * component preview and the preset preview agreeing, and a second run over the
- * updated space writes nothing.
+ * updated space writes nothing. A run with nothing to upload must still repoint
+ * every component that trails its first live preset's image.
  *
  * The fixtures live in a temp directory the test chdirs into, because the
  * script reads its config and its screenshots relative to the working
@@ -21,7 +22,9 @@ const path = require("node:path");
 
 const SPACE_ID = "123456";
 const SCREENSHOTS = "img/screenshots";
-const CDN = "https://a.storyblok.com/f/1";
+// The Management API returns preset image URLs protocol-relative, which is the
+// shape the component-image fallback has to accept.
+const CDN = "//a.storyblok.com/f/1";
 
 // The header preset whose screenshot changed: the live preset and the component
 // both still carry the previous CDN URL, which is the state the reported run
@@ -31,6 +34,12 @@ const HEADER_UPLOADED_IMAGE = `${CDN}/layout-header--header.png`;
 // The header's other preset and the footer's preset did not change.
 const HEADER_MINIMAL_IMAGE = `${CDN}/layout-header--minimal.png`;
 const FOOTER_IMAGE = `${CDN}/layout-footer--footer.png`;
+// An older image a component may still be carrying, never fetched.
+const FOOTER_STALE_IMAGE = `${CDN}/layout-footer--footer-old.png`;
+
+// `hashRemote()` fetches a protocol-relative URL as `https:…`.
+const fetchUrl = (image) =>
+  image.startsWith("//") ? `https:${image}` : image;
 
 const localScreenshots = {
   "layout-header--header.png": Buffer.from("header screenshot with the new nav"),
@@ -39,11 +48,15 @@ const localScreenshots = {
 };
 
 const remoteScreenshots = {
-  [HEADER_STALE_IMAGE]: Buffer.from("header screenshot before the nav change"),
-  [HEADER_MINIMAL_IMAGE]: localScreenshots["layout-header--minimal.png"],
-  [FOOTER_IMAGE]: localScreenshots["layout-footer--footer.png"],
+  [fetchUrl(HEADER_STALE_IMAGE)]: Buffer.from(
+    "header screenshot before the nav change",
+  ),
+  [fetchUrl(HEADER_MINIMAL_IMAGE)]:
+    localScreenshots["layout-header--minimal.png"],
+  [fetchUrl(FOOTER_IMAGE)]: localScreenshots["layout-footer--footer.png"],
   // What run 1 uploads is served at the URL it wrote, so run 2 sees no change.
-  [HEADER_UPLOADED_IMAGE]: localScreenshots["layout-header--header.png"],
+  [fetchUrl(HEADER_UPLOADED_IMAGE)]:
+    localScreenshots["layout-header--header.png"],
 };
 
 // ---------------------------------------------------------------------------
@@ -232,4 +245,33 @@ test("a second run over the updated space writes nothing", async () => {
 
   assert.deepEqual(uploads, []);
   assert.deepEqual(writes(client), []);
+});
+
+test("a no-upload run repoints every component behind its preset", async () => {
+  // The presets are current, so this run uploads nothing — the reported
+  // `Updated 0 component images` state — while both components still carry
+  // older images.
+  space.headerPresetImage = HEADER_UPLOADED_IMAGE;
+  space.headerComponentImage = HEADER_STALE_IMAGE;
+  space.footerComponentImage = FOOTER_STALE_IMAGE;
+  writeConfig();
+
+  const client = createClient();
+  const { uploads, upload } = createUpload();
+
+  await sync({ client, uploadScreenshot: upload, fetchImpl: fetchScreenshot });
+
+  assert.deepEqual(uploads, []);
+  assert.deepEqual(writes(client), [
+    {
+      method: "put",
+      url: `spaces/${SPACE_ID}/components/100`,
+      body: { component: { image: HEADER_UPLOADED_IMAGE } },
+    },
+    {
+      method: "put",
+      url: `spaces/${SPACE_ID}/components/101`,
+      body: { component: { image: FOOTER_IMAGE } },
+    },
+  ]);
 });

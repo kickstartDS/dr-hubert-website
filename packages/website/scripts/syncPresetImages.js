@@ -426,11 +426,14 @@ const sync = async ({
     if (cdnUrl) componentImageMap.set(componentName, cdnUrl);
   }
   // Components whose screenshots did not change this run keep their live
-  // preset's image.
+  // preset's image. The Management API returns those URLs protocol-relative
+  // (`//a.storyblok.com/…`) as well as absolute, so accept both and reject a
+  // local screenshot path — the `lp.image &&` guard stays, because an empty
+  // image is not a local path either.
   for (const lp of livePresets) {
     const componentName = lp.preset?.component;
     if (!componentName || componentImageMap.has(componentName)) continue;
-    if (lp.image && lp.image.startsWith("http")) {
+    if (lp.image && !isLocalPath(lp.image)) {
       componentImageMap.set(componentName, lp.image);
     }
   }
