@@ -133,7 +133,22 @@ export default class SearchForm extends Component {
     this.$paginationLinkTemplate = this.$("[data-template=pagination-link]");
     this.$pagination = this.$(".dsa-pagination");
     this.$results = this.$(".dsa-search-form__results");
+    this.$nav = this.$(".dsa-search-form__nav");
     this.$moreButton = this.$(".c-button");
+
+    // `data-results-container` names an element the hits and their pagination
+    // are moved into, so a page can render them outside the form itself - e.g.
+    // on the default background while the form sits on an inverted one. The
+    // form keeps rendering into the same `this.$results` node after the move;
+    // without the attribute, or when the selector matches nothing, the hits
+    // stay where the template put them.
+    const resultsContainer = element.dataset.resultsContainer;
+    const $resultsContainer = resultsContainer
+      ? document.querySelector(resultsContainer)
+      : null;
+    if ($resultsContainer) {
+      $resultsContainer.append(this.$results, this.$nav);
+    }
 
     const subResultsLimit = parseNumber(element.dataset.maxSubresults, 3);
     this.resultsPerPage = parseNumber(element.dataset.resultsPerPage, 10);
