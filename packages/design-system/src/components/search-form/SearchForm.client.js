@@ -52,9 +52,13 @@ const renderPagination = (
   $pagination.removeAttribute("hidden");
 };
 
+const hideMoreButton = ($button) => {
+  $button.setAttribute("hidden", "hidden");
+};
+
 const renderMoreButton = ($button, totalResults, totalPages) => {
   if (totalPages < 2) {
-    $button.setAttribute("hidden", "hidden");
+    hideMoreButton($button);
     return;
   }
 
@@ -203,6 +207,7 @@ export default class SearchForm extends Component {
       this.onRadio("dsa.search.reset", () => {
         this.$results.textContent = "";
         this.$pagination.setAttribute("hidden", "");
+        hideMoreButton(this.$moreButton);
         this.state = {};
       });
       this.onRadio("dsa.search.search", async (_, { term, page = 0 }) => {
@@ -244,6 +249,7 @@ export default class SearchForm extends Component {
           }
         } else {
           // TODO: no results message
+          hideMoreButton(this.$moreButton);
         }
       });
       this.onRadio("dsa.search.goToPage", (_, page) => {
