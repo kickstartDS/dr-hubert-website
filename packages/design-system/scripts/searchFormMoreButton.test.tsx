@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import Providers from "../src/components/Providers";
 import { SearchForm } from "../src/components/search-form/SearchFormComponent";
 import SearchFormClient from "../src/components/search-form/SearchForm.client";
+import { pagefindResult2searchResult } from "../src/components/search-form/SearchFormPagefind.client";
 
 // More hits than fit on one page, so the form - rendered with an `action`, the
 // way the header's search modal renders it - shows the "view all results"
@@ -111,5 +112,86 @@ describe("SearchForm more button", () => {
 
     await search(noResultsTerm);
     expect(moreButton.hasAttribute("hidden")).toBe(true);
+  });
+});
+
+// A pagefind hit as `pagefindResult2searchResult` receives it: the crawled file
+// as `url`, the page's public address as `meta.url`, and one sub-result per
+// heading anchor. Pagefind builds the page's excerpt from its best-matching
+// region and the excerpt of the section holding that region from the same
+// region, so a section hit can repeat the page hit's text.
+const pagefindHit = (overrides) => ({
+  url: "/pagefind/produkte/a1500.html",
+  excerpt: "Der <mark>A1500</mark> ist ein Leistungsverstärker",
+  meta: { url: "/produkte/a1500", title: "A1500 - Amp up your process" },
+  sub_results: [],
+  ...overrides,
+});
+
+describe("pagefindResult2searchResult", () => {
+  test("hides a section hit repeating the page hit's excerpt", () => {
+    const mapped = pagefindResult2searchResult(
+      pagefindHit({
+        sub_results: [
+          {
+            url: "/pagefind/produkte/a1500.html#a1500-systeme",
+            title: "A1500-Systeme",
+            // The same text as the page's excerpt, highlighted elsewhere.
+            excerpt: "Der A1500 ist ein <mark>Leistungsverstärker</mark>",
+          },
+        ],
+      })
+    );
+
+    expect(mapped.subResults).toEqual([]);
+    // Only the repetition is hidden, the page-level hit itself stays.
+    expect(mapped.excerpt).toBe(
+      "Der <mark>A1500</mark> ist ein Leistungsverstärker"
+    );
+  });
+
+  test("keeps a section hit whose excerpt is its own", () => {
+    const mapped = pagefindResult2searchResult(
+      pagefindHit({
+        sub_results: [
+          {
+            url: "/pagefind/produkte/a1500.html#technische-daten",
+            title: "Technische Daten",
+            excerpt: "Leistung <mark>300 W</mark> an 4 Ohm",
+          },
+        ],
+      })
+    );
+
+    expect(mapped.subResults.map(({ title }) => title)).toEqual([
+      "Technische Daten",
+    ]);
+    expect(mapped.subResults[0].url).toBe(
+      "/produkte/a1500#technische-daten"
+    );
+  });
+
+  test("still hides the page's own root sub-result", () => {
+    const mapped = pagefindResult2searchResult(
+      pagefindHit({
+        sub_results: [
+          {
+            // Pagefind's root sub-result: the crawled file, titled like the page.
+            url: "/pagefind/produkte/a1500.html",
+            title: "A1500 - Amp up your process",
+            excerpt: "Der <mark>A1500</mark> ist ein Leistungsverstärker",
+          },
+          {
+            url: "/pagefind/produkte/a1500.html#technische-daten",
+            title: "Technische Daten",
+            excerpt: "Leistung <mark>300 W</mark> an 4 Ohm",
+          },
+        ],
+      })
+    );
+
+    expect(mapped.subResults.map(({ title }) => title)).toEqual([
+      "Technische Daten",
+    ]);
   });
 });
