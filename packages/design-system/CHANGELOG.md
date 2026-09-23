@@ -1,5 +1,152 @@
 # v2.2.1 (Fri Mar 06 2026)
 
+## 2.3.0
+
+### Minor Changes
+
+- bd6f437: Add component/semantic design-token catalog tooling: `extractComponentTokenCatalog`,
+  `extractSemanticTokenCatalog`, and `componentTokensToCss` helpers, wired into the build and copied
+  to `dist/tokens`. Also fixes `fontFamily` quoting in `tokensToCss`. Upstreamed from the optoma
+  project (generic, brand-neutral parts only).
+- 747d7c4: Add the Cosmos Token Graph feature (upstream Batch B). Introduces the new
+  `@kickstartds/token-graph` workspace package (interactive design-token graph built on
+  sigma.js / graphology) and wires its extraction into the design-system build: the `token-graph`
+  step generates `src/token/token-graph.json` and rollup ships it to `dist/tokens/`. This also
+  completes the token-graph build wiring deferred from Batch A (build step, `@kickstartds/token-graph`
+  workspace dependency, and rollup copy entry).
+- d152d3a: Upstream design-system component fixes (upstream Batch D). Ports 37 brand-neutral
+  component sources — `*.tsx`, `*.scss`, `*.schema.json`, prop types and client
+  behaviour — across blog-head, business-card, button, content-nav,
+  event-registration, feature, gallery, header, headline, hero, html, lightbox,
+  logos, search-filter, section, split-even, split-weighted and teaser-card, plus a
+  new `SeoComponent.tsx` and a new `Gallery.client.js`. New component tokens are
+  introduced for the gallery slider, lightbox stroke/thumb and teaser-card image,
+  and the `component-token-catalog.json` and `SectionProps.d.ts` artifacts are
+  regenerated deterministically (Button added to the section content union).
+
+  Brand-laden Storybook stories and the story-coupled Footer redesign were excluded
+  (see ADR-008); LFS visual snapshots/screenshots are regenerated in the canonical
+  CI environment rather than committed from a locally drifted run (see ADR-009).
+
+- 0cb6f22: Point the `buttons` array of `hero`, `cta` and `video-curtain` at the canonical
+  `button` schema (`$ref` to `button.schema.json`) instead of restating an inline
+  label+url subset.
+
+  The inline shape had no `$id`, so the Storyblok config generator resolved it to a
+  blok named after the property (`buttons`) rather than to the canonical `button`
+  component — which is why the hero's buttons lost the `icon` the button schema
+  already exposed. The generated prop types follow: the item type is now
+  `ButtonProps`, so `variant`, `size`, `disabled` and `type` become available on
+  hero/cta/video-curtain buttons.
+
+  `injectRootFieldComponentTypes` now names array-of-objects items after the item
+  schema's `$id` when that schema is one the Storyblok config generator emits as a
+  standalone component, and after the property name otherwise — the same rule the
+  generator applies (a nested bloks field like `blog-head.tags` is emitted as
+  `tags`, not as the `blog-tag` schema it references). The set comes from the new
+  `collectStandaloneComponents()`, derived from the content type schema. With the
+  `$ref` above, root-field generation (`generate_root_field`) emits
+  `component: "button"` for `cta.buttons` instead of `component: "buttons"`, which
+  is what the schema-derived validation rules for that slot require.
+
+- 22f6b00: Redesign the Footer component with grouped navigation columns, social links, and a legal bottom bar.
+
+  The footer now renders multi-column link groups (`navGroups`), an icon-driven social-links row (`socialLinks`, using icon identifiers from the icon sprite such as `facebook`, `twitter`, `linkedin`, `xing`), a `copyright` notice, and a `legalLink` in the bottom bar.
+
+  BREAKING CHANGE: the `byline` and `navItems` props were removed. Migrate `navItems` to `navGroups` (an array of `{ heading, items: [{ label, url, newTab }] }`), move any byline text into `copyright`, and configure social media links via `socialLinks` (`{ icon, url, ariaLabel }`).
+
+### Patch Changes
+
+- 720dafb: Upstream dependency patch updates (upstream Batch E). Adds two pnpm
+  `patchedDependencies` and extends a third, all brand-neutral upstream bugfixes:
+
+  - **`unpic@3.22.0`** — hardens the Storyblok image-URL filter parser
+    (`splitFilters`) to use a regex instead of naive `:`/`(` splitting, so filter
+    values containing those characters parse correctly.
+  - **`kickstartds@3.5.0--canary.62.324.0`** — makes the `storyblok-task` CLI
+    actually consume the rc config returned by `taskInit` (`schemaPaths`,
+    `layerOrder`, `configurationPath`, `templates`, `globals`, `components`).
+  - **`@kickstartds/jsonschema-utils@3.9.0`** — extends the existing patch so
+    `reduceSchemaAllOfs` preserves `title`, `description`, and `required` when
+    collapsing `allOf` subschemas.
+
+  Note: pnpm patches apply only within this monorepo's install and are not shipped
+  with published artifacts; this patch bump records the toolchain change for
+  release tracking. Design-system `build` green (presets 137).
+
+- 710cc15: Keep `Cta`'s content box padding on mobile. A CTA without the content-padding toggle
+  (`padding: false`, the schema default - and the state every CTA in the Storyblok space
+  renders in, because the CMS hides the field) zeroed the box at every container width. On
+  desktop that is invisible: the image takes one half and the flex gap in front of the text
+  insets it from the card edge. Below a 640px container the CTA stacks, the image is
+  full-bleed, and the headline, subheadline and button sat flush against the card edge - the
+  homepage slider CTAs on the website, for instance. The zeroing now only applies at and above
+  the 640px container width, and only when the CTA has an image; a text-only CTA keeps its
+  flush box, as before. Desktop is unchanged.
+- d137c7a: Honour the Storyblok multilink `target=_blank` toggle. The derived `newTab` flag is now
+  forwarded as `target="_blank" rel="noopener noreferrer"` by the nav (topbar, flyout,
+  dropdown), logo, footer column headings and legal link, blog teaser, event teasers, mosaic
+  tile buttons and business card. Blog teaser, teaser card and mosaic tile links also pass the
+  base Button's `href` prop again instead of `url`, so they render as anchors that can carry
+  the target instead of inert `<button>` elements.
+- db2d11a: Declare `content-nav`'s `image.src` with `format: "image"` instead of
+  `format: "uri"`. The Storyblok config generator derives the editor field type
+  from that keyword, so the field was emitted as a `multilink` (a link picker with
+  an asset option) even though what the CMS stores for it is asset-shaped — every
+  other image `src` in the design system already uses `format: "image"` and is
+  emitted as an `asset` field. The `links[].url` field is a real link and stays
+  `format: "uri"`.
+
+  The schema change alone does not change the editor: the live Storyblok space
+  keeps the `multilink` field until the merged CMS config is pushed
+  (`pnpm --filter website update-storyblok-config`, which needs the OAuth token),
+  so that generate → merge → push step and the content pass
+  (`migrate-content-nav-image`) are still outstanding. A field type flip does not
+  migrate stored content either, hence the same-run content pass.
+
+- a385526: Preview the Header and Footer as Dr. Hubert's header and footer.
+
+  The Header and Footer stories are the source of those two components' Storyblok preview images, so
+  they now carry the client's own content instead of the design system's placeholder: `static/logo.svg`
+  and `static/logo-inverted.svg` are byte copies of Dr. Hubert's Storyblok assets (space 303819, source
+  recorded in `src/themes/index.ts`), the Header story overrides `navItems` with the site's navigation,
+  and the Footer story carries the client's flat column navigation and copyright. The design system
+  still ships its own copy of the logo and carries no CMS reference.
+
+  `static/logo.svg` is shared with the Business Card and token-playground stories, so their snapshots
+  change with it; the schemas' own `examples` are untouched.
+
+- 448e256: Render `children` inside `NavFlyout`, so a consuming app can place its own content in the mobile
+  menu panel next to the navigation — e.g. the website's language switcher — without forking the
+  flyout markup. The children render after the nav list, inside the panel's `<nav>`.
+- 4c06710: Resolve React element `type` references to component display names when writing
+  `snippets.json`. Split-layout stories pass their slot content as JSX, so `type` was a
+  component object that `JSON.stringify` collapsed to `{}`; the Storyblok preset generator
+  could therefore not recover the child component. `dist/components/presets.json` now
+  carries the component names, letting presets be generated schema-clean.
+- 89794b4: Show an identical search hit only once. Pagefind builds a page's excerpt from
+  the region its best match sits in, and the excerpt of the section holding that
+  region from the same region, so the result list showed the same text twice: as
+  the non-indented page hit and again as one of its indented section hits. The
+  pagefind client now drops a sub-hit whose excerpt repeats the text of an
+  earlier hit of the same page, comparing the text a visitor sees - highlight
+  markup stripped, whitespace collapsed. A hit whose excerpt is its own stays
+  visible, and so does a section hit that only repeats a heading.
+- bfda446: Hide `SearchForm`'s "view all results" button whenever there are no hits to
+  show. The button, which carries the total hit count and is rendered when the
+  form has an `action` (as in the header's search modal), was only ever hidden by
+  the rendering that follows a successful search, so the last count stayed on
+  screen after the term was cleared - and after a term with no hits. Clearing the
+  input and closing the modal both reset the form, and both now drop the button
+  with the results.
+- 7683811: Let `SearchForm`'s client move its hits and pagination into the element named by an optional
+  `data-results-container` attribute on the form. A page that puts the form on an inverted
+  background can point the attribute at a container on the default one — the search page does
+  this so that only the headline and the form itself stay on the bold, inverted band while the
+  results render below it, aligned with the headline. The form keeps rendering into the same
+  result list after the move; without the attribute, or when the selector matches nothing, the
+  hits stay inline as before.
+
 #### 🐛 Bug Fix
 
 - Merge branch 'feature/storybook-10' [#64](https://github.com/kickstartDS/ds-agency-premium/pull/64) ([@julrich](https://github.com/julrich))
