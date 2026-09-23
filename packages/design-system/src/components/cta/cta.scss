@@ -26,7 +26,15 @@
     --dsa-cta__copy--font: var(--dsa-cta_highlight-text__copy--font, var(--ks-font-copy-l));
     --dsa-cta__headline--font: var(--dsa-cta_highlight-text__headline--font, var(--dsa-headline_h1--font));
   }
-  &.dsa-cta--no-padding .c-storytelling__box {
+  // Without the content-padding toggle the box carries no padding. On mobile a CTA that has an
+  // image stacks instead of sitting next to it, and the gap in front of the text is gone, so the
+  // box keeps its padding there; the mobile block below still drops the side facing the image.
+  &.dsa-cta--no-padding .c-storytelling__box:not(:only-child) {
+    @container storytelling (min-width: 640px) {
+      padding: 0;
+    }
+  }
+  &.dsa-cta--no-padding .c-storytelling__box:only-child {
     padding: 0;
   }
   &.dsa-cta--image-padding .c-storytelling__image {

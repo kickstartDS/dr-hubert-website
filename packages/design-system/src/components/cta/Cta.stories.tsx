@@ -245,6 +245,41 @@ export const ColoredBanner: Story = {
   }),
 };
 
+/**
+ * A CTA without the content-padding toggle, pictured at a mobile viewport. Below a 640px
+ * container the CTA stacks, the image goes full-bleed and the box keeps the content padding,
+ * so the headline, subheadline and button stay inset from the card edge. This is the state the
+ * website's homepage slider renders in: its CTA bloks carry an image and the CMS hides the
+ * `padding` field, so `padding` stays at its `false` default.
+ */
+export const MobileBanner: Story = {
+  parameters: {
+    viewport: {
+      width: 390,
+      height: 844,
+    },
+  },
+  args: pack({
+    headline: "Key headline for this section",
+    sub: "Subheading for additional context",
+    text: "This is placeholder text used to demonstrate layout, spacing, and typography within the component.",
+    backgroundImage: "img/bg_dot-carpet-blue.svg",
+    padding: false,
+    image: {
+      padding: false,
+      src: "img/placeholder/cta-product-shot.svg",
+      alt: "Over-Ear Headphones",
+    },
+    buttons: [
+      {
+        label: "Details",
+        url: "/shop",
+        icon: "chevron-right",
+      },
+    ],
+  }),
+};
+
 export const AlignBottom: Story = {
   parameters: {
     viewport: {
