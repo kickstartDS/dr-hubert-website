@@ -53,6 +53,7 @@
     "migrate-section-styles": "dotenvx run -f .env.local -- npx tsx scripts/migrateSectionStyles.ts",
     "restore-section-styles": "dotenvx run -f .env.local -- npx tsx scripts/restoreSectionStyles.ts",
     "migrate-product-hero-offset": "dotenvx run -f .env.local -- npx tsx scripts/migrateProductHeroOffset.ts",
+    "migrate-content-nav-image": "dotenvx run -f .env.local -- npx tsx scripts/migrateContentNavImage.ts",
     "prune-stale-components": "dotenvx run -f .env.local -- npx tsx scripts/pruneStaleComponents.ts",
     "backup-space": "dotenvx run -f .env.local -- bash scripts/backupSpace.sh",
     "merge-storyblok-config-reset": "dotenvx run -f .env.local -- npx tsx scripts/mergeStoryblokConfig.ts --reset",

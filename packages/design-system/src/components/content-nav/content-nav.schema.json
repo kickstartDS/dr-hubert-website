@@ -10,7 +10,7 @@
       "properties": {
         "src": {
           "type": "string",
-          "format": "uri",
+          "format": "image",
           "description": "URL of the image to display in the content nav."
         },
         "alt": {
