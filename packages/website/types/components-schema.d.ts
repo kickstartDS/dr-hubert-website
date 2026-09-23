@@ -186,7 +186,7 @@ export interface ContactLinksStoryblok {
 }
 
 export interface ContentNavStoryblok {
-  image_src?: MultilinkStoryblok;
+  image_src?: AssetStoryblok;
   image_alt?: string;
   topic?: string;
   links?: LinksStoryblok[];
@@ -269,6 +269,7 @@ export interface EventDetailStoryblok {
 
 export interface EventFilterStoryblok {
   datePicker_title?: string;
+  "datePicker_tab-50087a9b-6f30-4629-87da-47e23b84c095"?: unknown;
   "datePicker_tab-29f0b886-746f-440e-8de7-607c7bd9b89c"?: unknown;
   "datePicker_tab-ee3c01e0-0f51-40de-8183-cf0874db91fc"?: unknown;
   "datePicker_tab-321060e6-529c-4634-ae06-ce8739f0fcbd"?: unknown;
@@ -279,6 +280,8 @@ export interface EventFilterStoryblok {
   "datePicker_tab-0c1c1bd2-1359-48e5-873e-010dba14cfa7"?: unknown;
   "datePicker_tab-34d8e4f1-fd69-4c71-b06d-3eacaf43721b"?: unknown;
   "datePicker_tab-515c7a2f-86fd-43dc-bc5d-914c9cedeae8"?: unknown;
+  "datePicker_tab-35ee8cd4-67cb-4d7c-a4ef-67062d4991fd"?: unknown;
+  "datePicker_tab-50f712c3-1c71-4527-bd93-14f9723a44a6"?: unknown;
   "datePicker_tab-6ff9d1ca-40ec-4996-8354-5ab1adf84df0"?: unknown;
   "datePicker_tab-0b24e9b5-7cfd-4a11-9754-ad167753b70d"?: unknown;
   "datePicker_tab-457cf842-f1d9-4ab0-9680-d1bdf3c41402"?: unknown;
@@ -289,6 +292,7 @@ export interface EventFilterStoryblok {
   "datePicker_tab-c8e41d9a-332a-4252-b9c2-1b92a8de548d"?: unknown;
   "datePicker_tab-e28d6adf-c7dd-424a-b2d6-130ee7f06427"?: unknown;
   "datePicker_tab-91ab33c8-a983-4bf8-b364-9fe8d4acebaa"?: unknown;
+  "datePicker_tab-18053c58-3fc7-4261-b636-711f7766decb"?: unknown;
   datePicker_toggle: boolean;
   categories_title?: string;
   categories_categoryCheckboxes?: CategoryCheckboxesStoryblok[];
