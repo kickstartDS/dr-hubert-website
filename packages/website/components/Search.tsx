@@ -22,9 +22,9 @@ const Search: React.FC<PageProps> = ({ blok }) => {
 
     return (
       <main {...storyblokEditable(blok)}>
-        {/* The search sits on the bold (brand blue) background with inverted
-            colours, the same treatment the imprint page gives its headline
-            section. */}
+        {/* Only the headline and the search form sit on the bold (brand blue)
+            background with inverted colours, the same treatment the imprint
+            page gives its headline section. */}
         <Section
           backgroundColor="bold"
           inverted
@@ -36,7 +36,24 @@ const Search: React.FC<PageProps> = ({ blok }) => {
         >
           {/* @ts-expect-error */}
           {headline && <Headline {...unflatten(headline)} />}
-          <SearchForm component="dsa.search-form.pagefind" />
+          {/* The hits and their pagination leave the form through
+              `data-results-container`, so they render on the default
+              background instead of the inverted one. */}
+          <SearchForm
+            component="dsa.search-form.pagefind"
+            data-results-container="#dsa-search-results"
+          />
+        </Section>
+        {/* Same width and gutter as the band, so the hits stay in the
+            headline's content column. */}
+        <Section
+          content={{
+            mode: "list",
+            gutter: "none",
+          }}
+          spaceBefore="small"
+        >
+          <div id="dsa-search-results" />
         </Section>
       </main>
     );
