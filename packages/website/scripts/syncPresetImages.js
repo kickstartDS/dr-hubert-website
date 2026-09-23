@@ -7,6 +7,9 @@
  *   3. Fetches existing presets from the Storyblok space
  *   4. Uploads changed screenshots to a "Component Screenshots" asset folder
  *   5. Updates each preset's `image` field via the Management API
+ *   6. Points each component's preview image at the screenshot this run
+ *      uploaded, falling back to its live preset's image when nothing changed
+ *      — so one run leaves the component preview and the preset preview agreeing
  *
  * Exits non-zero when a referenced screenshot is missing from the built design
  * system (before any Storyblok call) or when a preset that needs a preview ends
@@ -52,30 +55,33 @@ const promiseThrottle = new PromiseThrottle({
 
 // ---------------------------------------------------------------------------
 // Storyblok API helpers
+//
+// Every helper takes the client explicitly so `sync()` can run against a stub;
+// the CLI entry point uses the module's client.
 // ---------------------------------------------------------------------------
 
-const fetchAllPresets = async () => {
-  const res = await Storyblok.get(`spaces/${SPACE_ID}/presets`);
+const fetchAllPresets = async (client) => {
+  const res = await client.get(`spaces/${SPACE_ID}/presets`);
   return res.data?.presets || [];
 };
 
-const fetchAllComponents = async () => {
-  const res = await Storyblok.get(`spaces/${SPACE_ID}/components`);
+const fetchAllComponents = async (client) => {
+  const res = await client.get(`spaces/${SPACE_ID}/components`);
   return res.data?.components || [];
 };
 
-const updatePreset = async (presetId, fields) =>
-  Storyblok.put(`spaces/${SPACE_ID}/presets/${presetId}`, {
+const updatePreset = async (client, presetId, fields) =>
+  client.put(`spaces/${SPACE_ID}/presets/${presetId}`, {
     preset: fields,
   });
 
-const updateComponent = async (componentId, fields) =>
-  Storyblok.put(`spaces/${SPACE_ID}/components/${componentId}`, {
+const updateComponent = async (client, componentId, fields) =>
+  client.put(`spaces/${SPACE_ID}/components/${componentId}`, {
     component: fields,
   });
 
-const getOrCreateFolder = async (folderName) =>
-  getOrCreateAssetFolder(Storyblok, SPACE_ID, folderName);
+const getOrCreateFolder = async (client, folderName) =>
+  getOrCreateAssetFolder(client, SPACE_ID, folderName);
 
 // ---------------------------------------------------------------------------
 // Screenshot change detection
@@ -98,9 +104,11 @@ const hashFile = (filePath) =>
     ? crypto.createHash("sha1").update(fs.readFileSync(filePath)).digest("hex")
     : null;
 
-const hashRemote = async (url) => {
+const hashRemote = async (url, fetchImpl) => {
   try {
-    const response = await fetch(url.startsWith("//") ? `https:${url}` : url);
+    const response = await fetchImpl(
+      url.startsWith("//") ? `https:${url}` : url,
+    );
     if (!response.ok) return null;
     const buffer = Buffer.from(await response.arrayBuffer());
     return crypto.createHash("sha1").update(buffer).digest("hex");
@@ -114,7 +122,7 @@ const hashRemote = async (url) => {
  * when the live image no longer matches the local screenshot. Comparing hashes
  * keeps re-runs (and unrelated updates) from re-uploading unchanged images.
  */
-const screenshotChanged = async (localImage, liveImage) => {
+const screenshotChanged = async (localImage, liveImage, fetchImpl) => {
   const isRemote =
     liveImage && (liveImage.startsWith("http") || liveImage.startsWith("//"));
   if (!isRemote) return true;
@@ -125,7 +133,7 @@ const screenshotChanged = async (localImage, liveImage) => {
     return false;
   }
 
-  const remoteHash = await hashRemote(liveImage);
+  const remoteHash = await hashRemote(liveImage, fetchImpl);
   return remoteHash !== localHash;
 };
 
@@ -133,7 +141,11 @@ const screenshotChanged = async (localImage, liveImage) => {
 // Main sync logic
 // ---------------------------------------------------------------------------
 
-const sync = async () => {
+const sync = async ({
+  client = Storyblok,
+  uploadScreenshot = signedUpload,
+  fetchImpl = fetch,
+} = {}) => {
   // 1. Read merged presets
   const mergedDir = path.join("cms", "merged", "components", SPACE_ID);
   const presetsPath = path.join(mergedDir, "presets.json");
@@ -200,11 +212,11 @@ const sync = async () => {
 
   // 3. Fetch live presets and components from Storyblok
   console.log("Fetching live presets from Storyblok...");
-  const livePresets = await fetchAllPresets();
+  const livePresets = await fetchAllPresets(client);
   console.log(`  Found ${livePresets.length} live presets`);
 
   console.log("Fetching live components from Storyblok...");
-  const liveComponents = await fetchAllComponents();
+  const liveComponents = await fetchAllComponents(client);
   console.log(`  Found ${liveComponents.length} live components`);
 
   // Build live preset lookup by name+component
@@ -236,7 +248,10 @@ const sync = async () => {
 
     // Check if the screenshot image needs uploading
     const localImage = generatedScreenshots.get(key) ?? local.image ?? "";
-    if (isLocalPath(localImage) && (await screenshotChanged(localImage, live.image))) {
+    if (
+      isLocalPath(localImage) &&
+      (await screenshotChanged(localImage, live.image, fetchImpl))
+    ) {
       needsUpload.push({ local, live, localImage });
     }
   }
@@ -248,7 +263,10 @@ const sync = async () => {
   // 5. Ensure asset folders exist
   if (needsUpload.length > 0) {
     console.log("\nEnsuring asset folders...");
-    screenshotFolderId = await getOrCreateFolder(SCREENSHOT_FOLDER_NAME);
+    screenshotFolderId = await getOrCreateFolder(
+      client,
+      SCREENSHOT_FOLDER_NAME,
+    );
     console.log(`  ${SCREENSHOT_FOLDER_NAME}: folder ${screenshotFolderId}`);
   }
 
@@ -265,9 +283,9 @@ const sync = async () => {
     // Upload (or reuse cached URL)
     if (!imageCache.has(localImage)) {
       const result = await promiseThrottle.add(
-        signedUpload.bind(
+        uploadScreenshot.bind(
           null,
-          Storyblok,
+          client,
           SPACE_ID,
           localImage,
           screenshotFolderId,
@@ -285,7 +303,7 @@ const sync = async () => {
 
     // Update the preset's image in Storyblok
     await promiseThrottle.add(
-      updatePreset.bind(null, live.id, { image: cdnUrl }),
+      updatePreset.bind(null, client, live.id, { image: cdnUrl }),
     );
     uploaded++;
     console.log(" ✓");
@@ -309,7 +327,10 @@ const sync = async () => {
 
   if (contentImages.length > 0) {
     if (!demoContentFolderId) {
-      demoContentFolderId = await getOrCreateFolder(DEMO_CONTENT_FOLDER_NAME);
+      demoContentFolderId = await getOrCreateFolder(
+        client,
+        DEMO_CONTENT_FOLDER_NAME,
+      );
     }
 
     const uniqueContentImages = [
@@ -326,9 +347,9 @@ const sync = async () => {
       );
       if (!imageCache.has(imagePath)) {
         const result = await promiseThrottle.add(
-          signedUpload.bind(
+          uploadScreenshot.bind(
             null,
-            Storyblok,
+            client,
             SPACE_ID,
             imagePath,
             demoContentFolderId,
@@ -372,7 +393,7 @@ const sync = async () => {
       });
 
       await promiseThrottle.add(
-        updatePreset.bind(null, live.id, { preset: updatedPreset }),
+        updatePreset.bind(null, client, live.id, { preset: updatedPreset }),
       );
       contentUpdated++;
     }
@@ -382,28 +403,36 @@ const sync = async () => {
     }
   }
 
-  // 8. Sync component images (set each component's image to its first preset screenshot)
+  // 8. Sync component images (set each component's image to its preset screenshot)
   console.log("\nSyncing component preview images...");
   const liveComponentsByName = new Map();
   for (const comp of liveComponents) {
     liveComponentsByName.set(comp.name, comp);
   }
 
-  // Build a map: componentName → first preset screenshot CDN URL
+  // Build a map: componentName → preset screenshot CDN URL.
+  //
+  // This run's uploads come first: `livePresets` is the snapshot fetched before
+  // any upload, so a component whose screenshot changed in this run would
+  // otherwise be claimed with the preset's *previous* CDN URL — and the write
+  // below would then skip it as already current, leaving the component preview
+  // one run behind the preset preview.
   const componentImageMap = new Map();
+  for (const { local, localImage } of needsUpload) {
+    const componentName = local.preset?.component;
+    if (!componentName || componentImageMap.has(componentName)) continue;
+    // `localImage` is the key the upload stored the URL under (step 6).
+    const cdnUrl = imageCache.get(localImage);
+    if (cdnUrl) componentImageMap.set(componentName, cdnUrl);
+  }
+  // Components whose screenshots did not change this run keep their live
+  // preset's image.
   for (const lp of livePresets) {
     const componentName = lp.preset?.component;
     if (!componentName || componentImageMap.has(componentName)) continue;
     if (lp.image && lp.image.startsWith("http")) {
       componentImageMap.set(componentName, lp.image);
     }
-  }
-  // Also check freshly-uploaded screenshots from this run
-  for (const { local } of needsUpload) {
-    const componentName = local.preset?.component;
-    if (!componentName || componentImageMap.has(componentName)) continue;
-    const cdnUrl = imageCache.get(local.image);
-    if (cdnUrl) componentImageMap.set(componentName, cdnUrl);
   }
 
   let componentImagesUpdated = 0;
@@ -420,7 +449,7 @@ const sync = async () => {
       `  [${i + 1}/${componentEntries.length}] ${componentName}...`,
     );
     await promiseThrottle.add(
-      updateComponent.bind(null, comp.id, { image: imageUrl }),
+      updateComponent.bind(null, client, comp.id, { image: imageUrl }),
     );
     componentImagesUpdated++;
     console.log(" ✓");
@@ -449,9 +478,13 @@ const sync = async () => {
   console.log("Done!");
 };
 
-sync()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("Sync failed:", err);
-    process.exit(1);
-  });
+if (require.main === module) {
+  sync()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Sync failed:", err);
+      process.exit(1);
+    });
+}
+
+module.exports = { sync };

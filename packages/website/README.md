@@ -148,8 +148,11 @@ that still exist, and takes the regenerated body. The generated body must keep t
 because the CLI pushes the preset record verbatim: a local `img/screenshots/…` path would break the
 preset previews. `update-storyblok-config` therefore runs `sync-preset-images` after
 `push-components`: it uploads screenshots that changed and points the live presets at the new CDN
-URLs (the local screenshot path is read from the generated config). It has to run after the push —
-the push writes the merged presets verbatim, so a sync before it would be overwritten.
+URLs (the local screenshot path is read from the generated config). The same run points each owning
+component's preview `image` at the screenshot it uploaded — a component whose screenshot did not
+change keeps its preset's live CDN URL — so one run leaves the component preview and the preset
+preview agreeing, with no second run needed. It has to run after the push — the push writes the
+merged presets verbatim, so a sync before it would be overwritten.
 
 `sync-preset-images` fails loudly instead of finishing silently. Before it touches the API it checks
 that every screenshot referenced by the generated presets exists under
