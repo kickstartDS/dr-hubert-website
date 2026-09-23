@@ -84,9 +84,8 @@ export default function App({
   const isPreview = router.pathname.startsWith("/_preview");
 
   // In preview mode, get live story updates from the Storyblok Visual Editor bridge.
-  // This ensures hero extraction below always operates on the latest data,
-  // preventing a stale hero from appearing above the breadcrumb while
-  // the page component renders the updated hero again below it.
+  // The extracted hero section and the page component below both render from this
+  // story, so both follow the editor's latest draft data.
   const liveStory = useStoryblokState(pageProps.story ?? null, {
     resolveRelations: resolvableRelations.join(","),
   });
@@ -262,7 +261,6 @@ export default function App({
                           }}
                         />
                       )}
-                      {heroSection && <StoryblokComponent blok={heroSection} />}
                       {!hideBreadcrumbs &&
                         breadcrumbItems &&
                         breadcrumbItems.length > 1 && (
@@ -291,6 +289,9 @@ export default function App({
                             />
                           </Section>
                         )}
+                      {/* The leading hero was extracted above so that it renders here, below
+                          the breadcrumb: the trail always sits directly under the header. */}
+                      {heroSection && <StoryblokComponent blok={heroSection} />}
                       <Component {...newPageProps} />
                       {footerProps && (
                         <Footer

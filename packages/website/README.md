@@ -93,7 +93,7 @@ LanguageProvider → BlurHashProvider → DsaProviders → ComponentProviders �
 
 - **ISR (Incremental Static Regeneration)** with Storyblok webhook-triggered revalidation
 - **Storyblok Visual Editor** with live preview via `editable()` HOC
-- **Hero section extraction** — detects hero components and renders them before the breadcrumb for full-width layouts
+- **Hero section extraction** — detects a hero starting the page and renders it outside the page's `<main>`, below the breadcrumb trail
 - **BlurHash image placeholders** — pre-generated for all images
 - **Breadcrumb with JSON-LD** — auto-generated from URL path segments with Schema.org structured data
 - **Markdown endpoint** — every page is also available as Markdown (via middleware that rewrites `.md` URLs)
