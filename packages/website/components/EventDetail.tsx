@@ -27,12 +27,22 @@ const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
       download,
     } = blok;
 
+    const hasLocations = locations !== undefined && locations.length > 0;
+    const hasDescription = description !== undefined && description.length > 0;
+    const hasImages = images !== undefined && images.length > 0;
+    const hasDownloads = download !== undefined && download.length > 0;
+    const hasFollowingSection =
+      hasLocations || hasDescription || hasImages || hasDownloads;
+
     return (
       <main {...storyblokEditable(blok)} {...pagefindAttributes(pagefindUrl)}>
-        <Section width="narrow" spaceAfter="none">
+        <Section
+          width="narrow"
+          spaceAfter={hasFollowingSection ? "none" : "default"}
+        >
           <EventHeader title={title} categories={categories} intro={intro} />
         </Section>
-        {locations && locations.length > 0 && (
+        {hasLocations && (
           <Section width="default" content={{ mode: "list", gutter: "none" }}>
             <Headline
               text="Locations"
@@ -45,12 +55,12 @@ const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
             ))}
           </Section>
         )}
-        {description && (
+        {hasDescription && (
           <Section width="narrow" spaceBefore="none">
             <RichText className="dsa-event__description" text={description} />
           </Section>
         )}
-        {images && images.length > 0 && (
+        {hasImages && (
           <Section spaceBefore="none">
             <Gallery
               images={images}
@@ -60,7 +70,7 @@ const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
             />
           </Section>
         )}
-        {download && download.length > 0 && (
+        {hasDownloads && (
           <Section
             width="narrow"
             spaceBefore="none"
@@ -68,7 +78,6 @@ const EventDetail: React.FC<PageProps> = ({ blok, pagefindUrl }) => {
               mode: "list",
               gutter: "none",
             }}
-            spaceAfter="none"
           >
             <Headline text="Downloads" level="h3" style="h3" />
             <Downloads download={download} />
