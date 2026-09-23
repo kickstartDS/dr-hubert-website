@@ -58,7 +58,8 @@ const SETTLE_TIMEOUT_MS = 10_000;
  * `[data-topic="dsa.search-modal.open"]` on the header's search button.
  *
  * The terms are page names the site itself carries (`/kontakt`, `/en/contact`), so Pagefind has
- * something to match and the capture shows results instead of the empty form.
+ * something to match; the capture fails when a term returns no hits instead of writing a picture
+ * of an empty result list.
  */
 const ROUTE_STATES = {
   "/suche": { hash: "q=Kontakt" },
@@ -158,6 +159,27 @@ const waitForHashState = async (page, hash) => {
 };
 
 /**
+ * Proof that Pagefind answered with hits. `SearchForm.renderResults()` appends one `li` per
+ * result into `ol.dsa-search-form__results` and leaves it empty for a term that matches nothing,
+ * so a term without hits would still capture the search state — just with an empty result list.
+ * The capture fails instead of writing a picture of an empty search.
+ */
+const waitForSearchResults = async (page, hash) => {
+  const term = new URLSearchParams(hash).get("q");
+  try {
+    await page.waitForFunction(
+      () => document.querySelectorAll(".dsa-search-form__results > li").length > 0,
+      undefined,
+      { timeout: NAVIGATION_TIMEOUT_MS }
+    );
+  } catch {
+    throw new Error(
+      `Pagefind returned no hits for "${term}", so the captured search would be empty`
+    );
+  }
+};
+
+/**
  * Full-page shots leave everything below the fold blank unless the lazy images are started and
  * awaited first — the settling step of the design system's own screenshot hook. `error`
  * resolves as well, so an image that fails to load cannot stall the capture.
@@ -207,7 +229,10 @@ const capture = async (url, state, outDir, route, viewport) => {
     await page.evaluate(() => document.fonts.ready);
     await waitForRuntime(page);
     if (state?.click) await page.click(state.click, { timeout: NAVIGATION_TIMEOUT_MS });
-    if (state?.hash) await waitForHashState(page, state.hash);
+    if (state?.hash) {
+      await waitForHashState(page, state.hash);
+      await waitForSearchResults(page, state.hash);
+    }
     await settleImages(page);
 
     const shot = path.join(outDir, fileNameFor(route));
@@ -224,11 +249,6 @@ const capture = async (url, state, outDir, route, viewport) => {
 const main = async () => {
   const outDir = process.env.OMP_VISUAL_OUT;
   if (!outDir) fail("OMP_VISUAL_OUT is not set");
-  if (!process.env.NEXT_STORYBLOK_API_TOKEN) {
-    fail(
-      "NEXT_STORYBLOK_API_TOKEN is not set; the site cannot be built, so there is nothing to picture"
-    );
-  }
   if (!fs.existsSync(path.join(packageRoot, ".next/BUILD_ID"))) {
     fail("there is no site build in .next; `npm run capture-site` builds it first");
   }
@@ -246,6 +266,12 @@ const main = async () => {
   fs.mkdirSync(outDir, { recursive: true });
 
   await assertPortFree();
+  // `output: "standalone"` (next.config.js) makes `next start` warn on the pinned Next 13.5.6
+  // and fail outright from Next 14. The replacement is the standalone server the Dockerfile
+  // runs — `node .next/standalone/packages/website/server.js` (outputFileTracingRoot is the
+  // monorepo root, so the standalone tree mirrors the repo), with `.next/static` and `public`
+  // copied beside it (the Pagefind index lives in `public/pagefind`) and PORT/HOSTNAME set.
+  // The switch has to be exercised in a publish run: no other environment can build the site.
   server = spawn("next", ["start", "-p", String(PORT), "-H", HOST], {
     cwd: packageRoot,
     detached: true,

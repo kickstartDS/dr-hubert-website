@@ -219,11 +219,47 @@ Commit the updated files in `__snapshots__/` and `static/img/screenshots/` (trac
 
 `pnpm run test` in `packages/design-system` is the render smoke test: it builds and serves Storybook, runs every story and fails on render errors. It does not compare images — visual regression stays with the Chromatic CI job, which renders in a canonical environment.
 
+### A component thumbnail is its story
+
+The preset `image` is the story screenshot (`img/screenshots/<story-id>.png` from
+`capture-previews`), so a component preview can only show what its story renders. A story that
+spreads the schema args renders the design system's demo content — the schema's `examples` and the
+`Systemics` logo — and a component story carries no space content, so such a preview never
+resembles this site. A component whose preview should look like the client's own therefore carries
+that content in its story:
+
+- **Logo.** `packages/design-system/static/logo.svg` and `logo-inverted.svg` are byte copies of
+  Dr. Hubert's own Storyblok assets (`logo-hubert.svg` / `logo-hubert-inverted.svg`, space
+  `303819`); the source URLs are recorded in `src/themes/index.ts`. Keep the file names — the
+  design system stays stand-alone (no CMS reference in code), and `sync-preset-images` only
+  recognises the literal `/logo.svg` among preset args when it uploads the content images.
+  `static/logo.svg` is shared: the `Layout/Header` and `Layout/Footer` stories are the ones this
+  issue was about, but the three `Corporate/Business Card` stories and the
+  `Token/Playground → Spacing` story render it too, so replacing the asset refreshes those
+  previews as well.
+- **Navigation.** `Header.stories.tsx` overrides `navItems` and `Footer.stories.tsx` its
+  `navGroups`; the schema `examples` in `nav-main.schema.json` stay the component's published demo.
+- **Per-page states** (`inverted`, `floating`), the search field and the language switcher live in
+  the website's providers and are not part of a thumbnail: a preview is a representative
+  rendering of the component, not a capture of a route of the site.
+
+The path that refreshes a preview is therefore: edit the story (or the shared asset) → run
+`capture-previews` → commit `__snapshots__/` and `static/img/screenshots/` → build → re-install →
+run the credentialed `update-storyblok-config` (see [CMS Sync Commands](#cms-sync-commands)). No
+asset is uploaded by hand, and nothing in Storyblok changes before that credentialed run. The
+re-install is not optional: `injectWorkspacePackages` copies the package into `node_modules`, and
+the build starts with `rm -rf dist`, so until the install re-injects it both the preset generator
+and `sync-preset-images` keep reading the previously injected screenshots and preset bodies.
+
 ### Update previews in Storyblok
 
 ```bash
-pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter run update-previews
+pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter run update-storyblok-config
 ```
+
+The credentialed, operator-run step: it pushes the merged config and then `sync-preset-images`
+uploads the changed screenshots and the `/logo.svg` referenced by preset args, and repoints the
+presets and their components at the uploaded assets.
 
 ## Capturing a Page for a Pull Request
 
@@ -263,15 +299,21 @@ command exits non-zero with a message on stderr when nothing could be captured �
 reports that as "no illustration" instead of failing the run.
 
 `NEXT_STORYBLOK_API_TOKEN` has to be in the environment (or in the local env file): without it
-`next build` cannot fetch a single route. The browser comes from the workspace's `playwright`,
-which the design system declares — the website does not carry a second declaration of it.
+`next build` cannot fetch a single route. `checkBuildToken.js` runs before the build in the
+`capture-site` chain and fails with that message, so a missing token never surfaces as Next's own
+build error. The browser comes from the website's own `playwright` dependency.
 
 A route whose changed state only exists after an interaction is reached through the hook the page
 declares itself, never through a URL parameter invented for the capture: `/suche` and
 `/en/search` use the search form's own `#q=<term>` hash, the mechanism `SearchForm` wires to
-`hashchange`, and a panel is reached by clicking the element the page marks as its trigger, e.g.
-`[data-topic="dsa.search-modal.open"]` in the header. A hook that never materialises fails the
-command rather than writing a picture of the wrong state.
+`hashchange`. A hook that never materialises fails the command rather than writing a picture of
+the wrong state.
+
+The search terms are the site's own page names — `Kontakt` for `/suche`, `Contact` for
+`/en/search` (`/kontakt`, `/en/contact` in `helpers/i18n.ts`) — and the capture asserts Pagefind
+returned at least one result for the term. A term that stops matching fails the command with the
+term named, instead of writing a picture of an empty result list; pick a new term from the page's
+content and put it in `SEARCH_TERMS` when the site's copy or the Pagefind index changes.
 
 The header's mobile menu is the case `OMP_VISUAL_VIEWPORT` and `OMP_VISUAL_CLICK` exist for: it
 only exists below `62rem`, and it only shows once its own toggle is clicked.

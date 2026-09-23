@@ -416,6 +416,16 @@ export async function fetchStories(
 }
 
 export async function fetchPaths() {
+  // Without an access token `initStoryblok` does not load the apiPlugin, so
+  // `getStoryblokApi()` is undefined and every `getStaticPaths` fails. CI and
+  // preview builds run without credentials — build an empty route set instead.
+  if (!process.env.NEXT_STORYBLOK_API_TOKEN) {
+    console.warn(
+      "⚠️  fetchPaths: skipping — missing NEXT_STORYBLOK_API_TOKEN"
+    );
+    return [];
+  }
+
   const { data } = await fetchStories();
   return data.stories
     .filter((story) => story.content.component !== "settings")
