@@ -219,11 +219,47 @@ Commit the updated files in `__snapshots__/` and `static/img/screenshots/` (trac
 
 `pnpm run test` in `packages/design-system` is the render smoke test: it builds and serves Storybook, runs every story and fails on render errors. It does not compare images — visual regression stays with the Chromatic CI job, which renders in a canonical environment.
 
+### A component thumbnail is its story
+
+The preset `image` is the story screenshot (`img/screenshots/<story-id>.png` from
+`capture-previews`), so a component preview can only show what its story renders. A story that
+spreads the schema args renders the design system's demo content — the schema's `examples` and the
+`Systemics` logo — and a component story carries no space content, so such a preview never
+resembles this site. A component whose preview should look like the client's own therefore carries
+that content in its story:
+
+- **Logo.** `packages/design-system/static/logo.svg` and `logo-inverted.svg` are byte copies of
+  Dr. Hubert's own Storyblok assets (`logo-hubert.svg` / `logo-hubert-inverted.svg`, space
+  `303819`); the source URLs are recorded in `src/themes/index.ts`. Keep the file names — the
+  design system stays stand-alone (no CMS reference in code), and `sync-preset-images` only
+  recognises the literal `/logo.svg` among preset args when it uploads the content images.
+  `static/logo.svg` is shared: the `Layout/Header` and `Layout/Footer` stories are the ones this
+  issue was about, but the three `Corporate/Business Card` stories and the
+  `Token/Playground → Spacing` story render it too, so replacing the asset refreshes those
+  previews as well.
+- **Navigation.** `Header.stories.tsx` overrides `navItems` and `Footer.stories.tsx` its
+  `navGroups`; the schema `examples` in `nav-main.schema.json` stay the component's published demo.
+- **Per-page states** (`inverted`, `floating`), the search field and the language switcher live in
+  the website's providers and are not part of a thumbnail: a preview is a representative
+  rendering of the component, not a capture of a route of the site.
+
+The path that refreshes a preview is therefore: edit the story (or the shared asset) → run
+`capture-previews` → commit `__snapshots__/` and `static/img/screenshots/` → build → re-install →
+run the credentialed `update-storyblok-config` (see [CMS Sync Commands](#cms-sync-commands)). No
+asset is uploaded by hand, and nothing in Storyblok changes before that credentialed run. The
+re-install is not optional: `injectWorkspacePackages` copies the package into `node_modules`, and
+the build starts with `rm -rf dist`, so until the install re-injects it both the preset generator
+and `sync-preset-images` keep reading the previously injected screenshots and preset bodies.
+
 ### Update previews in Storyblok
 
 ```bash
-pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter run update-previews
+pnpm --filter @kickstartds/ruhmesmeile-storyblok-starter run update-storyblok-config
 ```
+
+The credentialed, operator-run step: it pushes the merged config and then `sync-preset-images`
+uploads the changed screenshots and the `/logo.svg` referenced by preset args, and repoints the
+presets and their components at the uploaded assets.
 
 ## Capturing a Page for a Pull Request
 
