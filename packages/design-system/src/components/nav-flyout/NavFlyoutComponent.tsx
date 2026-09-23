@@ -29,7 +29,7 @@ type NavFlyoutItem = Omit<
 export const NavFlyoutContextDefault = forwardRef<
   HTMLElement,
   NavFlyoutProps & HTMLAttributes<HTMLElement>
->(({ items, inverted }, ref) => {
+>(({ items, inverted, children }, ref) => {
   const itemsWithNewTab = items as NavFlyoutItem[];
 
   return itemsWithNewTab && itemsWithNewTab.length > 0 ? (
@@ -96,6 +96,10 @@ export const NavFlyoutContextDefault = forwardRef<
           }
         )}
       </ul>
+      {/* Content the consuming app places in the panel itself, next to the
+          navigation - e.g. a language switcher. Rendered after the list so a
+          child that wants to sit above it can use flex `order` on the panel. */}
+      {children}
     </nav>
   ) : null;
 });

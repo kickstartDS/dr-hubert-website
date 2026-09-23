@@ -12,6 +12,9 @@
  *
  *   OMP_VISUAL_ROUTE  the route to capture; empty means the site root
  *   OMP_VISUAL_OUT    the directory the PNG is written into
+ *   OMP_VISUAL_VIEWPORT  the viewport to capture at, `WIDTHxHEIGHT`; 1440x900 by default
+ *   OMP_VISUAL_CLICK  a selector clicked once the page's runtime is up, for state that only
+ *                     exists after an interaction — e.g. `.dsa-nav-toggle` for the mobile menu
  *
  * Exits non-zero with a message on stderr when nothing could be captured — the automation reads
  * that as "no illustration" and says so in the pull request instead of failing the run.
@@ -37,7 +40,8 @@ const { chromium } = require("playwright");
 /** The server this command owns; 3210 is unused by every other script in the repository. */
 const HOST = "127.0.0.1";
 const PORT = 3210;
-const VIEWPORT = { width: 1440, height: 900 };
+/** The desktop viewport a capture uses unless `OMP_VISUAL_VIEWPORT` asks for another one. */
+const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 
 /** A navigation, the started server answering, and the page's images settling. */
 const NAVIGATION_TIMEOUT_MS = 30_000;
@@ -72,6 +76,13 @@ const fail = (reason) => {
 /** The automation's own naming rule: `/suche` -> `suche.png`, `/` -> `index.png`. */
 const fileNameFor = (route) =>
   `${route.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "index"}.png`;
+
+/** `WIDTHxHEIGHT` -> `{ width, height }`; anything else is the caller's mistake, not a default. */
+const parseViewport = (value) => {
+  const match = /^(\d+)x(\d+)$/.exec(value.trim());
+  if (!match) fail(`OMP_VISUAL_VIEWPORT is not WIDTHxHEIGHT ("${value}")`);
+  return { width: Number(match[1]), height: Number(match[2]) };
+};
 
 let server = null;
 let spawnError = null;
@@ -175,10 +186,10 @@ const settleImages = async (page) => {
   await page.waitForTimeout(1_000);
 };
 
-const capture = async (url, state, outDir, route) => {
+const capture = async (url, state, outDir, route, viewport) => {
   const browser = await chromium.launch();
   try {
-    const context = await browser.newContext({ viewport: VIEWPORT });
+    const context = await browser.newContext({ viewport });
     const page = await context.newPage();
     const response = await page.goto(url, {
       // `domcontentloaded`, not `load`: stylesheets are applied and the deferred module bundle
@@ -223,7 +234,14 @@ const main = async () => {
   }
 
   const route = (process.env.OMP_VISUAL_ROUTE || "").trim() || "/";
-  const state = ROUTE_STATES[route];
+  const viewport = process.env.OMP_VISUAL_VIEWPORT
+    ? parseViewport(process.env.OMP_VISUAL_VIEWPORT)
+    : DEFAULT_VIEWPORT;
+  // A selector on the command line replaces the route's own click hook: it is
+  // the caller saying which panel of *this* route they want pictured. The
+  // route's own hash state is not a click and stays as it is.
+  const click = (process.env.OMP_VISUAL_CLICK || "").trim();
+  const state = { ...ROUTE_STATES[route], ...(click ? { click } : {}) };
   const url = `http://${HOST}:${PORT}${route}${state?.hash ? `#${state.hash}` : ""}`;
   fs.mkdirSync(outDir, { recursive: true });
 
@@ -239,7 +257,7 @@ const main = async () => {
 
   try {
     await waitForServer(url);
-    console.log(await capture(url, state, outDir, route));
+    console.log(await capture(url, state, outDir, route, viewport));
   } finally {
     await stopServer();
   }

@@ -250,10 +250,12 @@ full page at 1440x900, and stops the server again. Nothing is written into the r
 nothing is compared: a page has no committed baseline, so the image is an illustration that the
 pull request shows as it is.
 
-| Variable           | Meaning                                     |
-| ------------------ | ------------------------------------------- |
-| `OMP_VISUAL_ROUTE` | the route to capture; empty means the site root |
-| `OMP_VISUAL_OUT`   | the directory the PNG is written into           |
+| Variable              | Meaning                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------- |
+| `OMP_VISUAL_ROUTE`    | the route to capture; empty means the site root                                                   |
+| `OMP_VISUAL_OUT`      | the directory the PNG is written into                                                             |
+| `OMP_VISUAL_VIEWPORT` | the viewport to capture at, `WIDTHxHEIGHT`; `1440x900` by default                                 |
+| `OMP_VISUAL_CLICK`    | a selector clicked once the page's runtime is up, for state that only exists after an interaction |
 
 The file is named after the route with the leading slash dropped and everything unsafe replaced:
 `/suche` becomes `suche.png`, `/` becomes `index.png`. One PNG is written per captured view. The
@@ -270,6 +272,15 @@ declares itself, never through a URL parameter invented for the capture: `/suche
 `hashchange`, and a panel is reached by clicking the element the page marks as its trigger, e.g.
 `[data-topic="dsa.search-modal.open"]` in the header. A hook that never materialises fails the
 command rather than writing a picture of the wrong state.
+
+The header's mobile menu is the case `OMP_VISUAL_VIEWPORT` and `OMP_VISUAL_CLICK` exist for: it
+only exists below `62rem`, and it only shows once its own toggle is clicked.
+
+```bash
+OMP_VISUAL_ROUTE=/ OMP_VISUAL_VIEWPORT=390x844 OMP_VISUAL_CLICK=.dsa-nav-toggle \
+  OMP_VISUAL_OUT=/tmp/omp-visual \
+  npx --yes pnpm@10.30.3 --filter @kickstartds/ruhmesmeile-storyblok-starter run capture-site
+```
 
 ## Content Schema & Migrations
 

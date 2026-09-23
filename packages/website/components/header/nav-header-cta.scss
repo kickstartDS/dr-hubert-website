@@ -110,4 +110,23 @@
       font-weight: var(--ks-font-weight-regular);
     }
   }
+
+  // Below 62rem the header bar is replaced by the flyout, which carries the
+  // same DE/EN pair through its content slot. The current language is marked
+  // the way the flyout marks the active nav item: primary tint plus bold. The
+  // bar's own rules above stay untouched, so nothing from 62rem up changes.
+  .dsa-nav-flyout .dsa-language-switcher {
+    display: flex;
+    // Above the nav list, where the flyout's logo used to sit. The panel's own
+    // padding is horizontal only, so the vertical spacing has to come from
+    // here.
+    order: -1;
+    padding-top: var(--ks-spacing-inset-m);
+    padding-bottom: var(--ks-spacing-stack-s);
+
+    .dsa-language-switcher__item--active {
+      color: var(--dsa-nav-flyout__label--color_active);
+      font-weight: var(--dsa-nav-flyout__label--font-weight_active);
+    }
+  }
 }
