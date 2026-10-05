@@ -1,5 +1,11 @@
 @use "./info-table-tokens.scss";
 
+.dsa-info-table {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   color: var(--dsa-table--color);
   width: 100%;
