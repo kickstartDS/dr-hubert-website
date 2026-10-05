@@ -5,6 +5,37 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat curl
 RUN corepack enable && corepack prepare pnpm@10.30.3 --activate
 
+# ── design-system-builder ──────────────────────────────────────────────────────
+# The design system's dist/ is gitignored, so a deploy can never count on it
+# being present in the build context — it has to be built inside the image.
+# Source is copied before pnpm install so pnpm creates proper local
+# node_modules symlinks for the kickstartDS CLI binary the build invokes;
+# packages/token-graph/ is included because the design-system build runs
+# `node ../token-graph/scripts/extractTokenGraph.mjs` from disk.
+FROM base AS design-system-builder
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc package.json ./
+COPY patches/ ./patches/
+# Workspace graph: all package.json stubs
+COPY packages/component-builder-mcp/package.json ./packages/component-builder-mcp/
+COPY packages/design-tokens-editor/package.json ./packages/design-tokens-editor/
+COPY packages/design-tokens-mcp/package.json ./packages/design-tokens-mcp/
+COPY packages/schema-layer-editor/package.json ./packages/schema-layer-editor/
+COPY packages/shared-auth/package.json ./packages/shared-auth/
+COPY packages/storyblok-icon-sprite-picker-field-plugin/package.json ./packages/storyblok-icon-sprite-picker-field-plugin/
+COPY packages/storyblok-mcp/package.json ./packages/storyblok-mcp/
+COPY packages/storyblok-n8n/package.json ./packages/storyblok-n8n/
+COPY packages/storyblok-services/package.json ./packages/storyblok-services/
+COPY packages/storyblok-sharepoint-folder-picker-field-plugin/package.json ./packages/storyblok-sharepoint-folder-picker-field-plugin/
+COPY packages/storyblok-theme-select-field-plugin/package.json ./packages/storyblok-theme-select-field-plugin/
+COPY packages/website/package.json ./packages/website/
+# Full source for the packages the design-system build reads directly
+COPY packages/token-graph/ ./packages/token-graph/
+COPY packages/design-system/ ./packages/design-system/
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm rebuild
+RUN pnpm --filter @kickstartds/design-system run build
+
 FROM base AS deps
 WORKDIR /app
 
@@ -15,8 +46,8 @@ COPY patches/ ./patches/
 # Copy package.json files for all workspace packages (pnpm needs the full workspace graph)
 COPY packages/component-builder-mcp/package.json ./packages/component-builder-mcp/
 COPY packages/design-system/package.json ./packages/design-system/
-# Copy pre-built design system dist (injectWorkspacePackages copies it into the store at install time)
-COPY packages/design-system/dist/ ./packages/design-system/dist/
+# Inject the dist built in design-system-builder (injectWorkspacePackages copies it into the store at install time)
+COPY --from=design-system-builder /app/packages/design-system/dist/ ./packages/design-system/dist/
 COPY packages/design-tokens-editor/package.json ./packages/design-tokens-editor/
 COPY packages/design-tokens-mcp/package.json ./packages/design-tokens-mcp/
 COPY packages/schema-layer-editor/package.json ./packages/schema-layer-editor/
