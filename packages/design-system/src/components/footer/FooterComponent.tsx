@@ -16,7 +16,16 @@ export const FooterContextDefault = forwardRef<
   FooterProps & HTMLAttributes<HTMLDivElement>
 >(
   (
-    { logo, badge, inverted, navGroups, socialLinks, copyright, legalLink },
+    {
+      logo,
+      badge,
+      inverted,
+      navGroups,
+      socialLinks,
+      copyright,
+      legalLink,
+      backToTop,
+    },
     ref,
   ) => {
     // `newTab` is resolved at story-processing time from Storyblok's multilink
@@ -42,10 +51,15 @@ export const FooterContextDefault = forwardRef<
         ref={ref}
       >
         <div className="dsa-footer__content">
-          {navGroupsWithNewTab?.length || socialLinks?.length ? (
+          {navGroupsWithNewTab?.length ||
+          socialLinks?.length ||
+          backToTop?.label ? (
             <div
               className={classnames("dsa-footer__columns", {
                 "dsa-footer__columns--flat": flat,
+                "dsa-footer__columns--with-back-to-top": Boolean(
+                  backToTop?.label,
+                ),
               })}
             >
               {navGroupsWithNewTab?.map((group, groupIdx) => (
@@ -121,6 +135,22 @@ export const FooterContextDefault = forwardRef<
                     ))}
                   </ul>
                 </div>
+              )}
+
+              {backToTop?.label && (
+                <a
+                  className="dsa-footer__back-to-top"
+                  href="#top"
+                  aria-label={backToTop.label}
+                  title={backToTop.label}
+                >
+                  <Icon
+                    icon="arrow-up"
+                    role="presentation"
+                    focusable="false"
+                    aria-hidden
+                  />
+                </a>
               )}
             </div>
           ) : null}
