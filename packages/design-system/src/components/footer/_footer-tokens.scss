@@ -60,7 +60,9 @@
   --dsa-footer__back-to-top--background-color_hover: var(
     --ks-background-color-primary-interactive-hover
   );
-  --dsa-footer__back-to-top--color: var(--ks-text-color-on-primary);
+  // Same token the solid primary Button uses for its label on a dark surface,
+  // so the arrow is the brand's dark blue on the light-blue circle.
+  --dsa-footer__back-to-top--color: var(--dsa-text-color-on-primary);
   --dsa-footer__back-to-top--transition: var(--ks-transition-hover);
   --dsa-footer__back-to-top--reserved-space: calc(
     var(--dsa-footer__back-to-top--size) + var(--ks-spacing-inline-s)

@@ -19,7 +19,7 @@
           "x-cms-hidden": false
         },
         "backToTop": {
-          "x-cms-hidden": true
+          "x-cms-hidden": false
         }
       },
       "additionalProperties": false
