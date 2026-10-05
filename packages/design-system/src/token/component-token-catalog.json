@@ -1848,9 +1848,9 @@
         "referencedToken": "--ks-background-color-primary-interactive-hover"
       },
       "--dsa-footer__back-to-top--color": {
-        "defaultValue": "var(--ks-text-color-on-primary)",
-        "valueType": "semantic-ref",
-        "referencedToken": "--ks-text-color-on-primary"
+        "defaultValue": "var(--dsa-text-color-on-primary)",
+        "valueType": "component-ref",
+        "referencedToken": "--dsa-text-color-on-primary"
       },
       "--dsa-footer__back-to-top--transition": {
         "defaultValue": "var(--ks-transition-hover)",

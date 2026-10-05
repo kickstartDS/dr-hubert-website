@@ -39,9 +39,6 @@ export const footerProps = {
     label: "Legal",
     url: "#",
   },
-  backToTop: {
-    label: "Zurück nach oben",
-  },
 };
 
 const meta: Meta = {
@@ -61,6 +58,24 @@ export default meta;
 type Story = StoryObj<typeof FooterComponent>;
 
 export const Footer: Story = {
+  parameters: {
+    viewport: {
+      width: 1280,
+      height: 330,
+    },
+  },
+};
+
+// The round back-to-top button only renders when the CMS provides a label, so
+// it needs its own story - the shared props must not render it incidentally.
+// The site footer is inverted (dark), which is where the light-blue circle and
+// dark-blue arrow from the mockup apply.
+export const BackToTop: Story = {
+  args: pack({
+    ...footerProps,
+    inverted: true,
+    backToTop: { label: "Zurück nach oben" },
+  }),
   parameters: {
     viewport: {
       width: 1280,

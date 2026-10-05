@@ -117,7 +117,10 @@
     );
   }
 
-  &__back-to-top {
+  // `:not(.c-button)` mirrors the `a:not(.c-button)` reset in `global.scss`,
+  // which would otherwise win on specificity and strip the circle's background
+  // and border-radius (the same trick the link styles above use).
+  &__back-to-top:not(.c-button) {
     position: absolute;
     inset-inline-end: 0;
     top: 50%;
@@ -135,7 +138,7 @@
       --dsa-footer__back-to-top--background-color,
       var(--ks-background-color-primary-interactive)
     );
-    color: var(--dsa-footer__back-to-top--color, var(--ks-text-color-on-primary));
+    color: var(--dsa-footer__back-to-top--color, var(--dsa-text-color-on-primary));
     text-decoration: none;
     transition: var(
       --dsa-footer__back-to-top--transition,
@@ -155,7 +158,7 @@
       );
       color: var(
         --dsa-footer__back-to-top--color_hover,
-        var(--dsa-footer__back-to-top--color, var(--ks-text-color-on-primary))
+        var(--dsa-footer__back-to-top--color, var(--dsa-text-color-on-primary))
       );
     }
   }
