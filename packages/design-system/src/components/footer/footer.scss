@@ -19,6 +19,7 @@
   }
 
   &__columns {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--dsa-footer__columns--gap, var(--ks-spacing-stack-l) var(--ks-spacing-inline-xl));
@@ -99,6 +100,63 @@
     // Keep the social icons at the far end rather than inline with the menu.
     .dsa-footer__column--social {
       margin-inline-start: auto;
+    }
+  }
+
+  // Reserve a gutter at the inline end for the round back-to-top button, so a
+  // wrapped navigation row cannot run underneath it. Without the button the
+  // columns use the full width.
+  &__columns--with-back-to-top {
+    padding-inline-end: var(
+      --dsa-footer__back-to-top--reserved-space,
+      calc(
+        var(--dsa-footer__back-to-top--size, 2.75rem) + var(
+            --ks-spacing-inline-s
+          )
+      )
+    );
+  }
+
+  &__back-to-top {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--dsa-footer__back-to-top--size, 2.75rem);
+    height: var(--dsa-footer__back-to-top--size, 2.75rem);
+    border-radius: var(
+      --dsa-footer__back-to-top--border-radius,
+      var(--ks-border-radius-circle)
+    );
+    background-color: var(
+      --dsa-footer__back-to-top--background-color,
+      var(--ks-background-color-primary-interactive)
+    );
+    color: var(--dsa-footer__back-to-top--color, var(--ks-text-color-on-primary));
+    text-decoration: none;
+    transition: var(
+      --dsa-footer__back-to-top--transition,
+      var(--ks-transition-hover)
+    );
+    transition-property: background-color, color;
+
+    svg {
+      width: var(--dsa-footer__back-to-top--icon-size, 1.5rem);
+      height: var(--dsa-footer__back-to-top--icon-size, 1.5rem);
+    }
+
+    &:hover {
+      background-color: var(
+        --dsa-footer__back-to-top--background-color_hover,
+        var(--ks-background-color-primary-interactive-hover)
+      );
+      color: var(
+        --dsa-footer__back-to-top--color_hover,
+        var(--dsa-footer__back-to-top--color, var(--ks-text-color-on-primary))
+      );
     }
   }
 

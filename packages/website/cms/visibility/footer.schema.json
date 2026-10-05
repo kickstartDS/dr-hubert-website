@@ -17,6 +17,9 @@
         },
         "navItems": {
           "x-cms-hidden": false
+        },
+        "backToTop": {
+          "x-cms-hidden": true
         }
       },
       "additionalProperties": false

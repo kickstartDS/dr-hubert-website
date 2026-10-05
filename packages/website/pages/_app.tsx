@@ -50,6 +50,14 @@ if (typeof window !== "undefined") {
   console.log(palette);
 }
 
+// The settings story is a single, language-agnostic story, so the footer's
+// back-to-top label is injected from the page's language instead of being
+// authored in Storyblok.
+const BACK_TO_TOP_LABEL: Record<string, string> = {
+  de: "Zurück nach oben",
+  en: "Back to top",
+};
+
 const handleRouteChange = (url: string) => {
   // close mobile nav
   window._ks.radio.emit("location.change", url);
@@ -297,6 +305,11 @@ export default function App({
                         <Footer
                           {...footerProps}
                           inverted={invertFooter || false}
+                          backToTop={{
+                            label:
+                              BACK_TO_TOP_LABEL[language] ??
+                              BACK_TO_TOP_LABEL[DEFAULT_LANGUAGE],
+                          }}
                           logo={{
                             ...footerProps?.logo,
                             src:

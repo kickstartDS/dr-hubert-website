@@ -87,6 +87,10 @@ export type SocialLinks = {
   url: URL2;
   ariaLabel?: AccessibleLabel;
 }[];
+/**
+ * Accessible label for the button, announced by screen readers and shown as a tooltip
+ */
+export type Label2 = string;
 
 /**
  * Footer component for displaying site logo, grouped navigation links, social links and a legal bottom bar at the bottom of the page.
@@ -99,6 +103,7 @@ export interface FooterProps {
   copyright?: Copyright;
   legalLink?: LegalLink;
   socialLinks?: SocialLinks;
+  backToTop?: BackToTop;
 }
 export interface Logo {
   src?: Source;
@@ -121,4 +126,10 @@ export interface Badge {
 export interface LegalLink {
   label?: Label1;
   url?: URL1;
+}
+/**
+ * Round button at the inline end of the footer's navigation row that scrolls the page back to the top
+ */
+export interface BackToTop {
+  label: Label2;
 }

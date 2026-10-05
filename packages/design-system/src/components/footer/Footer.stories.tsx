@@ -39,6 +39,9 @@ export const footerProps = {
     label: "Legal",
     url: "#",
   },
+  backToTop: {
+    label: "Zurück nach oben",
+  },
 };
 
 const meta: Meta = {
