@@ -1,6 +1,6 @@
 {
   "name": "@kickstartds/design-system",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "kickstartDS Design System — 80+ React components, design tokens, and Storybook",
   "homepage": "https://github.com/kickstartDS/storyblok-starter-premium#readme",
   "bugs": {
