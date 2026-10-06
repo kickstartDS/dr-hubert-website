@@ -17,8 +17,19 @@ import {
 // ── Prompt definitions ─────────────────────────────────────────────
 
 describe("PROMPT_DEFINITIONS", () => {
-  it("exports exactly 6 prompts", () => {
-    expect(PROMPT_DEFINITIONS).toHaveLength(6);
+  it("exports exactly the documented prompts", () => {
+    const names = PROMPT_DEFINITIONS.map((p) => p.name).sort();
+    expect(names).toEqual(
+      [
+        "content-audit",
+        "create-blog-post",
+        "create-page",
+        "extend-page",
+        "migrate-from-url",
+        "theme-management",
+        "translate-page",
+      ].sort()
+    );
   });
 
   it("contains all expected prompt names", () => {
@@ -58,12 +69,15 @@ describe("PROMPT_DEFINITIONS", () => {
     });
   });
 
-  it("every prompt has at least one required argument", () => {
-    // content-audit has no required args — verify that's the only exception
+  it("only the read-only prompts take no required argument", () => {
+    // The audit and theme-management prompts work without any argument.
     const promptsWithNoRequired = PROMPT_DEFINITIONS.filter(
       (p) => !p.arguments.some((a) => a.required)
-    );
-    expect(promptsWithNoRequired.map((p) => p.name)).toEqual(["content-audit"]);
+    ).map((p) => p.name);
+    expect(promptsWithNoRequired.sort()).toEqual([
+      "content-audit",
+      "theme-management",
+    ]);
   });
 });
 

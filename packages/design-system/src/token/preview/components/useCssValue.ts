@@ -1,4 +1,4 @@
-import { MutableRefObject, useState, useEffect, useMemo } from "react";
+import { RefObject, useState, useEffect, useMemo } from "react";
 import tinycolor from "tinycolor2";
 
 const format = (property: string, value: string | undefined) => {
@@ -20,13 +20,13 @@ const format = (property: string, value: string | undefined) => {
 
 export const useCssValue = (
   property: string,
-  ref: MutableRefObject<HTMLElement>
+  ref: RefObject<HTMLElement | null>
 ): string | undefined => {
   const [computedStyle, setComputedStyle] = useState<CSSStyleDeclaration>();
 
   useEffect(() => {
-    setComputedStyle(getComputedStyle(ref.current));
-  }, []);
+    if (ref.current) setComputedStyle(getComputedStyle(ref.current));
+  }, [ref]);
 
   return useMemo(() => {
     const value = computedStyle?.[property];

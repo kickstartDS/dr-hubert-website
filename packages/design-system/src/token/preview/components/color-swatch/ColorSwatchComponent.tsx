@@ -55,7 +55,7 @@ export const ColorSwatchContextDefault = forwardRef<
     },
     ref
   ) => {
-    const swatchRef = useRef<HTMLDivElement>();
+    const swatchRef = useRef<HTMLDivElement>(null);
     const cssProperty = cssPropertyByCategory(category);
     const style: React.CSSProperties = { [cssProperty]: `var(${token})` };
     const computedValue = useCssValue(cssProperty, swatchRef);

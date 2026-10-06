@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { actions } from "storybook/actions";
 import { useGlobals } from "storybook/preview-api";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@storybook/addon-docs/blocks";
 import "lazysizes/plugins/attrchange/ls.attrchange";
 import { Preview } from "@storybook/react-vite";
+import type { Decorator } from "@storybook/react-vite";
 import { unpackDecorator } from "@kickstartds/core/lib/storybook";
 import { CssPropsParameter } from "@kickstartds/storybook-addon-component-tokens";
 import { light } from "./themes";
@@ -16,6 +17,10 @@ import { providerDecorator } from "../src/components/Providers";
 import { LinkProvider } from "../src/docs/LinkProvider";
 
 import "./preview.css";
+
+// Injected at build time by the `define` in .storybook/main.ts, which reads
+// process.env.STORYBLOK_API_TOKEN.
+declare const STORYBLOK_API_TOKEN: string;
 
 const STATIC_THEME_FILES: Record<string, string> = {
   blizzard: "/tokens/branding-tokens-blizzard.css",
@@ -175,7 +180,9 @@ const preview: Preview = {
     },
   },
   decorators: [
-    unpackDecorator,
+    // `unpackDecorator` is typed against the legacy `@storybook/types` (v7) that
+    // @kickstartds/core ships with; this project runs Storybook 10.
+    unpackDecorator as unknown as Decorator,
     (Story) => {
       const [globals] = useGlobals();
       const theme = (globals.theme as string) || "default";

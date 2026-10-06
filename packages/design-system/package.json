@@ -77,7 +77,7 @@
     "pretest": "playwright install chromium",
     "test": "pnpm run build-storybook && pnpm run vitest:client && run-p -r test:*",
     "test:server": "npx http-server storybook-static --port 6006 --silent",
-    "test:suite": "npx wait-on http://127.0.0.1:6006 && test-storybook --maxWorkers=8",
+    "test:suite": "npx wait-on http://127.0.0.1:6006/index.json && test-storybook --maxWorkers=2",
     "token": "node scripts/customPropertyExtract.cjs",
     "component-token-catalog": "node scripts/extractComponentTokenCatalog.cjs",
     "semantic-token-catalog": "node scripts/extractSemanticTokenCatalog.cjs",
