@@ -23,18 +23,50 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
 
       - name: Build all packages
         run: pnpm -r run build
 
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          publish: pnpm publish-packages
-          version: pnpm version-packages
+      # `changesets/action` is deliberately not used here: it looks its version
+      # PR up with `pulls.list({ head: "<owner>:<branch>" })`, and that filter
+      # currently returns nothing for existing PRs (reproduced on this repo and
+      # on unrelated ones), so every run tried to create the already-existing PR
+      # and failed with `Validation Failed: A pull request already exists`.
+      # `gh` resolves the same PR through GraphQL, so version and push here, and
+      # let `gh` create or update the PR.
+      - name: Version packages (release PR)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          pending=$(find .changeset -maxdepth 1 -name '*.md' ! -name README.md | wc -l)
+          if [ "$pending" -eq 0 ]; then
+            echo "No pending changesets — nothing to version."
+            exit 0
+          fi
+
+          pnpm version-packages
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B changeset-release/main
+          git add -A
+          git commit -m 'Version Packages'
+          git push --force origin HEAD:changeset-release/main
+
+          rows=''
+          for manifest in $(git show --name-only --format='' HEAD -- 'packages/*/package.json'); do
+            name=$(node -p "require('./$manifest').name")
+            version=$(node -p "require('./$manifest').version")
+            rows=$(printf '%s| `%s` | %s |\n' "$rows" "$name" "$version")
+          done
+          body=$(printf 'This PR was opened by the Release workflow.\n\nMerging it records the version bumps and changelog entries on `main`.\n\n| Package | Version |\n| --- | --- |\n%s' "$rows")
+
+          number=$(gh pr list --repo "$GITHUB_REPOSITORY" --head changeset-release/main --base main --state open --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh pr edit "$number" --repo "$GITHUB_REPOSITORY" --title 'Version Packages' --body "$body"
+          else
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head changeset-release/main --title 'Version Packages' --body "$body"
+          fi
