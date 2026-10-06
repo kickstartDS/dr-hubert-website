@@ -1822,6 +1822,46 @@
         "valueType": "semantic-ref",
         "referencedToken": "--ks-text-color-interface-interactive-hover"
       },
+      "--dsa-footer__back-to-top--size": {
+        "defaultValue": "2.75rem",
+        "valueType": "literal",
+        "referencedToken": null
+      },
+      "--dsa-footer__back-to-top--icon-size": {
+        "defaultValue": "1.5rem",
+        "valueType": "literal",
+        "referencedToken": null
+      },
+      "--dsa-footer__back-to-top--border-radius": {
+        "defaultValue": "var(--ks-border-radius-circle)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-border-radius-circle"
+      },
+      "--dsa-footer__back-to-top--background-color": {
+        "defaultValue": "var(\n    --ks-background-color-primary-interactive\n  )",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-background-color-primary-interactive"
+      },
+      "--dsa-footer__back-to-top--background-color_hover": {
+        "defaultValue": "var(\n    --ks-background-color-primary-interactive-hover\n  )",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-background-color-primary-interactive-hover"
+      },
+      "--dsa-footer__back-to-top--color": {
+        "defaultValue": "var(--dsa-text-color-on-primary)",
+        "valueType": "component-ref",
+        "referencedToken": "--dsa-text-color-on-primary"
+      },
+      "--dsa-footer__back-to-top--transition": {
+        "defaultValue": "var(--ks-transition-hover)",
+        "valueType": "semantic-ref",
+        "referencedToken": "--ks-transition-hover"
+      },
+      "--dsa-footer__back-to-top--reserved-space": {
+        "defaultValue": "calc(\n    var(--dsa-footer__back-to-top--size) + var(--ks-spacing-inline-s)\n  )",
+        "valueType": "literal",
+        "referencedToken": null
+      },
       "--dsa-footer__bottom--gap": {
         "defaultValue": "var(--ks-spacing-stack-s)",
         "valueType": "semantic-ref",

@@ -23,6 +23,10 @@
         "navItems": {
           "title": "Navigationselemente",
           "description": "Eine Liste von Navigationselementen, die im Footer angezeigt werden."
+        },
+        "backToTop": {
+          "title": "Zurück nach oben",
+          "description": "Runder Button am Ende der Footer-Navigation, der die Seite nach oben scrollt. Ohne Label wird der Button nicht angezeigt."
         }
       },
       "additionalProperties": false

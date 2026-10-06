@@ -150,6 +150,20 @@
         "required": ["icon", "url"],
         "additionalProperties": false
       }
+    },
+    "backToTop": {
+      "title": "Back to Top",
+      "description": "Round button at the inline end of the footer's navigation row that scrolls the page back to the top",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "Label",
+          "description": "Accessible label for the button, announced by screen readers and shown as a tooltip"
+        }
+      },
+      "required": ["label"],
+      "additionalProperties": false
     }
   },
   "required": ["logo"],
