@@ -35,7 +35,7 @@ describe("OUTPUT_SCHEMAS", () => {
     expect(Object.keys(OUTPUT_SCHEMAS).length).toBeGreaterThan(0);
   });
 
-  it("contains schemas for all 13 mapped tools", () => {
+  it("contains schemas for every mapped tool", () => {
     // list_stories, get_story, list_components are excluded —
     // they return raw Storyblok API shapes that don't conform to a stable object schema
     const expectedTools = [
@@ -52,6 +52,10 @@ describe("OUTPUT_SCHEMAS", () => {
       "update_story",
       "replace_section",
       "update_seo",
+      "apply_theme",
+      "remove_theme",
+      "create_theme",
+      "update_theme",
     ];
     expectedTools.forEach((tool) => {
       expect(OUTPUT_SCHEMAS).toHaveProperty(tool);

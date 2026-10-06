@@ -259,7 +259,7 @@ const ColorDemo = () => (
               url: "#",
             },
           ]}
-          contact={[
+          contactLinks={[
             {
               icon: "phone",
               label: "+1 234 567 890",

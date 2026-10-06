@@ -26,7 +26,6 @@
     "build": "node scripts/sync-schemas.js && tsc && gulp build:icons",
     "sync-schemas": "node scripts/sync-schemas.js",
     "dev": "tsc --watch",
-    "lint": "eslint nodes credentials --ext .ts",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "prepublishOnly": "npm run build"

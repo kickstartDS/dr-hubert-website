@@ -1,4 +1,3 @@
-import React from "react";
 import { TokenPicker } from "./TokenPicker";
 import "../preview/preview-pages.scss";
 
