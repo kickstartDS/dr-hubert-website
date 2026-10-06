@@ -126,6 +126,13 @@ const Picture = forwardRef<
   const size = useImageSize();
   const ratio = useImageRatio();
 
+  // An eagerly rendered image can never have its blurhash placeholder removed:
+  // the content route sets `unstable_runtimeJS: false`, so React never hydrates
+  // here, and the vanilla sweep in `picture/picuture.client.js` only covers
+  // `img[loading=lazy]`. Such images must not get a placeholder at all, or the
+  // gradient stays behind transparent artwork forever.
+  const isPriority = lazy === false || priority;
+
   useImperativeHandle<HTMLImageElement | null, HTMLImageElement | null>(
     ref,
     () => internalRef.current,
@@ -167,14 +174,14 @@ const Picture = forwardRef<
       aspectRatio={ratio > 0 ? ratio : undefined}
       width={maxWidth}
       height={autoSize || ratio > 0 ? undefined : maxHeight}
-      priority={lazy === false || priority}
+      priority={isPriority}
       onLoad={(event) => {
         if (event.target instanceof HTMLImageElement) {
           resetBackgroundBlurHash(event.target);
         }
       }}
       background={
-        blurHashes[fileUrl]
+        !isPriority && blurHashes[fileUrl]
           ? blurhashToCssGradientString(blurHashes[fileUrl])
           : undefined
       }
