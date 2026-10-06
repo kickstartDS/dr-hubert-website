@@ -39,6 +39,11 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      # Job-level, so the step's own `if` can see the value. A step-level `env`
+      # is not in scope for that step's condition, so the publish step would
+      # otherwise run with an empty token and fail.
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,5 +62,3 @@ jobs:
       - name: Publish to Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN != ''
         run: pnpm --filter @kickstartds/design-system chromatic
-        env:
-          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
