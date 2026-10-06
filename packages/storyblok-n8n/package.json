@@ -49,6 +49,7 @@
     "storyblok-js-client": "^7.2.3"
   },
   "devDependencies": {
+    "@kickstartds/design-system": "workspace:*",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "gulp": "^4.0.2",
