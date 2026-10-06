@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -37,7 +37,12 @@ jobs:
 
   chromatic:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Runs on pull requests as well as on pushes to main: the comparison is the
+    # point on a PR, and main builds keep the baseline branch current. The
+    # environment provides CHROMATIC_PROJECT_TOKEN; it has no protection rules,
+    # so it is available to PR runs too (fork PRs get no secrets and skip the
+    # publish step).
+    environment: Production
     runs-on: ubuntu-latest
     env:
       # Job-level, so the step's own `if` can see the value. A step-level `env`
@@ -54,7 +59,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
