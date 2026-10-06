@@ -36,6 +36,33 @@ const THEME_NAME = "Default";
 const THEME_SLUG = "default";
 const THEME_FOLDER = "settings/themes";
 
+/** The parts of a Management API single-story response this script reads. */
+type ThemeStory = { id: number; content: Record<string, unknown> };
+
+/**
+ * Read a Management API single-story response.
+ *
+ * The lookup in `main` uses the story *list* endpoint, which returns no
+ * `content` (only a `content_summary`), so the full story has to be fetched
+ * before its content can be compared.
+ */
+const readStory = (responseData: unknown): ThemeStory | undefined => {
+  if (typeof responseData !== "object" || responseData === null)
+    return undefined;
+  if (!("story" in responseData)) return undefined;
+
+  const story = responseData.story; // unknown until narrowed below
+  if (typeof story !== "object" || story === null) return undefined;
+  if (!("id" in story) || typeof story.id !== "number") return undefined;
+  if (!("content" in story)) return undefined;
+
+  const content = story.content; // unknown until narrowed below
+  if (typeof content !== "object" || content === null) return undefined;
+
+  // Re-type the open content object instead of asserting a shape on it.
+  return { id: story.id, content: Object.fromEntries(Object.entries(content)) };
+};
+
 async function main(): Promise<void> {
   // ── Check environment ──────────────────────────────────────────
   const oauthToken = process.env.NEXT_STORYBLOK_OAUTH_TOKEN;
@@ -96,12 +123,29 @@ async function main(): Promise<void> {
   }
 
   if (existingStory) {
+    // ── Fetch the full story first — the list endpoint above returns no
+    // `content` (only `content_summary`), so a comparison against it can never
+    // match, and every non-matching build republishes the theme story, which
+    // re-triggers the Storyblok webhook and another deploy.
+    const storyResponse = await managementClient.get(
+      `spaces/${spaceId}/stories/${existingStory.id}`,
+    );
+    const story = readStory(storyResponse.data);
+    if (!story) {
+      console.error(
+        "❌ sync-default-theme: could not read the default theme story",
+      );
+      process.exit(1);
+    }
+    const content = story.content;
+
     // ── Compare content — skip if identical ────────────────────
-    const existingContent = existingStory.content || {};
     if (
-      existingContent.tokens === tokensJson &&
-      existingContent.css === css &&
-      existingContent.system === true
+      typeof content.tokens === "string" &&
+      content.tokens === tokensJson &&
+      typeof content.css === "string" &&
+      content.css === css &&
+      content.system === true
     ) {
       console.log(
         "✅ sync-default-theme: default theme is up-to-date, skipping",
@@ -111,11 +155,6 @@ async function main(): Promise<void> {
 
     // ── Update existing story ──────────────────────────────────
     console.log("🔄 sync-default-theme: updating default theme...");
-    const storyResponse = await managementClient.get(
-      `spaces/${spaceId}/stories/${existingStory.id}`,
-    );
-    const story = (storyResponse.data as any).story;
-    const content = story.content as Record<string, unknown>;
 
     content.name = THEME_NAME;
     content.tokens = tokensJson;
