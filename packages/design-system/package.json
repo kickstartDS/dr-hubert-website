@@ -56,7 +56,7 @@
     "build-storybook": "pnpm run build-tokens && pnpm run schema && pnpm run token && pnpm run search && pnpm run copy-theme-css && storybook build",
     "copy-theme-css": "mkdir -p static/tokens && cp src/token/branding-tokens*.css static/tokens/",
     "build-tokens": "kickstartDS tokens compile",
-    "chromatic": "chromatic --build-script-name \"build-storybook\" --output-dir \"storybook-static\" --skip \"@(renovate/**|dependabot/**)\" --exit-zero-on-changes --exit-once-uploaded",
+    "chromatic": "pnpm run build-storybook && chromatic --storybook-build-dir storybook-static --skip \"@(renovate/**|dependabot/**)\" --exit-zero-on-changes --exit-once-uploaded",
     "init-tokens": "kickstartDS tokens init",
     "playroom": "run-p watch:* playroom:start",
     "playroom:start": "playroom start",
