@@ -20,7 +20,7 @@ import {
   MultilinkStoryblok,
 } from "@/types/components-schema";
 import componentsSchema from "@/types/components-schema.json";
-import { INDEX_SLUG } from "@/helpers/i18n";
+import { INDEX_SLUG, pathOf } from "@/helpers/i18n";
 
 export function initStoryblok(accessToken?: string) {
   storyblokInit({
@@ -114,9 +114,9 @@ export function storyProcessing(
   function mapStoryblokLinks({ parent, key, value }: TraversalCallbackContext) {
     if (parent && key) {
       if (isStoryblokStoryLinkObject(value)) {
-        parent[key] = `${
-          value.story?.full_slug === INDEX_SLUG ? "/" : value.story.full_slug
-        }${value.anchor ? `#${value.anchor}` : ""}`;
+        parent[key] = `${pathOf(value.story.full_slug)}${
+          value.anchor ? `#${value.anchor}` : ""
+        }`;
       } else if (isStoryblokLink(value)) {
         if (value.linktype === "email") {
           parent[key] = `mailto:${value.email}`;
@@ -131,6 +131,10 @@ export function storyProcessing(
           // however, always include `cached_url` - the slug captured when the
           // link was picked in the editor - so use that as a fallback instead
           // of collapsing to "#" and hiding the link/button in preview.
+          // Both forms go through `pathOf()` because Storyblok stores them
+          // without a leading slash (`support/downloads`), which would
+          // otherwise resolve relative to the *current* directory and duplicate
+          // the last path segment on nested pages.
           //
           // An untouched, optional link field defaults to
           // `{ linktype: "story", id: "", url: "", cached_url: "" }` - map
@@ -139,7 +143,9 @@ export function storyProcessing(
           // being set (e.g. the footer's legal link) don't render a link to
           // nowhere.
           parent[key] = value.cached_url
-            ? `${value.cached_url}${value.anchor ? `#${value.anchor}` : ""}`
+            ? `${pathOf(value.cached_url)}${
+                value.anchor ? `#${value.anchor}` : ""
+              }`
             : "";
         } else {
           parent[key] = "#";
